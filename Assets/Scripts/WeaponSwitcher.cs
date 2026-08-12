@@ -4,7 +4,8 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// Enables one held weapon at a time. Cycle with Previous/Next (or scroll),
-/// or press 1–4 for a direct slot. No runtime Find/bootstrap — assign weapons in the Inspector.
+/// or press 1–4 for a direct slot. Only unlocked weapons can be selected;
+/// slot 0 (bat) starts unlocked. No runtime Find/bootstrap — assign weapons in the Inspector.
 /// </summary>
 public class WeaponSwitcher : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class WeaponSwitcher : MonoBehaviour
     public float scrollThreshold = 0.1f;
 
     public event Action<int, GameObject> WeaponChanged;
+    public event Action<int> WeaponUnlocked;
 
     InputAction previousAction;
     InputAction nextAction;
@@ -27,6 +29,7 @@ public class WeaponSwitcher : MonoBehaviour
     bool ownsNext;
     int currentIndex = -1;
     float scrollCooldown;
+    bool[] unlocked;
 
     public int CurrentIndex => currentIndex;
     public GameObject CurrentWeapon =>
@@ -36,6 +39,11 @@ public class WeaponSwitcher : MonoBehaviour
 
     public Weapon CurrentRangedWeapon =>
         CurrentWeapon != null ? CurrentWeapon.GetComponent<Weapon>() : null;
+
+    void Awake()
+    {
+        InitUnlocked();
+    }
 
     void OnEnable()
     {
@@ -87,8 +95,14 @@ public class WeaponSwitcher : MonoBehaviour
         if (weapons == null || weapons.Length == 0)
             return;
 
+        InitUnlocked();
+
         int index = Mathf.Clamp(startingWeaponIndex, 0, weapons.Length - 1);
-        SelectWeapon(index, force: true);
+        if (!IsUnlocked(index))
+            index = FirstUnlockedIndex();
+
+        if (index >= 0)
+            SelectWeapon(index, force: true);
     }
 
     void Update()
@@ -101,6 +115,74 @@ public class WeaponSwitcher : MonoBehaviour
 
         HandleScroll();
         HandleNumberKeys();
+    }
+
+    public bool IsUnlocked(int index)
+    {
+        InitUnlocked();
+        return unlocked != null && index >= 0 && index < unlocked.Length && unlocked[index];
+    }
+
+    /// <summary>
+    /// Unlocks a loadout slot. When equip is true, switches to that weapon.
+    /// Returns true if the slot was newly unlocked.
+    /// </summary>
+    public bool UnlockWeapon(int index, bool equip = true)
+    {
+        if (weapons == null || index < 0 || index >= weapons.Length)
+            return false;
+
+        InitUnlocked();
+
+        bool newlyUnlocked = !unlocked[index];
+        unlocked[index] = true;
+
+        if (newlyUnlocked)
+            WeaponUnlocked?.Invoke(index);
+
+        if (equip)
+            SelectWeapon(index, force: true);
+
+        return newlyUnlocked;
+    }
+
+    void InitUnlocked()
+    {
+        if (weapons == null)
+        {
+            unlocked = null;
+            return;
+        }
+
+        if (unlocked != null && unlocked.Length == weapons.Length)
+            return;
+
+        bool[] next = new bool[weapons.Length];
+        if (unlocked != null)
+        {
+            int copy = Mathf.Min(unlocked.Length, next.Length);
+            for (int i = 0; i < copy; i++)
+                next[i] = unlocked[i];
+        }
+
+        if (next.Length > 0)
+            next[0] = true;
+
+        unlocked = next;
+    }
+
+    int FirstUnlockedIndex()
+    {
+        if (unlocked == null)
+            return -1;
+
+        for (int i = 0; i < unlocked.Length; i++)
+        {
+            if (unlocked[i])
+                return i;
+        }
+
+        return -1;
     }
 
     void BindActions()
@@ -176,13 +258,24 @@ public class WeaponSwitcher : MonoBehaviour
         if (weapons == null || weapons.Length == 0)
             return;
 
-        int count = weapons.Length;
-        int next = currentIndex < 0 ? startingWeaponIndex : currentIndex;
-        next = (next + direction) % count;
-        if (next < 0)
-            next += count;
+        InitUnlocked();
 
-        SelectWeapon(next);
+        int count = weapons.Length;
+        int start = currentIndex < 0 ? startingWeaponIndex : currentIndex;
+        int step = direction >= 0 ? 1 : -1;
+
+        for (int i = 1; i <= count; i++)
+        {
+            int next = (start + step * i) % count;
+            if (next < 0)
+                next += count;
+
+            if (IsUnlocked(next))
+            {
+                SelectWeapon(next);
+                return;
+            }
+        }
     }
 
     public void SelectWeapon(int index, bool force = false)
@@ -193,8 +286,13 @@ public class WeaponSwitcher : MonoBehaviour
         if (index < 0 || index >= weapons.Length)
             return;
 
+        if (!IsUnlocked(index))
+            return;
+
         if (!force && index == currentIndex)
             return;
+
+        bool playSwapSound = !force && currentIndex >= 0 && index != currentIndex;
 
         for (int i = 0; i < weapons.Length; i++)
         {
@@ -204,5 +302,8 @@ public class WeaponSwitcher : MonoBehaviour
 
         currentIndex = index;
         WeaponChanged?.Invoke(currentIndex, CurrentWeapon);
+
+        if (playSwapSound)
+            AudioManager.WeaponSwap();
     }
 }

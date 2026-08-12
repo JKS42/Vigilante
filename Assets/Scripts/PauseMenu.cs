@@ -44,7 +44,7 @@ public class PauseMenu : MonoBehaviour
         if (pauseMenuPanel == null)
             pauseMenuPanel = gameObject;
 
-        SetPaused(false);
+        ApplyPausedState(false, playSound: false);
     }
 
     void OnDestroy()
@@ -72,6 +72,7 @@ public class PauseMenu : MonoBehaviour
 
     public void Resume()
     {
+        AudioManager.UIClick();
         SetPaused(false);
     }
 
@@ -80,6 +81,7 @@ public class PauseMenu : MonoBehaviour
         if (settingsPanel == null)
             return;
 
+        AudioManager.UIClick();
         settingsPanel.SetActive(true);
         if (pauseMenuPanel != null && pauseMenuPanel != settingsPanel)
             pauseMenuPanel.SetActive(false);
@@ -87,6 +89,7 @@ public class PauseMenu : MonoBehaviour
 
     public void CloseSettings()
     {
+        AudioManager.UIBack();
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
 
@@ -96,18 +99,31 @@ public class PauseMenu : MonoBehaviour
 
     public void RestartLevel()
     {
+        AudioManager.UIClick();
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void LoadMainMenu()
     {
+        AudioManager.UIClick();
         Time.timeScale = 1f;
         SceneManager.LoadScene(mainMenuSceneName);
     }
 
     public void SetPaused(bool paused)
     {
+        if (paused == isPaused)
+            return;
+
+        ApplyPausedState(paused, playSound: paused);
+    }
+
+    void ApplyPausedState(bool paused, bool playSound)
+    {
+        if (playSound && paused)
+            AudioManager.UIClick();
+
         if (paused)
         {
             if (!isPaused)

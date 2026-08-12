@@ -9,6 +9,10 @@ public class WaveDefinition
     public int enemyCount = 2;
     [Min(0f)] public float startDelay = 3f;
     [Min(0f)] public float maxWaitBeforeNext = 40f;
+    [Tooltip("Optional override prefab for this wave. Falls back to WaveManager.enemyPrefab.")]
+    public GameObject enemyPrefabOverride;
+    public EnemyArchetype archetype = EnemyArchetype.Pistol;
+    public bool useArchetypeProfile = true;
 }
 
 [Serializable]
@@ -19,20 +23,17 @@ public class WaveSpawnPoint
 }
 
 /// <summary>
-/// Spawns inspector-defined waves using the serialized Spawn Points list.
-/// Next wave starts on a full clear or maxWaitBeforeNext, whichever comes first.
-/// After the last wave, waits until remaining spawned enemies die.
-///
-/// Scene wiring:
-/// 1. Empty GameObject named WaveManager, add this component.
-/// 2. Fill Spawn Points with NavMesh walkable world positions (and facing).
-/// 3. Fill Waves (enemyCount, startDelay, maxWaitBeforeNext). Optional: assign Enemy Prefab.
+/// Spawns inspector-defined waves. Supports per-wave prefabs / archetypes for
+/// Level 1 pistol thugs, Level 2 mixed shotgun+rifle, Level 3 + boss.
 /// </summary>
 public class WaveManager : MonoBehaviour
 {
     public static WaveManager Instance { get; private set; }
 
     [SerializeField] GameObject enemyPrefab;
+    [SerializeField] GameObject shotgunPrefab;
+    [SerializeField] GameObject riflePrefab;
+    [SerializeField] GameObject bossPrefab;
     [SerializeField] float spawnStagger = 0.15f;
     [SerializeField] List<WaveSpawnPoint> spawnPoints = new List<WaveSpawnPoint>();
     [SerializeField] List<WaveDefinition> waves = new List<WaveDefinition>
@@ -59,12 +60,15 @@ public class WaveManager : MonoBehaviour
     float timer;
     bool started;
     int enemiesKilled;
+    bool paused;
 
     public int CurrentWaveIndex => waveIndex;
     public int TotalWaves => waves != null ? waves.Count : 0;
     public bool IsComplete => phase == Phase.Complete;
     public int AliveSpawnedCount => CountAlive();
     public int EnemiesKilled => enemiesKilled;
+    public bool IsPaused => paused;
+
     public int TotalEnemyCount
     {
         get
@@ -83,10 +87,6 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Seconds left on the current wave timer: startDelay while waiting to spawn,
-    /// or maxWaitBeforeNext while a wave is active (not used on the last wave).
-    /// </summary>
     public float TimeRemaining
     {
         get
@@ -108,6 +108,11 @@ public class WaveManager : MonoBehaviour
             }
         }
     }
+
+    public GameObject DefaultEnemyPrefab => enemyPrefab;
+    public GameObject ShotgunEnemyPrefab => shotgunPrefab;
+    public GameObject RifleEnemyPrefab => riflePrefab;
+    public GameObject BossEnemyPrefab => bossPrefab;
 
     public event Action OnAllWavesCompleted;
     public event Action<int> OnWaveStarted;
@@ -141,6 +146,16 @@ public class WaveManager : MonoBehaviour
 
     void Start()
     {
+        if (started)
+            return;
+
+        // LevelDirector owns campaign wave setup — wait for BeginConfigured().
+        if (paused || UnityEngine.Object.FindFirstObjectByType<LevelDirector>() != null)
+        {
+            paused = true;
+            return;
+        }
+
         if (waves == null || waves.Count == 0)
         {
             Debug.LogWarning("WaveManager: no waves defined.");
@@ -159,9 +174,53 @@ public class WaveManager : MonoBehaviour
         BeginWave(0);
     }
 
+    public void SetPaused(bool value)
+    {
+        paused = value;
+        if (!paused && !started && waves != null && waves.Count > 0 && spawnPoints != null && spawnPoints.Count > 0)
+        {
+            started = true;
+            BeginWave(0);
+        }
+    }
+
+    public void ConfigureLevel(List<WaveDefinition> newWaves, List<WaveSpawnPoint> newPoints = null)
+    {
+        waves = newWaves ?? new List<WaveDefinition>();
+        if (newPoints != null && newPoints.Count > 0)
+            spawnPoints = newPoints;
+
+        spawnedAlive.Clear();
+        enemiesKilled = 0;
+        waveIndex = 0;
+        phase = Phase.Delay;
+        started = false;
+    }
+
+    public void SetPrefabs(GameObject pistol, GameObject shotgun, GameObject rifle, GameObject boss)
+    {
+        if (pistol != null) enemyPrefab = pistol;
+        if (shotgun != null) shotgunPrefab = shotgun;
+        if (rifle != null) riflePrefab = rifle;
+        if (boss != null) bossPrefab = boss;
+    }
+
+    public void BeginConfigured()
+    {
+        if (waves == null || waves.Count == 0 || spawnPoints == null || spawnPoints.Count == 0)
+        {
+            CompleteWaves();
+            return;
+        }
+
+        started = true;
+        paused = false;
+        BeginWave(0);
+    }
+
     void Update()
     {
-        if (!started || phase == Phase.Complete)
+        if (!started || paused || phase == Phase.Complete)
             return;
 
         PruneDead();
@@ -191,6 +250,7 @@ public class WaveManager : MonoBehaviour
         timer = 0f;
         phase = Phase.Delay;
         OnWaveStarted?.Invoke(waveIndex);
+        DialogueManager.Announcer($"Wave {waveIndex + 1}");
     }
 
     void BeginSpawning()
@@ -201,7 +261,6 @@ public class WaveManager : MonoBehaviour
 
         if (spawnPoints == null || spawnPoints.Count == 0)
         {
-            Debug.LogWarning("WaveManager: no Spawn Points configured. Skipping remaining waves.");
             CompleteWaves();
             return;
         }
@@ -278,7 +337,7 @@ public class WaveManager : MonoBehaviour
                 continue;
 
             Pose pose = GetSpawnPose(point);
-            GameObject go = SpawnEnemy(pose.position, pose.rotation);
+            GameObject go = SpawnEnemy(pose.position, pose.rotation, CurrentWave());
             if (go == null)
                 continue;
 
@@ -311,12 +370,38 @@ public class WaveManager : MonoBehaviour
         return new Pose(pos, Quaternion.LookRotation(face.normalized, Vector3.up));
     }
 
-    GameObject SpawnEnemy(Vector3 position, Quaternion rotation)
+    GameObject SpawnEnemy(Vector3 position, Quaternion rotation, WaveDefinition wave)
     {
-        if (enemyPrefab != null)
-            return Instantiate(enemyPrefab, position, rotation);
+        GameObject prefab = ResolvePrefab(wave);
+        GameObject go = prefab != null
+            ? Instantiate(prefab, position, rotation)
+            : EnemyFactory.Create(position, rotation, wave != null ? wave.archetype : EnemyArchetype.Pistol);
 
-        return EnemyFactory.Create(position, rotation);
+        if (go != null && wave != null && wave.useArchetypeProfile)
+            EnemyProfile.ApplyDefaults(go, wave.archetype);
+
+        return go;
+    }
+
+    GameObject ResolvePrefab(WaveDefinition wave)
+    {
+        if (wave != null && wave.enemyPrefabOverride != null)
+            return wave.enemyPrefabOverride;
+
+        if (wave == null)
+            return enemyPrefab;
+
+        switch (wave.archetype)
+        {
+            case EnemyArchetype.Shotgun:
+                return shotgunPrefab != null ? shotgunPrefab : enemyPrefab;
+            case EnemyArchetype.Rifle:
+                return riflePrefab != null ? riflePrefab : enemyPrefab;
+            case EnemyArchetype.Boss:
+                return bossPrefab != null ? bossPrefab : enemyPrefab;
+            default:
+                return enemyPrefab;
+        }
     }
 
     void HandleEnemyDied(EnemyAI enemy)

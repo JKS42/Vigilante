@@ -24,6 +24,7 @@ public class Health : MonoBehaviour
 
         CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
         OnDamaged?.Invoke(amount, hitPoint, instigator);
+        AudioManager.HitFlesh(hitPoint);
 
         if (CurrentHealth <= 0f)
             Die();
@@ -45,6 +46,15 @@ public class Health : MonoBehaviour
     public void ResetHealth()
     {
         CurrentHealth = maxHealth;
+    }
+
+    public void SetMaxHealth(float value, bool refill = true)
+    {
+        maxHealth = Mathf.Max(1f, value);
+        if (refill)
+            CurrentHealth = maxHealth;
+        else
+            CurrentHealth = Mathf.Min(CurrentHealth, maxHealth);
     }
 
     void Die()

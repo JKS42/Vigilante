@@ -14,8 +14,8 @@ public enum EnemyState
 }
 
 /// <summary>
-/// Full tactical enemy FSM. Requires NavMeshAgent + baked NavMesh.
-/// Scene setup: tag Player/Enemy, add Health, EnemyCombat, EnemySquad, bake NavMeshSurface.
+/// Full tactical enemy FSM. Behaviour weights come from EnemyProfile when present:
+/// shotgun rushes, rifle holds range / cover, pistol balanced, boss mixes pressure.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Health))]
@@ -45,6 +45,8 @@ public class EnemyAI : MonoBehaviour
     NavMeshAgent agent;
     Health health;
     EnemyCombat combat;
+    EnemyProfile profile;
+    EnemyAnimator animator;
     Transform player;
 
     EnemyState state = EnemyState.Idle;
@@ -60,6 +62,7 @@ public class EnemyAI : MonoBehaviour
     float lostSightTimer;
     float idleTimer;
     float alertBroadcastCooldown;
+    float reassessTimer;
     bool hasLastKnown;
     bool wasSeeingPlayer;
 
@@ -67,11 +70,19 @@ public class EnemyAI : MonoBehaviour
     public bool IsDead => health != null && health.IsDead;
     public EnemyState CurrentState => state;
 
+    float Aggression => profile != null ? profile.aggression : 0.5f;
+    float CoverPref => profile != null ? profile.coverPreference : 0.55f;
+    float FlankTend => profile != null ? profile.flankTendency : 0.4f;
+    float HoldBias => profile != null ? profile.holdDistanceBias : 0.4f;
+    float PreferredDist => profile != null ? profile.preferredEngageDistance : 10f;
+
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         health = GetComponent<Health>();
         combat = GetComponent<EnemyCombat>();
+        profile = GetComponent<EnemyProfile>();
+        animator = GetComponent<EnemyAnimator>();
         if (combat == null)
             combat = gameObject.AddComponent<EnemyCombat>();
 
@@ -117,6 +128,14 @@ public class EnemyAI : MonoBehaviour
         if (!gameObject.CompareTag("Enemy"))
             gameObject.tag = "Enemy";
 
+        if (profile == null)
+            profile = EnemyProfile.ApplyDefaults(gameObject, EnemyArchetype.Pistol);
+        else
+            profile.ApplyToComponents();
+
+        if (GetComponent<EnemyWeaponDrop>() == null)
+            gameObject.AddComponent<EnemyWeaponDrop>();
+
         EnemySquad.EnsureExists().Register(this);
         FindPlayer();
         SetState(EnemyState.Idle);
@@ -132,6 +151,8 @@ public class EnemyAI : MonoBehaviour
 
         bool canSee = CanSeePlayer();
         alertBroadcastCooldown -= Time.deltaTime;
+        reassessTimer -= Time.deltaTime;
+
         if (canSee)
         {
             lostSightTimer = 0f;
@@ -154,30 +175,14 @@ public class EnemyAI : MonoBehaviour
 
         switch (state)
         {
-            case EnemyState.Idle:
-                TickIdle(canSee);
-                break;
-            case EnemyState.Patrol:
-                TickPatrol(canSee);
-                break;
-            case EnemyState.Investigate:
-                TickInvestigate(canSee);
-                break;
-            case EnemyState.Chase:
-                TickChase(canSee);
-                break;
-            case EnemyState.TakeCover:
-                TickTakeCover(canSee);
-                break;
-            case EnemyState.Flank:
-                TickFlank(canSee);
-                break;
-            case EnemyState.Attack:
-                TickAttack(canSee);
-                break;
-            case EnemyState.Search:
-                TickSearch(canSee);
-                break;
+            case EnemyState.Idle: TickIdle(canSee); break;
+            case EnemyState.Patrol: TickPatrol(canSee); break;
+            case EnemyState.Investigate: TickInvestigate(canSee); break;
+            case EnemyState.Chase: TickChase(canSee); break;
+            case EnemyState.TakeCover: TickTakeCover(canSee); break;
+            case EnemyState.Flank: TickFlank(canSee); break;
+            case EnemyState.Attack: TickAttack(canSee); break;
+            case EnemyState.Search: TickSearch(canSee); break;
         }
     }
 
@@ -242,15 +247,21 @@ public class EnemyAI : MonoBehaviour
         investigatePos = position;
         pendingAttackAfterCover = true;
 
-        // Wall breach: take cover first, then attack / flank.
-        BeginTakeCover();
+        if (Aggression > 0.75f && Random.value < Aggression)
+            SetState(EnemyState.Chase);
+        else
+            BeginTakeCover();
+
         EnemySquad.Instance?.BroadcastAlert(this, lastKnownPlayerPos);
+        DialogueManager.EnemyBark(transform.position, "breach");
     }
 
     void HandleDamaged(float amount, Vector3 hitPoint, GameObject instigator)
     {
         if (IsDead)
             return;
+
+        animator?.PlayHurt();
 
         if (instigator != null)
         {
@@ -264,14 +275,20 @@ public class EnemyAI : MonoBehaviour
         }
 
         EnemySquad.Instance?.BroadcastAlert(this, lastKnownPlayerPos);
+        DialogueManager.EnemyBark(transform.position, "hurt");
 
+        float coverRoll = hurtCoverChance * CoverPref;
         bool exposed = state != EnemyState.TakeCover && state != EnemyState.Attack;
-        bool wantCover = exposed || Random.value <= hurtCoverChance;
+        bool wantCover = (exposed || Random.value <= coverRoll) && Aggression < 0.85f;
 
         if (wantCover && state != EnemyState.TakeCover)
         {
             pendingAttackAfterCover = true;
             BeginTakeCover();
+        }
+        else if (Aggression > 0.7f)
+        {
+            SetState(EnemyState.Chase);
         }
         else if (state == EnemyState.Idle || state == EnemyState.Patrol || state == EnemyState.Investigate || state == EnemyState.Search)
         {
@@ -295,6 +312,8 @@ public class EnemyAI : MonoBehaviour
 
         CombatStimulus.NotifyEnemyDied(this);
         EnemySquad.Instance?.Unregister(this);
+        DialogueManager.EnemyBark(transform.position, "death");
+        CombatVfx.SpawnOnomatopoeia(transform.position + Vector3.up * 1.5f, "THUD!");
         enabled = false;
         Destroy(gameObject, 2.5f);
     }
@@ -303,7 +322,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (canSee)
         {
-            SetState(EnemyState.Chase);
+            EnterCombatFromSight();
             return;
         }
 
@@ -316,7 +335,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (canSee)
         {
-            SetState(EnemyState.Chase);
+            EnterCombatFromSight();
             return;
         }
 
@@ -328,7 +347,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (canSee)
         {
-            SetState(EnemyState.Chase);
+            EnterCombatFromSight();
             return;
         }
 
@@ -337,7 +356,6 @@ public class EnemyAI : MonoBehaviour
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.4f)
         {
             stateTimer -= Time.deltaTime;
-            // Look around in place.
             transform.Rotate(0f, 90f * Time.deltaTime, 0f);
             if (stateTimer <= 0f)
             {
@@ -346,6 +364,24 @@ public class EnemyAI : MonoBehaviour
                 else
                     SetState(EnemyState.Patrol);
             }
+        }
+    }
+
+    void EnterCombatFromSight()
+    {
+        // Aggressive types push; cautious types peek cover first.
+        if (Random.value < CoverPref * 0.55f && Aggression < 0.7f)
+        {
+            pendingAttackAfterCover = true;
+            BeginTakeCover();
+        }
+        else if (AssignedRole == SquadRole.Flanker || Random.value < FlankTend)
+        {
+            BeginFlank();
+        }
+        else
+        {
+            SetState(EnemyState.Chase);
         }
     }
 
@@ -358,14 +394,31 @@ public class EnemyAI : MonoBehaviour
         }
 
         Vector3 dest = canSee && player != null ? player.position : lastKnownPlayerPos;
+
+        if (canSee && player != null && HoldBias > 0.55f)
+        {
+            // Rifle-style: hold preferred distance instead of running into face.
+            Vector3 away = (transform.position - player.position).normalized;
+            float dist = Vector3.Distance(transform.position, player.position);
+            if (dist < PreferredDist * 0.75f)
+                dest = transform.position + away * 4f;
+            else if (dist > PreferredDist * 1.2f)
+                dest = player.position;
+            else
+                dest = transform.position + transform.right * (preferLeftFlank ? -3f : 3f);
+        }
+
         agent.SetDestination(dest);
 
         if (canSee && player != null)
         {
             float dist = Vector3.Distance(transform.position, player.position);
-            if (dist <= combat.AttackRange && combat.HasLineOfFire(player))
+            bool inRange = dist <= combat.AttackRange;
+
+            if (inRange && combat.HasLineOfFire(player))
             {
-                if (AssignedRole == SquadRole.Flanker && Random.value < 0.35f)
+                float flankChance = FlankTend * (AssignedRole == SquadRole.Flanker ? 1.2f : 0.7f);
+                if (Random.value < flankChance * 0.35f)
                 {
                     BeginFlank();
                     return;
@@ -374,10 +427,20 @@ public class EnemyAI : MonoBehaviour
                 SetState(EnemyState.Attack);
                 return;
             }
+
+            // Shotgun aggression: keep closing even without perfect LOS.
+            if (Aggression > 0.8f && dist > 2f && reassessTimer <= 0f)
+            {
+                reassessTimer = 0.6f;
+                agent.SetDestination(player.position);
+            }
         }
         else if (lostSightTimer >= lostSightGrace)
         {
-            SetState(EnemyState.Search);
+            if (Random.value < FlankTend)
+                BeginFlank();
+            else
+                SetState(EnemyState.Search);
         }
     }
 
@@ -391,20 +454,25 @@ public class EnemyAI : MonoBehaviour
 
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.35f)
         {
-            // In cover: then attack or flank per squad role.
-            pendingAttackAfterCover = false;
-            if (AssignedRole == SquadRole.Flanker)
+            if (pendingAttackAfterCover)
+            {
+                pendingAttackAfterCover = false;
+                if (Aggression > 0.75f)
+                    SetState(EnemyState.Chase);
+                else
+                    SetState(EnemyState.Attack);
+            }
+            else if (AssignedRole == SquadRole.Flanker || Random.value < FlankTend)
                 BeginFlank();
+            else if (Aggression > 0.75f)
+                SetState(EnemyState.Chase);
             else
                 SetState(EnemyState.Attack);
             return;
         }
 
         if (canSee && player != null && Vector3.Distance(transform.position, player.position) < 3f)
-        {
-            // Too close while seeking cover — fight.
             SetState(EnemyState.Attack);
-        }
     }
 
     void TickFlank(bool canSee)
@@ -417,7 +485,6 @@ public class EnemyAI : MonoBehaviour
 
         if (canSee && player != null && combat.HasLineOfFire(player))
         {
-            // Opportunistic fire while flanking.
             FaceTarget(player.position);
             combat.TryFireAt(player);
         }
@@ -434,27 +501,48 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        agent.isStopped = true;
+        float dist = Vector3.Distance(transform.position, player.position);
+
+        // Aggressive close-range: keep advancing while shooting.
+        bool pushIn = Aggression > 0.7f && dist > PreferredDist * 0.6f;
+        bool backOff = HoldBias > 0.6f && dist < PreferredDist * 0.7f;
+
+        if (pushIn || backOff)
+        {
+            agent.isStopped = false;
+            if (pushIn)
+                agent.SetDestination(player.position);
+            else
+                agent.SetDestination(transform.position + (transform.position - player.position).normalized * 4f);
+        }
+        else
+        {
+            agent.isStopped = true;
+        }
+
         FaceTarget(canSee ? player.position : lastKnownPlayerPos);
 
         if (canSee)
         {
             if (combat.HasLineOfFire(player))
                 combat.TryFireAt(player);
-            else if (AssignedRole == SquadRole.Flanker)
+            else if (AssignedRole == SquadRole.Flanker || Random.value < FlankTend)
                 BeginFlank();
             else
             {
-                // Reposition via cover if LOS blocked.
                 pendingAttackAfterCover = true;
                 BeginTakeCover();
             }
 
-            float dist = Vector3.Distance(transform.position, player.position);
             if (dist > combat.AttackRange * 1.15f)
             {
                 agent.isStopped = false;
                 SetState(EnemyState.Chase);
+            }
+            else if (reassessTimer <= 0f && Random.value < FlankTend * 0.15f)
+            {
+                reassessTimer = 2.5f;
+                BeginFlank();
             }
         }
         else if (lostSightTimer >= lostSightGrace)
@@ -468,7 +556,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (canSee)
         {
-            SetState(EnemyState.Chase);
+            EnterCombatFromSight();
             return;
         }
 
@@ -477,7 +565,6 @@ public class EnemyAI : MonoBehaviour
 
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.4f)
         {
-            // Pick a nearby search point.
             if (NavMesh.SamplePosition(
                     lastKnownPlayerPos + Random.insideUnitSphere * 6f,
                     out NavMeshHit hit,
@@ -520,7 +607,6 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        // No cover available — push aggression.
         SetState(hasLastKnown || player != null ? EnemyState.Chase : EnemyState.Investigate);
     }
 
@@ -530,11 +616,13 @@ public class EnemyAI : MonoBehaviour
         preferLeftFlank = GetInstanceID() % 2 == 0;
 
         Vector3 threat = player != null ? player.position : lastKnownPlayerPos;
-        if (CoverFinder.FindFlankPosition(transform.position, threat, flankDistance, preferLeftFlank, out Vector3 flankPos))
+        float dist = flankDistance * (0.75f + FlankTend * 0.5f);
+        if (CoverFinder.FindFlankPosition(transform.position, threat, dist, preferLeftFlank, out Vector3 flankPos))
         {
             agent.isStopped = false;
             agent.SetDestination(flankPos);
             SetState(EnemyState.Flank);
+            DialogueManager.EnemyBark(transform.position, "flank");
         }
         else
         {
@@ -575,7 +663,7 @@ public class EnemyAI : MonoBehaviour
                 agent.isStopped = false;
                 break;
             case EnemyState.Attack:
-                if (agent.isOnNavMesh)
+                if (agent.isOnNavMesh && Aggression < 0.7f)
                     agent.isStopped = true;
                 break;
             case EnemyState.Search:

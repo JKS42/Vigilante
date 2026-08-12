@@ -41,6 +41,67 @@ public static class VigilanteEnemyMenu
         Selection.activeGameObject = spawn.gameObject;
     }
 
+    [MenuItem("Vigilante/Create Audio Manager")]
+    public static void CreateAudioManager()
+    {
+        AudioManager existing = Object.FindFirstObjectByType<AudioManager>();
+        if (existing != null)
+        {
+            Selection.activeGameObject = existing.gameObject;
+            Debug.Log("Vigilante: AudioManager already in the scene — assign clips in the Inspector.");
+            return;
+        }
+
+        GameObject go = new GameObject("AudioManager");
+        go.AddComponent<AudioManager>();
+        Undo.RegisterCreatedObjectUndo(go, "Create Audio Manager");
+        Selection.activeGameObject = go;
+        Debug.Log("Vigilante: AudioManager created. Assign UI / combat / swap / ambient clips, then save the scene.");
+    }
+
+    [MenuItem("Vigilante/Create Level Director")]
+    public static void CreateLevelDirector()
+    {
+        LevelDirector existing = Object.FindFirstObjectByType<LevelDirector>();
+        if (existing != null)
+        {
+            Selection.activeGameObject = existing.gameObject;
+            return;
+        }
+
+        GameObject go = new GameObject("LevelDirector");
+        go.AddComponent<LevelDirector>();
+        Undo.RegisterCreatedObjectUndo(go, "Create Level Director");
+        Selection.activeGameObject = go;
+    }
+
+    [MenuItem("Vigilante/Create Shotgun Enemy At Scene View")]
+    public static void CreateShotgunEnemy()
+    {
+        Vector3 pos = GetSpawnPosition();
+        GameObject enemy = EnemyFactory.Create(pos, Quaternion.identity, EnemyArchetype.Shotgun);
+        Undo.RegisterCreatedObjectUndo(enemy, "Create Shotgun Enemy");
+        Selection.activeGameObject = enemy;
+    }
+
+    [MenuItem("Vigilante/Create Rifle Enemy At Scene View")]
+    public static void CreateRifleEnemy()
+    {
+        Vector3 pos = GetSpawnPosition();
+        GameObject enemy = EnemyFactory.Create(pos, Quaternion.identity, EnemyArchetype.Rifle);
+        Undo.RegisterCreatedObjectUndo(enemy, "Create Rifle Enemy");
+        Selection.activeGameObject = enemy;
+    }
+
+    [MenuItem("Vigilante/Create Boss Enemy At Scene View")]
+    public static void CreateBossEnemy()
+    {
+        Vector3 pos = GetSpawnPosition();
+        GameObject enemy = EnemyFactory.Create(pos, Quaternion.identity, EnemyArchetype.Boss);
+        Undo.RegisterCreatedObjectUndo(enemy, "Create Boss Enemy");
+        Selection.activeGameObject = enemy;
+    }
+
     [MenuItem("Vigilante/Ensure Combat Bootstrap (Player Tag + Squad + NavMesh Bake)")]
     public static void EnsureBootstrap()
     {

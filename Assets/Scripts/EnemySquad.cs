@@ -129,15 +129,34 @@ public class EnemySquad : MonoBehaviour
         if (living.Count == 0)
             return;
 
+        // Prefer shotgun / high-aggression as flankers; rifle / cover-heavy as suppressors.
+        living.Sort((a, b) => FlankScore(b).CompareTo(FlankScore(a)));
+
         int flankerCount = Mathf.Max(1, Mathf.RoundToInt(living.Count * flankerRatio));
         if (living.Count == 1)
             flankerCount = 0;
 
-        // Deterministic-ish: every Nth becomes flanker based on instance id.
-        living.Sort((a, b) => a.GetInstanceID().CompareTo(b.GetInstanceID()));
-
         for (int i = 0; i < living.Count; i++)
             living[i].AssignedRole = i < flankerCount ? SquadRole.Flanker : SquadRole.Suppressor;
+    }
+
+    static float FlankScore(EnemyAI ai)
+    {
+        if (ai == null)
+            return 0f;
+
+        EnemyProfile profile = ai.GetComponent<EnemyProfile>();
+        if (profile == null)
+            return 0.4f;
+
+        float score = profile.flankTendency + profile.aggression * 0.5f - profile.coverPreference * 0.35f;
+        if (profile.archetype == EnemyArchetype.Shotgun)
+            score += 0.5f;
+        if (profile.archetype == EnemyArchetype.Rifle)
+            score -= 0.35f;
+        if (profile.archetype == EnemyArchetype.Boss)
+            score += 0.2f;
+        return score;
     }
 
     public bool IsCoverReservedByOther(CoverPoint point, EnemyAI requester)

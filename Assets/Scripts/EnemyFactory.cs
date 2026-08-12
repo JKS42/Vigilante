@@ -8,13 +8,17 @@ public static class EnemyFactory
 {
     public static GameObject Create(Vector3 position, Quaternion rotation)
     {
+        return Create(position, rotation, EnemyArchetype.Pistol);
+    }
+
+    public static GameObject Create(Vector3 position, Quaternion rotation, EnemyArchetype archetype)
+    {
         GameObject enemy = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-        enemy.name = "Enemy";
+        enemy.name = archetype + "Enemy";
         enemy.tag = "Enemy";
         enemy.transform.position = position;
         enemy.transform.rotation = rotation;
 
-        // Capsule collider from CreatePrimitive is fine; add agent + AI stack.
         Rigidbody rb = enemy.AddComponent<Rigidbody>();
         rb.isKinematic = true;
         rb.useGravity = false;
@@ -32,22 +36,9 @@ public static class EnemyFactory
 
         enemy.AddComponent<Health>();
         enemy.AddComponent<EnemyCombat>();
+        EnemyProfile.ApplyDefaults(enemy, archetype);
+        enemy.AddComponent<EnemyWeaponDrop>();
         enemy.AddComponent<EnemyAI>();
-
-        // Distinct look from player capsule.
-        Renderer renderer = enemy.GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-            if (shader == null)
-                shader = Shader.Find("Standard");
-            if (shader != null)
-            {
-                Material mat = new Material(shader);
-                mat.color = new Color(0.75f, 0.15f, 0.15f);
-                renderer.sharedMaterial = mat;
-            }
-        }
 
         return enemy;
     }

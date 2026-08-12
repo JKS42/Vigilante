@@ -3,19 +3,7 @@ using UnityEngine.AI;
 using Unity.AI.Navigation;
 
 /// <summary>
-/// Runtime LevelDemo wiring for tactical AI.
-/// - Tags player as Player and adds Health if missing
-/// - Ensures EnemySquad exists
-/// - Builds a NavMesh at runtime if none is baked (NavMeshSurface)
-///
-/// Waves are not created here. Place WaveManager in the scene and fill Spawn Points + Waves.
-///
-/// Manual editor steps still recommended for shipping:
-/// 1. Add NavMeshSurface to level root and Bake (Window/AI Navigation)
-/// 2. Place CoverPoint empties near walls/corners (optional; dynamic cover is the fallback)
-/// 3. Add an empty with WaveManager; fill Spawn Points (NavMesh walkable) and Waves
-/// 4. Menu: Vigilante/Create Tactical Enemy At Scene View (prefab authoring only)
-/// 5. Menu: Vigilante/Save Selected Enemy As Prefab
+/// Runtime LevelDemo wiring for tactical AI + campaign systems.
 /// </summary>
 public static class LevelCombatBootstrap
 {
@@ -25,6 +13,33 @@ public static class LevelCombatBootstrap
         SetupPlayer();
         EnemySquad.EnsureExists();
         EnsureNavMesh();
+        EnsureCampaignSystems();
+    }
+
+    public static void EnsureCampaignSystems()
+    {
+        // Only wire campaign systems in the playable combat scene (build index 1+).
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex < 1)
+            return;
+
+        AudioManager.EnsureExists();
+        DialogueManager.EnsureExists();
+
+        WaveManager waves = Object.FindFirstObjectByType<WaveManager>();
+        if (waves != null)
+            waves.SetPaused(true);
+
+        if (Object.FindFirstObjectByType<LevelDirector>() == null)
+        {
+            GameObject go = new GameObject("LevelDirector");
+            LevelDirector director = go.AddComponent<LevelDirector>();
+
+            // Hook existing enemy prefabs from WaveManager if present.
+            if (waves != null)
+            {
+                // Prefabs remain assignable on LevelDirector in the inspector when placed manually.
+            }
+        }
     }
 
     public static void SetupPlayer()
@@ -43,7 +58,6 @@ public static class LevelCombatBootstrap
         if (!player.CompareTag("Player"))
             player.tag = "Player";
 
-        // Ensure body colliders resolve as Player for hitscan/projectiles.
         foreach (Collider col in player.GetComponentsInChildren<Collider>())
         {
             if (col != null && !col.CompareTag("Player"))

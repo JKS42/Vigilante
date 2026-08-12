@@ -22,6 +22,7 @@ public class UIManager : MonoBehaviour
     public GameObject[] inventorySlots;
     public float selectedInventoryAlpha = 1f;
     public float unselectedInventoryAlpha = 0.35f;
+    public float lockedInventoryAlpha = 0.12f;
 
     [Header("Wave timer")]
     public TextMeshProUGUI timerText;
@@ -39,13 +40,19 @@ public class UIManager : MonoBehaviour
     void OnEnable()
     {
         if (weaponSwitcher != null)
+        {
             weaponSwitcher.WeaponChanged += OnWeaponChanged;
+            weaponSwitcher.WeaponUnlocked += OnWeaponUnlocked;
+        }
     }
 
     void OnDisable()
     {
         if (weaponSwitcher != null)
+        {
             weaponSwitcher.WeaponChanged -= OnWeaponChanged;
+            weaponSwitcher.WeaponUnlocked -= OnWeaponUnlocked;
+        }
     }
 
     void Start()
@@ -56,10 +63,20 @@ public class UIManager : MonoBehaviour
         if (weaponSwitcher != null && weaponSwitcher.CurrentIndex >= 0)
             OnWeaponChanged(weaponSwitcher.CurrentIndex, weaponSwitcher.CurrentWeapon);
         else
+        {
+            UpdateInventoryHighlight(boundIndex);
             RefreshAmmo();
+        }
 
         RefreshWaveTimer();
         RefreshEnemyCount();
+
+        if (enemyCountText != null)
+        {
+            string levelLabel = $"LEVEL {GameProgression.SelectedLevel}  ·  ";
+            if (!enemyCountPrefix.Contains("LEVEL"))
+                enemyCountPrefix = levelLabel + enemyCountPrefix;
+        }
     }
 
     void Update()
@@ -75,6 +92,11 @@ public class UIManager : MonoBehaviour
         SetActiveExclusive(weaponHudIcons, index);
         UpdateInventoryHighlight(index);
         RefreshAmmo();
+    }
+
+    void OnWeaponUnlocked(int index)
+    {
+        UpdateInventoryHighlight(weaponSwitcher != null ? weaponSwitcher.CurrentIndex : boundIndex);
     }
 
     void RefreshAmmo()
@@ -145,8 +167,16 @@ public class UIManager : MonoBehaviour
             if (!slot.activeSelf)
                 slot.SetActive(true);
 
+            bool unlocked = weaponSwitcher == null || weaponSwitcher.IsUnlocked(i);
+            float alpha;
+            if (!unlocked)
+                alpha = lockedInventoryAlpha;
+            else if (i == selectedIndex)
+                alpha = selectedInventoryAlpha;
+            else
+                alpha = unselectedInventoryAlpha;
+
             Graphic[] graphics = slot.GetComponentsInChildren<Graphic>(true);
-            float alpha = i == selectedIndex ? selectedInventoryAlpha : unselectedInventoryAlpha;
             for (int g = 0; g < graphics.Length; g++)
             {
                 if (graphics[g] == null)

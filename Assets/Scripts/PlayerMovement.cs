@@ -4,8 +4,16 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
+    public float walkSpeed = 5f;
+    public float sprintSpeed = 8f;
+    public float crouchSpeed = 2.6f;
     public float moveSpeed = 5f;
     public float groundDrag = 5f;
+
+    [Header("Dash")]
+    public float dashForce = 18f;
+    public float dashDuration = 0.18f;
+    public float dashCooldown = 1.1f;
 
     [Header("Jump")]
     public float jumpForce = 5f;
@@ -17,27 +25,52 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Ground Check")]
     public float playerHeight = 2f;
+    public float crouchHeight = 1.2f;
     public LayerMask whatIsGround;
     bool grounded;
     public Transform orientation;
 
     [Header("Input")]
-    // Assign an InputAction (Value - Vector2) in the Inspector (InputActionReference)
     public InputActionReference moveAction;
     public InputActionReference jumpAction;
     public InputActionReference reloadAction;
     public InputActionReference sprintAction;
+    public InputActionReference crouchAction;
+    public InputActionReference dashAction;
 
     Vector2 moveInput;
     Rigidbody rb;
+    CapsuleCollider bodyCapsule;
+    float standingHeight;
+    float standingCenterY;
+    bool crouching;
+    bool dashing;
+    float dashTimer;
+    float dashCooldownTimer;
+    Vector3 dashDirection;
+    InputAction ownedCrouch;
+    InputAction ownedDash;
+    bool ownsCrouch;
+    bool ownsDash;
 
-    // Cache the rigidbody for movement and jumping.
+    public bool IsCrouching => crouching;
+    public bool IsSprinting { get; private set; }
+    public bool IsDashing => dashing;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        bodyCapsule = GetComponent<CapsuleCollider>();
+        if (bodyCapsule == null)
+            bodyCapsule = GetComponentInChildren<CapsuleCollider>();
+
+        if (bodyCapsule != null)
+        {
+            standingHeight = bodyCapsule.height;
+            standingCenterY = bodyCapsule.center.y;
+        }
     }
 
-    // Enable input actions when this component activates.
     void OnEnable()
     {
         if (moveAction != null) moveAction.action.Enable();
@@ -45,9 +78,11 @@ public class PlayerMovement : MonoBehaviour
         if (reloadAction != null) reloadAction.action.Enable();
         if (sprintAction != null) sprintAction.action.Enable();
 
+        BindExtraActions();
+        if (ResolveCrouch() != null) ResolveCrouch().Enable();
+        if (ResolveDash() != null) ResolveDash().Enable();
     }
 
-    // Disable input actions when this component deactivates.
     void OnDisable()
     {
         if (moveAction != null) moveAction.action.Disable();
@@ -55,16 +90,80 @@ public class PlayerMovement : MonoBehaviour
         if (reloadAction != null) reloadAction.action.Disable();
         if (sprintAction != null) sprintAction.action.Disable();
 
+        InputAction crouch = ResolveCrouch();
+        InputAction dash = ResolveDash();
+        if (crouch != null && ownsCrouch)
+        {
+            crouch.Disable();
+            crouch.Dispose();
+            ownedCrouch = null;
+            ownsCrouch = false;
+        }
+        else if (crouch != null)
+            crouch.Disable();
+
+        if (dash != null && ownsDash)
+        {
+            dash.Disable();
+            dash.Dispose();
+            ownedDash = null;
+            ownsDash = false;
+        }
+        else if (dash != null)
+            dash.Disable();
     }
 
-    // Prevent rigidbody rotation at startup.
+    void BindExtraActions()
+    {
+        if (crouchAction != null && crouchAction.action != null)
+        {
+            ownedCrouch = null;
+            ownsCrouch = false;
+        }
+        else if (ownedCrouch == null)
+        {
+            ownedCrouch = new InputAction("Crouch", InputActionType.Button);
+            ownedCrouch.AddBinding("<Keyboard>/c");
+            ownedCrouch.AddBinding("<Keyboard>/leftCtrl");
+            ownedCrouch.AddBinding("<Gamepad>/buttonEast");
+            ownsCrouch = true;
+        }
+
+        if (dashAction != null && dashAction.action != null)
+        {
+            ownedDash = null;
+            ownsDash = false;
+        }
+        else if (ownedDash == null)
+        {
+            ownedDash = new InputAction("Dash", InputActionType.Button);
+            ownedDash.AddBinding("<Keyboard>/leftAlt");
+            ownedDash.AddBinding("<Keyboard>/q");
+            ownedDash.AddBinding("<Gamepad>/buttonNorth");
+            ownsDash = true;
+        }
+    }
+
+    InputAction ResolveCrouch()
+    {
+        if (crouchAction != null && crouchAction.action != null)
+            return crouchAction.action;
+        return ownedCrouch;
+    }
+
+    InputAction ResolveDash()
+    {
+        if (dashAction != null && dashAction.action != null)
+            return dashAction.action;
+        return ownedDash;
+    }
+
     void Start()
     {
         if (rb != null) rb.freezeRotation = true;
         readyToJump = true;
     }
 
-    // Read input, check ground, and update movement state.
     void Update()
     {
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
@@ -72,86 +171,142 @@ public class PlayerMovement : MonoBehaviour
         if (moveAction != null)
             moveInput = moveAction.action.ReadValue<Vector2>();
 
-        if (jumpAction != null && jumpAction.action.WasPressedThisFrame() && readyToJump && grounded){
+        InputAction crouch = ResolveCrouch();
+        InputAction dash = ResolveDash();
+
+        bool wantsCrouch = crouch != null && crouch.IsPressed();
+        SetCrouching(wantsCrouch && grounded && !dashing);
+
+        IsSprinting = !crouching && !dashing && sprintAction != null && sprintAction.action.IsPressed() && moveInput.sqrMagnitude > 0.01f;
+
+        if (crouching)
+            moveSpeed = crouchSpeed;
+        else if (IsSprinting)
+            moveSpeed = sprintSpeed;
+        else
+            moveSpeed = walkSpeed;
+
+        if (jumpAction != null && jumpAction.action.WasPressedThisFrame() && readyToJump && grounded && !crouching)
+        {
             readyToJump = false;
             Jump();
             Invoke(nameof(ResetJump), jumpCooldown);
-            
         }
-        if (sprintAction != null && sprintAction.action.IsPressed())
+
+        dashCooldownTimer -= Time.deltaTime;
+        if (dash != null && dash.WasPressedThisFrame())
+            TryDash();
+
+        if (dashing)
         {
-            moveSpeed = 7f; // Sprint speed
+            dashTimer -= Time.deltaTime;
+            if (dashTimer <= 0f)
+                dashing = false;
         }
-        else
-        {
-            moveSpeed = 5f; // Normal speed
-        }
-        
+
         if (rb == null) return;
 
         rb.linearDamping = grounded ? groundDrag : 0f;
         SpeedControl();
-        
     }
 
-    // Apply movement forces every physics step.
     void FixedUpdate()
     {
+        if (dashing)
+        {
+            Vector3 vel = dashDirection * dashForce;
+            vel.y = rb.linearVelocity.y;
+            rb.linearVelocity = vel;
+            return;
+        }
+
         MovePlayer();
         ApplyExtraGravity();
-        
     }
 
-    // Move the player using camera-relative input.
+    void TryDash()
+    {
+        if (!grounded || dashing || dashCooldownTimer > 0f || crouching)
+            return;
+
+        Vector3 dir = orientation != null
+            ? orientation.forward * moveInput.y + orientation.right * moveInput.x
+            : transform.forward;
+
+        if (dir.sqrMagnitude < 0.01f)
+            dir = orientation != null ? orientation.forward : transform.forward;
+
+        dashDirection = dir.normalized;
+        dashing = true;
+        dashTimer = dashDuration;
+        dashCooldownTimer = dashCooldown;
+        CombatVfx.SpawnOnomatopoeia(transform.position + Vector3.up, "WHOOSH!");
+        AudioManager.Dash();
+        CombatStimulus.EmitNoise(transform.position, 8f, StimulusType.Footstep);
+    }
+
+    void SetCrouching(bool value)
+    {
+        if (crouching == value)
+            return;
+
+        crouching = value;
+        if (bodyCapsule == null)
+            return;
+
+        if (crouching)
+        {
+            bodyCapsule.height = crouchHeight;
+            bodyCapsule.center = new Vector3(bodyCapsule.center.x, crouchHeight * 0.5f, bodyCapsule.center.z);
+        }
+        else
+        {
+            bodyCapsule.height = standingHeight > 0.1f ? standingHeight : playerHeight;
+            bodyCapsule.center = new Vector3(bodyCapsule.center.x, standingCenterY, bodyCapsule.center.z);
+        }
+    }
+
     void MovePlayer()
     {
         if (rb == null || orientation == null) return;
 
         Vector3 moveDirection = orientation.forward * moveInput.y + orientation.right * moveInput.x;
 
-        if(grounded){
+        if (grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
-        }
-        //The player is in the Air
-        else if(!grounded){
+        else
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
-        }
-        
     }
 
-    // Launch the player upward from the ground.
     void Jump()
     {
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
-    // Apply stronger gravity for tighter jump arcs.
     void ApplyExtraGravity()
     {
         if (rb == null || grounded) return;
 
         if (rb.linearVelocity.y < 0f)
-        {
             rb.AddForce(Vector3.up * Physics.gravity.y * (fallMultiplier - 1f), ForceMode.Acceleration);
-        }
         else if (rb.linearVelocity.y > 0f && (jumpAction == null || !jumpAction.action.IsPressed()))
-        {
             rb.AddForce(Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1f), ForceMode.Acceleration);
-        }
     }
 
-    // Reallow jumping after the cooldown ends.
-    private void ResetJump()
+    void ResetJump()
     {
         readyToJump = true;
     }
 
-    // Clamp horizontal velocity to the movement speed.
-    private void SpeedControl(){
-        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+    void SpeedControl()
+    {
+        if (dashing)
+            return;
 
-        if(flatVel.magnitude > moveSpeed){
+        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        if (flatVel.magnitude > moveSpeed)
+        {
             Vector3 limitedVel = flatVel.normalized * moveSpeed;
             rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
         }

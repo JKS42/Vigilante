@@ -16,7 +16,11 @@ public class Shotgun : Weapon
     public int pelletCount = 8;
     public float spreadAngle = 6f;
 
+    [Header("Optional FX")]
+    public AudioClip shotSound;
+
     Transform cam;
+    AudioSource audioSource;
 
     protected override void Awake()
     {
@@ -32,6 +36,9 @@ public class Shotgun : Weapon
     {
         base.Start();
         cam = Camera.main != null ? Camera.main.transform : null;
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null && shotSound != null)
+            audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     protected override void FireShot()
@@ -53,6 +60,13 @@ public class Shotgun : Weapon
             Bullet.Spawn(bulletPrefab, spawnPos, pelletDir, bulletSpeed, DamagePerPellet, instigator, bulletScale);
         }
 
+        if (shotSound != null && audioSource != null)
+            audioSource.PlayOneShot(shotSound);
+        else
+            AudioManager.EnemyGunshot(spawnPos, EnemyWeaponKind.Shotgun);
+
+        CombatVfx.SpawnMuzzleFlash(spawnPos, aimDir);
+        CombatVfx.SpawnOnomatopoeia(spawnPos + aimDir * 0.5f, "BOOM!");
         NoiseEmitter.Emit(spawnPos, shotNoiseRadius, StimulusType.Gunfire);
     }
 

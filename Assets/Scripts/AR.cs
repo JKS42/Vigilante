@@ -58,6 +58,11 @@ public class AR : Weapon
 
         if (shotSound != null && audioSource != null)
             audioSource.PlayOneShot(shotSound);
+        else
+            AudioManager.EnemyGunshot(spawnPos, EnemyWeaponKind.Rifle);
+
+        if (muzzleFlash == null)
+            CombatVfx.SpawnMuzzleFlash(spawnPos, aimDir);
 
         NoiseEmitter.Emit(spawnPos, shotNoiseRadius, StimulusType.Gunfire);
     }
