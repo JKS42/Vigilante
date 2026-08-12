@@ -2,8 +2,14 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
+    const float MinSweepRadius = 0.08f;
+
     public float damage = 25f;
     public GameObject instigator;
+
+    bool consumed;
+    Vector3 lastPosition;
+    Collider bulletCollider;
 
     public static Bullet Spawn(
         GameObject prefab,
@@ -36,8 +42,11 @@ public class Bullet : MonoBehaviour
             bullet = spawned.AddComponent<Bullet>();
         bullet.damage = damage;
         bullet.instigator = instigator;
+        bullet.lastPosition = spawnPos;
+        bullet.consumed = false;
 
         Collider col = spawned.GetComponent<Collider>();
+        bullet.bulletCollider = col;
         if (col != null)
         {
             col.isTrigger = true;
@@ -64,6 +73,44 @@ public class Bullet : MonoBehaviour
         return bullet;
     }
 
+    void Awake()
+    {
+        if (bulletCollider == null)
+            bulletCollider = GetComponent<Collider>();
+        lastPosition = transform.position;
+    }
+
+    void FixedUpdate()
+    {
+        if (consumed)
+            return;
+
+        Vector3 current = transform.position;
+        Vector3 delta = current - lastPosition;
+        float distance = delta.magnitude;
+
+        if (distance > 0.0001f)
+        {
+            Vector3 direction = delta / distance;
+            float radius = GetSweepRadius();
+            if (Physics.SphereCast(
+                    lastPosition,
+                    radius,
+                    direction,
+                    out RaycastHit hit,
+                    distance,
+                    ~0,
+                    QueryTriggerInteraction.Ignore))
+            {
+                HandleHit(hit.collider);
+                if (consumed)
+                    return;
+            }
+        }
+
+        lastPosition = current;
+    }
+
     void OnTriggerEnter(Collider other)
     {
         HandleHit(other);
@@ -76,7 +123,10 @@ public class Bullet : MonoBehaviour
 
     void HandleHit(Collider other)
     {
-        if (other == null)
+        if (consumed || other == null)
+            return;
+
+        if (other == bulletCollider)
             return;
 
         // Ignore other projectiles so shotgun pellets don't wipe each other out.
@@ -97,7 +147,7 @@ public class Bullet : MonoBehaviour
         if (!hitBreakable && !hitEnemy && !hitPlayer)
         {
             if (!other.isTrigger)
-                Destroy(gameObject);
+                Consume();
             return;
         }
 
@@ -108,7 +158,55 @@ public class Bullet : MonoBehaviour
                 health.TakeDamage(damage, other.ClosestPoint(transform.position), instigator);
         }
 
+        // Sweep can destroy the bullet before trigger overlap notifies Break.
+        if (hitBreakable)
+        {
+            Break breakable = other.GetComponentInParent<Break>();
+            if (breakable != null)
+                breakable.BreakApart();
+        }
+
+        Consume();
+    }
+
+    void Consume()
+    {
+        if (consumed)
+            return;
+
+        consumed = true;
         Destroy(gameObject);
+    }
+
+    float GetSweepRadius()
+    {
+        if (bulletCollider == null)
+            bulletCollider = GetComponent<Collider>();
+
+        if (bulletCollider == null)
+            return MinSweepRadius;
+
+        float radius = MinSweepRadius;
+        Vector3 lossy = bulletCollider.transform.lossyScale;
+        float maxScale = Mathf.Max(Mathf.Abs(lossy.x), Mathf.Abs(lossy.y), Mathf.Abs(lossy.z));
+
+        if (bulletCollider is SphereCollider sphere)
+            radius = Mathf.Max(MinSweepRadius, sphere.radius * maxScale);
+        else if (bulletCollider is CapsuleCollider capsule)
+            radius = Mathf.Max(MinSweepRadius, capsule.radius * maxScale);
+        else if (bulletCollider is BoxCollider box)
+        {
+            Vector3 half = Vector3.Scale(box.size * 0.5f, new Vector3(
+                Mathf.Abs(lossy.x), Mathf.Abs(lossy.y), Mathf.Abs(lossy.z)));
+            radius = Mathf.Max(MinSweepRadius, Mathf.Min(half.x, half.y, half.z));
+        }
+        else
+        {
+            Vector3 extents = bulletCollider.bounds.extents;
+            radius = Mathf.Max(MinSweepRadius, Mathf.Min(extents.x, extents.y, extents.z));
+        }
+
+        return radius;
     }
 
     static bool HasTagInParents(Transform t, string tag)
