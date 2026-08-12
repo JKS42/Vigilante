@@ -132,6 +132,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 736558}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &736558
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -287,6 +293,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 4258726}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &4595538
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -442,6 +454,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 5968202}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &7390072 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 4ed70686d2b979840b8faaba9e4d5c00, type: 3}
@@ -899,6 +917,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 8985818}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &11200577 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -1393,6 +1417,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 28119297}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &28378653
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2305,6 +2335,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 44736177}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &45135858
 GameObject:
   m_ObjectHideFlags: 0
@@ -2357,6 +2393,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 45653929}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &45653929
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2441,6 +2483,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 47364688}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &47364688
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3260,6 +3308,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 66022470}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!4 &66715066 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 343638e4dbe4b024aa9a2f97c1a5601f, type: 3}
@@ -3809,6 +3863,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 82755674}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &82755674
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4119,6 +4179,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 89685285}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &89927189
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4792,6 +4858,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 112693341}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &116031389
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5135,6 +5207,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 122946104}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &122946104
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5535,6 +5613,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 141585411}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &143693563
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5745,6 +5829,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 144427876}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &145954957
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6696,6 +6786,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 172703895}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &173051811
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6775,6 +6871,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 176004435}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &176004435
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -7149,6 +7251,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 188700976}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &189048352
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7610,6 +7718,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 214237848}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &214237848
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -8015,6 +8129,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 231704818}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &234552727
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8314,6 +8434,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 252204816}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &254863150
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8464,6 +8590,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 257218266}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &257491136
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9427,6 +9559,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 278843593}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &280574289
 GameObject:
   m_ObjectHideFlags: 0
@@ -9542,6 +9680,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 282982866}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &283948067
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9763,6 +9907,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 298083424}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &299292002
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10511,6 +10661,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 328924494}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &331885525
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10665,6 +10821,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 339057983}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &340192720
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10749,6 +10911,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 340192722}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &340251700
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10833,6 +11001,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 340251702}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!4 &342717163 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: bed8b23fc54befe4fb04becb9f45025b, type: 3}
@@ -10922,6 +11096,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 342932179}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &346844510
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -11006,6 +11186,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 346844512}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &349094930
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11397,6 +11583,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 349629695}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &349629695
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -11613,6 +11805,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 356731869}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &356731869
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -12157,6 +12355,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 960158127}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &382849053
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -12444,6 +12648,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 390024867}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &396775974
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12599,6 +12809,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 399101470}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &404401348
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13553,6 +13769,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 406526805}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &406526805
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13637,6 +13859,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 406526809}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &406526809
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -14163,6 +14391,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 413769095}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &415117703
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -14247,6 +14481,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 415117705}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &417653362
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14659,6 +14899,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 427947733}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &427947733
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -14879,6 +15125,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 431803866}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &435210091
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15338,6 +15590,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 443645094}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &443645094
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -15824,6 +16082,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 457413809}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &457413809
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -16333,6 +16597,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 466293196}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &467008693
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -16417,6 +16687,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 467008695}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &470340555
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16992,6 +17268,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 483128637}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &483128637
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -17614,6 +17896,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 504319855}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &505187037 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -17867,6 +18155,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 512231680}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &513298440
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -17951,6 +18245,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 513298442}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &513648057
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -18035,6 +18335,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 513648059}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &515186883
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18250,6 +18556,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 520047053}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &521923903
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18432,6 +18744,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 526428604}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &527369262
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18883,6 +19201,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 539096792}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &539096792
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -19170,6 +19494,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 546175860}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &546548779
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19650,6 +19980,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 557232242}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &558287525
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -19734,6 +20070,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 558287527}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &559026140
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20074,6 +20416,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 569331311}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &569331311
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -20158,6 +20506,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 770658956}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &570954218
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -20308,6 +20662,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 574546617}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &574546617
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -20463,6 +20823,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 574700529}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &575982987
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20711,6 +21077,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 579580080}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!114 &580276393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20724,6 +21096,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 580276394}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &580276394
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -21085,6 +21463,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 592165537}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &593861886
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -21169,6 +21553,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 593861888}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &594220667
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -21253,6 +21643,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 594220669}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &597343665
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21742,6 +22138,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 609609564}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &611526482
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22058,8 +22460,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Melee
   attackCooldown: 0.5
   attackTrigger: Attack
+  damage: 25
+  attackRange: 2
+  attackRadius: 0.4
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  attackOrigin: {fileID: 0}
+  attackCamera: {fileID: 0}
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   animator: {fileID: 616256869}
+  swingSound: {fileID: 0}
 --- !u!1001 &621545305
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22916,6 +23327,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 634359835}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &639227137
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23098,6 +23515,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 646911135}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &647210102
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -23182,6 +23605,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 647210104}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &648004143
 GameObject:
   m_ObjectHideFlags: 0
@@ -23731,6 +24160,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 649800113}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &652614588
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -24842,6 +25277,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 689781591}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &689781591
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -24997,6 +25438,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 694017093}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &694017093
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -25532,6 +25979,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 705378383}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &706155628
 GameObject:
   m_ObjectHideFlags: 0
@@ -25738,6 +26191,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 711513717}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &711513717
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -25893,6 +26352,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 716712625}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &716769219
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26043,6 +26508,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 717392294}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &719303736
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26255,6 +26726,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 721491211}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &721491211
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -26476,6 +26953,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 723859936}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &725116818
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27351,6 +27834,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 750241492}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &750241492
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -27973,6 +28462,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 770658956}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &770658956
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -28509,6 +29004,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 786009746}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &787002638
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -28588,6 +29089,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 790674878}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &790674878
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -28748,6 +29255,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 796650967}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &796650967
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -29433,6 +29946,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 820669688}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &823749562
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29819,6 +30338,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 823749578}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &824004882
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30287,6 +30812,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 832313119}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!114 &832336972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30300,6 +30831,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 832336973}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &832336973
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -30708,6 +31245,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 841069078}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &841069078
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -31597,6 +32140,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 862174521}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &871435830 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -31681,6 +32230,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 885605056}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &885605056
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -32523,6 +33078,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 904404368}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!114 &905127698
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32536,6 +33097,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 905127699}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &905127699
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -33321,6 +33888,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 905559979}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &905559979
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -33405,6 +33978,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 905559983}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &905559983
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -33489,6 +34068,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 906854650}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &906854650
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -34182,6 +34767,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 926298813}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &926298813
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -34337,6 +34928,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 927207256}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &927533868
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -34623,6 +35220,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 933381980}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &933381980
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -35255,6 +35858,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 960158127}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &960158127
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -36040,6 +36649,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 964087956}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &964087956
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -36124,6 +36739,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 964087960}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &964087960
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -37048,6 +37669,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 987858908}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &987858908
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -37203,6 +37830,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 990184809}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &993529316
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37622,6 +38255,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1004440541}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1005248016
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37843,6 +38482,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1006943033}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1008942312
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37993,6 +38638,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1010795819}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!4 &1011884546 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2020992140052417456, guid: c7f39adc5c1e646448ce0285f2eb7879, type: 3}
@@ -38818,6 +39469,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1036700844}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1037724583
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38896,6 +39553,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1040039708}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1040039708
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -39153,6 +39816,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1046677352}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1046677352
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -39495,6 +40164,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1052721394}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1058419155
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -39731,6 +40406,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1061972016}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1061972016
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -40155,6 +40836,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1073622504}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1074141337 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -40194,6 +40881,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1074555378}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1074555378
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -40349,6 +41042,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1079941884}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1085645883
 GameObject:
   m_ObjectHideFlags: 0
@@ -40624,6 +41323,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1089702476}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1089702476
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -41858,6 +42563,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1129572332}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1130846979
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -42328,6 +43039,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1144636581}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1144636581
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -42754,6 +43471,7 @@ MonoBehaviour:
   shotNoiseRadius: 45
   pelletCount: 8
   spreadAngle: 6
+  shotSound: {fileID: 0}
 --- !u!1001 &1149454455
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -42972,6 +43690,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1155573016}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1156084740
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43370,6 +44094,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1156084756}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1156357733
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43875,6 +44605,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1174983617}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1176234791
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -43959,6 +44695,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1176234793}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1178765164
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -44207,6 +44949,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1184521241}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1187809645
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -44488,6 +45236,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1197185408}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1197794703 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -44800,6 +45554,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1203755293}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1204812972
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -44884,6 +45644,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1204812974}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!114 &1206748072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44897,6 +45663,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1206748073}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1206748073
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -44981,6 +45753,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1206825039}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1206825039
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -45294,6 +46072,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1218256721}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1218256721
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -45632,6 +46416,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1223358867}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1223529187
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -45716,6 +46506,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1223529189}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1223540203
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -45800,6 +46596,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1223540205}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1225569711
 GameObject:
   m_ObjectHideFlags: 0
@@ -46139,6 +46941,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1235766734}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1238275507
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -46289,6 +47097,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1239933000}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1240592804
 GameObject:
   m_ObjectHideFlags: 0
@@ -46423,6 +47237,7 @@ MonoBehaviour:
   - {fileID: 1487627185}
   selectedInventoryAlpha: 1
   unselectedInventoryAlpha: 0.35
+  lockedInventoryAlpha: 0.12
   timerText: {fileID: 1463917564}
   timerPrefix: 'Time: '
   enemyCountText: {fileID: 485650718}
@@ -46784,6 +47599,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1259264367}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1261537044
 GameObject:
   m_ObjectHideFlags: 0
@@ -47243,6 +48064,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1267702927}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1270248860
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -47327,6 +48154,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1270248862}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1270890225
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -47650,6 +48483,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1279296553}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1281130014
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -48067,6 +48906,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1292507006}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!4 &1293733597 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 46a48407b230d1042a2208438239e8fb, type: 3}
@@ -48504,6 +49349,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1300460466}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1302500649
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -48979,6 +49830,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1310560474}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1310602773
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -50264,6 +51121,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1357149297}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1357679077
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -50348,6 +51211,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1357679079}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1360004366
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -51027,6 +51896,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1370570212}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1374074753
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -51243,6 +52118,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1379016739}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1385088717
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -51546,6 +52427,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1409137120}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1409137120
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -51706,6 +52593,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1409682340}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1411047336
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -52150,6 +53043,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1428615899}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1428989857
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -52300,6 +53199,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1430909336}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!114 &1434069231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52313,6 +53218,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1434069232}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1434069232
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -52397,6 +53308,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1434172586}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1434172586
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -52481,6 +53398,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1434637391}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1434637391
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -52955,6 +53878,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1443418073}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1443682207
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53200,6 +54129,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1449718275}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1452237488 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -53284,6 +54219,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1453831749}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1453831749
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -54181,6 +55122,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1474922404}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1475127281
 GameObject:
   m_ObjectHideFlags: 0
@@ -54595,6 +55542,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1483253829}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1487076575
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -54980,6 +55933,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1495190166}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1495190166
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -55294,6 +56253,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1501506992}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1501506992
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -55987,6 +56952,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1518545581}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!4 &1522002499 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 46a48407b230d1042a2208438239e8fb, type: 3}
@@ -56005,6 +56976,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1527058403}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1527058403
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -56316,6 +57293,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1530470353}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1532634343
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -56395,6 +57378,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1536455193}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1536455193
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -57164,6 +58153,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1550423420}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1552221748
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -57994,6 +58989,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1569287430}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1569287430
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -58321,6 +59322,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1573747626}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1574038847
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -58405,6 +59412,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1574038849}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1575553026
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -58489,6 +59502,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1575553028}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!114 &1575766045
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58502,6 +59521,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1575766046}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1575766046
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -58905,6 +59930,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1588144472}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1588144472
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -59060,6 +60091,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1591937759}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1594165910
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -59342,6 +60379,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1597777870}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1598985149
 GameObject:
   m_ObjectHideFlags: 0
@@ -60081,6 +61124,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1625445513}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1625445513
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -60429,6 +61478,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1637087427}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1637087427
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -60716,6 +61771,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1646699761}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!114 &1647622912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60729,6 +61790,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1074555378}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1647622913
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -60961,6 +62028,7 @@ MonoBehaviour:
   bulletSpeed: 20
   bulletScale: 2
   shotNoiseRadius: 35
+  shotSound: {fileID: 0}
 --- !u!1 &1651586272 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -61306,6 +62374,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1676302696}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1680067249
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -61390,6 +62464,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1680067251}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1680149303
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -61532,14 +62612,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dfb83b765541624f8ec8acdb25750fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
+  walkSpeed: 5
+  sprintSpeed: 8
+  crouchSpeed: 2.6
   moveSpeed: 7.5
   groundDrag: 5
+  dashForce: 18
+  dashDuration: 0.18
+  dashCooldown: 1.1
   jumpForce: 7
   jumpCooldown: 0.5
   airMultiplier: 0.5
   fallMultiplier: 2.5
   lowJumpMultiplier: 2
   playerHeight: 2
+  crouchHeight: 1.2
   whatIsGround:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -61548,6 +62635,8 @@ MonoBehaviour:
   jumpAction: {fileID: -2099379676528639254, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   reloadAction: {fileID: 1506216217208338517, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   sprintAction: {fileID: -7471211009204490832, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  crouchAction: {fileID: 7040659881675835329, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  dashAction: {fileID: -4673282693011978190, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!114 &1680292637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61566,8 +62655,8 @@ MonoBehaviour:
   - {fileID: 1149168459}
   - {fileID: 7390072}
   startingWeaponIndex: 0
-  previousActionReference: {fileID: 0}
-  nextActionReference: {fileID: 0}
+  previousActionReference: {fileID: 2411907206095950430, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  nextActionReference: {fileID: 7476244043514120974, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   scrollThreshold: 0.1
 --- !u!1001 &1682086237
 PrefabInstance:
@@ -61870,6 +62959,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1686972353}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!4 &1691190797 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0dd9ea0afd5576a4d900b04501b37c46, type: 3}
@@ -61954,6 +63049,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1705421618}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1705421618
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -62526,6 +63627,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1724525706}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1724525706
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -62681,6 +63788,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1729789353}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1729819874
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -63411,6 +64524,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1751622340}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1753351148 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -63587,6 +64706,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1758497977}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1761365469
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -63671,6 +64796,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1761365471}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1764481121 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -64618,6 +65749,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1787951493}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1789351202
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -64921,6 +66058,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1795801483}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1795801483
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -65005,6 +66148,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1796733453}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1796733453
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -66242,6 +67391,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1833628691}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1833628691
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -66326,6 +67481,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1835080314}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1835080314
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -66559,6 +67720,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1842877120}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1845930195
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -66775,6 +67942,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1850469648}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1851311926
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -67586,6 +68759,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1866672795}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1867167341
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -68266,6 +69445,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1879401755}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1879401757
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -68350,6 +69535,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1879401759}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1879891042
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -68434,6 +69625,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1879891044}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1880620233
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -68808,6 +70005,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1904371524}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1904371524
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -68961,6 +70164,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1904687160}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1904687160
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -69355,6 +70564,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1918027710}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1918027710
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -69510,6 +70725,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1919861608}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1922864323
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -69589,6 +70810,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1926148163}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1926148163
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -69810,6 +71037,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1926293597}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1927694718
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -70372,6 +71605,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1937203481}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &1937403632
 GameObject:
   m_ObjectHideFlags: 0
@@ -70547,6 +71786,7 @@ MonoBehaviour:
   - {fileID: 1487627185}
   selectedInventoryAlpha: 1
   unselectedInventoryAlpha: 0.35
+  lockedInventoryAlpha: 0.12
   timerText: {fileID: 1463917564}
   timerPrefix: 'Time: '
   enemyCountText: {fileID: 485650718}
@@ -70651,6 +71891,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1938577081}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1943302068
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -70730,6 +71976,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1945717763}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1945717763
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -71551,6 +72803,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1961972126}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1961972126
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -71770,6 +73028,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1968569597}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1968569597
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -72011,6 +73275,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1976297799}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &1976611661
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -72095,6 +73365,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1976611663}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1976750329
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -72245,6 +73521,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1978283878}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1982617540
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -72901,6 +74183,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1989174045}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1989174045
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -72985,6 +74273,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1989870615}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1989870615
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -73069,6 +74363,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1992506323}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1992506323
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -73310,6 +74610,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1993980918}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &1995840136
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -73458,6 +74764,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 1999988745}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &1999988745
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -73755,6 +75067,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2001668028}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &2007684939
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -74320,6 +75638,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2025562762}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &2026519483
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -74425,6 +75749,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2027439898}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &2027439898
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -74646,6 +75976,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2029452034}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!64 &2031951001
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -74730,6 +76066,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2031951003}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &2033124450
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -75182,6 +76524,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2034124587}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &2034619998
 GameObject:
   m_ObjectHideFlags: 0
@@ -75614,6 +76962,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2042043602}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!4 &2046885837 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0babc876efffe7b48a53c6f5b77c7d44, type: 3}
@@ -75830,6 +77184,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2055596829}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &2055596829
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -75914,6 +77274,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2057960900}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &2057960900
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -75998,6 +77364,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2058311525}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &2058311525
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -76671,6 +78043,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2093242200}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!4 &2093982713 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2020992140052417456, guid: c7f39adc5c1e646448ce0285f2eb7879, type: 3}
@@ -76760,6 +78138,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2095812290}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1001 &2096404327
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -77069,6 +78453,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveManager
   enemyPrefab: {fileID: 3471822538585445616, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+  shotgunPrefab: {fileID: 0}
+  riflePrefab: {fileID: 0}
+  bossPrefab: {fileID: 0}
   spawnStagger: 0.15
   spawnPoints:
   - position: {x: -13.4, y: 2.0533, z: 45.7}
@@ -77081,12 +78468,21 @@ MonoBehaviour:
   - enemyCount: 10
     startDelay: 0
     maxWaitBeforeNext: 130
+    enemyPrefabOverride: {fileID: 0}
+    archetype: 0
+    useArchetypeProfile: 1
   - enemyCount: 15
     startDelay: 4
     maxWaitBeforeNext: 130
+    enemyPrefabOverride: {fileID: 0}
+    archetype: 0
+    useArchetypeProfile: 1
   - enemyCount: 20
     startDelay: 5
     maxWaitBeforeNext: 130
+    enemyPrefabOverride: {fileID: 0}
+    archetype: 0
+    useArchetypeProfile: 1
 --- !u!114 &2102304379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77100,6 +78496,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2102304380}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &2102304380
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -77429,6 +78831,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2110739522}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!114 &2111970932
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77442,6 +78850,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2111970933}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &2111970933
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -77663,6 +79077,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2112863710}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &2113249459
 GameObject:
   m_ObjectHideFlags: 0
@@ -77872,6 +79292,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2116059143}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!54 &2116059143
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -78622,6 +80048,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Break
   rb: {fileID: 2143511353}
+  debrisCount: 5
+  debrisForce: 7
+  debrisDamage: 18
+  debrisLifetime: 0.7
+  brokenMaterial: {fileID: 0}
+  isWallTile: 0
 --- !u!1 &2145326111 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
