@@ -418,6 +418,7 @@ GameObject:
   - component: {fileID: 168958820}
   - component: {fileID: 168958819}
   - component: {fileID: 168958818}
+  - component: {fileID: 168958821}
   m_Layer: 5
   m_Name: NewGame
   m_TagString: Untagged
@@ -491,7 +492,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1007692618}
         m_TargetAssemblyTypeName: MainMenu, Assembly-CSharp
-        m_MethodName: StartNewGame
+        m_MethodName: NewGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -539,6 +540,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 168958816}
   m_CullTransparentMesh: 1
+--- !u!114 &168958821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 168958816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fffe9858a3a7327428efba6cd9c19311, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonGlow
+  text: {fileID: 163984662}
+  glowOn: 1
+  glowOff: 0
+  sizeIncrease: 4
 --- !u!1 &197210858
 GameObject:
   m_ObjectHideFlags: 0
@@ -1611,7 +1628,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1007692618}
         m_TargetAssemblyTypeName: MainMenu, Assembly-CSharp
-        m_MethodName: OpenNewGamePanel
+        m_MethodName: StartNewGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1856,24 +1873,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7c4e2b91f6d4a0e8c3b5d7e9f1a2b3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenu
-  startMenuButtons: {fileID: 1499618584}
-  newGamePanel: {fileID: 1282988985}
-  settingsPanel: {fileID: 260345252}
-  storySynopsisPanel: {fileID: 1865196727}
-  startButton: {fileID: 815107430}
-  settingsButton: {fileID: 1798696248}
-  quitButton: {fileID: 33534759}
-  newGameButton: {fileID: 168958818}
-  levelSelectButton: {fileID: 1403079592}
-  storySynopsisButton: {fileID: 1865196729}
-  newGameQuitButton: {fileID: 1135645908}
-  settingsBackButton: {fileID: 1825261275}
-  volumeSlider: {fileID: 0}
-  brightnessSlider: {fileID: 0}
-  sceneLight: {fileID: 0}
-  gameSceneName: LevelDemo
-  defaultVolume: 80
-  defaultBrightness: 50
+  NewGamePanel: {fileID: 1282988985}
+  StartMenuPanel: {fileID: 1499618584}
+  SettingsPanel: {fileID: 260345252}
 --- !u!114 &1007692619
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2067,6 +2069,7 @@ GameObject:
   - component: {fileID: 1135645910}
   - component: {fileID: 1135645909}
   - component: {fileID: 1135645908}
+  - component: {fileID: 1135645911}
   m_Layer: 5
   m_Name: Quit
   m_TagString: Untagged
@@ -2188,6 +2191,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1135645906}
   m_CullTransparentMesh: 1
+--- !u!114 &1135645911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1135645906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fffe9858a3a7327428efba6cd9c19311, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonGlow
+  text: {fileID: 323417294}
+  glowOn: 1
+  glowOff: 0
+  sizeIncrease: 4
 --- !u!1 &1141752163
 GameObject:
   m_ObjectHideFlags: 0
@@ -2883,6 +2902,7 @@ GameObject:
   - component: {fileID: 1403079594}
   - component: {fileID: 1403079593}
   - component: {fileID: 1403079592}
+  - component: {fileID: 1403079595}
   m_Layer: 5
   m_Name: Level Select
   m_TagString: Untagged
@@ -3004,6 +3024,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1403079590}
   m_CullTransparentMesh: 1
+--- !u!114 &1403079595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403079590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fffe9858a3a7327428efba6cd9c19311, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonGlow
+  text: {fileID: 1766421453}
+  glowOn: 1
+  glowOff: 0
+  sizeIncrease: 4
 --- !u!1 &1406301630
 GameObject:
   m_ObjectHideFlags: 0
@@ -3772,24 +3808,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7c4e2b91f6d4a0e8c3b5d7e9f1a2b3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenu
-  startMenuButtons: {fileID: 1499618584}
-  newGamePanel: {fileID: 1282988985}
-  settingsPanel: {fileID: 260345252}
-  storySynopsisPanel: {fileID: 0}
-  startButton: {fileID: 815107430}
-  settingsButton: {fileID: 1798696248}
-  quitButton: {fileID: 33534759}
-  newGameButton: {fileID: 168958818}
-  levelSelectButton: {fileID: 1403079592}
-  storySynopsisButton: {fileID: 1865196729}
-  newGameQuitButton: {fileID: 1135645908}
-  settingsBackButton: {fileID: 1825261275}
-  volumeSlider: {fileID: 1401098735}
-  brightnessSlider: {fileID: 511940598}
-  sceneLight: {fileID: 1141752164}
-  gameSceneName: LevelDemo
-  defaultVolume: 80
-  defaultBrightness: 50
+  NewGamePanel: {fileID: 0}
+  StartMenuPanel: {fileID: 0}
+  SettingsPanel: {fileID: 0}
 --- !u!1 &1825261273
 GameObject:
   m_ObjectHideFlags: 0
@@ -3875,7 +3896,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1007692618}
         m_TargetAssemblyTypeName: MainMenu, Assembly-CSharp
-        m_MethodName: ShowStartMenu
+        m_MethodName: BackToMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3935,6 +3956,7 @@ GameObject:
   - component: {fileID: 1865196731}
   - component: {fileID: 1865196730}
   - component: {fileID: 1865196729}
+  - component: {fileID: 1865196732}
   m_Layer: 5
   m_Name: Story Synopsis
   m_TagString: Untagged
@@ -4056,6 +4078,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1865196727}
   m_CullTransparentMesh: 1
+--- !u!114 &1865196732
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865196727}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fffe9858a3a7327428efba6cd9c19311, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonGlow
+  text: {fileID: 1314774561}
+  glowOn: 1
+  glowOff: 0
+  sizeIncrease: 4
 --- !u!1 &1912651080
 GameObject:
   m_ObjectHideFlags: 0
@@ -4302,7 +4340,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 304, y: 0}
+  m_AnchoredPosition: {x: 286, y: 0}
   m_SizeDelta: {x: 223.1, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2013720534
@@ -4391,7 +4429,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: -64.04443, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
