@@ -189,6 +189,9 @@ public class LevelDirector : MonoBehaviour
             TryAddUniqueSpawn(points, point.position - right * 2.2f, point.facing, 2.5f);
         }
 
+        if (points.Count == 0)
+            AddRingAroundPlayer(points, source.Count > 0 ? source[0].position : Vector3.zero);
+
         return points.Count > 0 ? points : source;
     }
 
@@ -203,13 +206,12 @@ public class LevelDirector : MonoBehaviour
         {
             float angle = i * (360f / radii.Length) * Mathf.Deg2Rad;
             Vector3 intended = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radii[i];
-            if (!NavMesh.SamplePosition(intended, out NavMeshHit hit, 8f, NavMesh.AllAreas))
-                continue;
+            Vector3 pos = intended;
+            if (NavMesh.SamplePosition(intended, out NavMeshHit hit, 8f, NavMesh.AllAreas)
+                && Vector3.Distance(intended, hit.position) <= 6f)
+                pos = hit.position;
 
-            if (Vector3.Distance(intended, hit.position) > 6f)
-                continue;
-
-            TryAddUniqueSpawn(points, hit.position, center - hit.position, 2.5f);
+            TryAddUniqueSpawn(points, pos, center - pos, 2.5f);
         }
 
         if (points.Count < 4)
@@ -219,7 +221,24 @@ public class LevelDirector : MonoBehaviour
                 TryAddUniqueSpawn(points, fallback[i].position, fallback[i].facing, 2.5f);
         }
 
+        if (points.Count < 4)
+            AddRingAroundPlayer(points, center);
+
         return points;
+    }
+
+    static void AddRingAroundPlayer(List<WaveSpawnPoint> points, Vector3 center)
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            center = player.transform.position;
+
+        for (int i = 0; i < 8; i++)
+        {
+            float angle = i * 45f * Mathf.Deg2Rad;
+            Vector3 pos = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * 10f;
+            TryAddUniqueSpawn(points, pos, center - pos, 2.5f);
+        }
     }
 
     static void MergeSceneSpawnMarkers(List<WaveSpawnPoint> points)

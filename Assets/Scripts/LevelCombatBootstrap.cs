@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using Unity.AI.Navigation;
 
 /// <summary>
@@ -8,9 +9,31 @@ using Unity.AI.Navigation;
 /// </summary>
 public static class LevelCombatBootstrap
 {
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void RegisterSceneHook()
+    {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AfterSceneLoad()
     {
+        BootstrapActiveScene();
+    }
+
+    static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.buildIndex < 1)
+            return;
+        BootstrapActiveScene();
+    }
+
+    static void BootstrapActiveScene()
+    {
+        if (SceneManager.GetActiveScene().buildIndex < 1)
+            return;
+
         SetupPlayer();
         EnemySquad.EnsureExists();
         EnsureNavMesh();
@@ -20,22 +43,23 @@ public static class LevelCombatBootstrap
     public static void EnsureCampaignSystems()
     {
         // Only wire campaign systems in the playable combat scene (build index 1+).
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex < 1)
+        if (SceneManager.GetActiveScene().buildIndex < 1)
             return;
 
         AudioManager.EnsureExists();
         DialogueManager.EnsureExists();
 
         WaveManager waves = Object.FindFirstObjectByType<WaveManager>();
-        if (waves != null)
-            waves.SetPaused(true);
-
         LevelDirector director = Object.FindFirstObjectByType<LevelDirector>();
         if (director == null)
         {
             GameObject go = new GameObject("LevelDirector");
             director = go.AddComponent<LevelDirector>();
         }
+
+        // Don't pause a manager that already began — a second bootstrap would freeze waves.
+        if (waves != null && !waves.HasBegun)
+            waves.SetPaused(true);
 
         director.Configure();
         GameSettings.ApplyAll();
@@ -84,13 +108,13 @@ public static class LevelCombatBootstrap
         NavMeshSurface surface = GetOrCreateRuntimeSurface();
         EnsureRuntimeWalkableFloor(surface.transform);
 
-        surface.collectObjects = CollectObjects.Children;
         surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+        surface.collectObjects = CollectObjects.All;
         surface.BuildNavMesh();
 
         if (!HasPlayableNavMesh())
         {
-            surface.collectObjects = CollectObjects.All;
+            surface.collectObjects = CollectObjects.Children;
             surface.BuildNavMesh();
         }
 
@@ -206,8 +230,28 @@ public static class LevelCombatBootstrap
     static float FindFloorY(Vector3 probe)
     {
         Vector3 origin = probe + Vector3.up * 3f;
-        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 24f, ~0, QueryTriggerInteraction.Ignore))
-            return hit.point.y;
+        RaycastHit[] hits = Physics.RaycastAll(origin, Vector3.down, 24f, ~0, QueryTriggerInteraction.Ignore);
+        float bestY = float.NegativeInfinity;
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider col = hits[i].collider;
+            if (col == null)
+                continue;
+            if (col.GetComponentInParent<PlayerMovement>() != null)
+                continue;
+            if (col.GetComponentInParent<EnemyAI>() != null)
+                continue;
+
+            float y = hits[i].point.y;
+            if (y > probe.y + 2f || y < probe.y - 4f)
+                continue;
+            if (y > bestY)
+                bestY = y;
+        }
+
+        if (bestY > float.NegativeInfinity)
+            return bestY;
+
         return probe.y;
     }
 }
