@@ -10,14 +10,18 @@ public enum EnemyWeaponKind
 
 /// <summary>
 /// Enemy hitscan / pellet fire configured per archetype.
+/// Close range uses a melee swipe so shots are not required to land damage.
 /// Bosses also throw grenades via BossController.
 /// </summary>
 public class EnemyCombat : MonoBehaviour
 {
     [SerializeField] EnemyWeaponKind weaponKind = EnemyWeaponKind.Pistol;
     [SerializeField] float damage = 12f;
+    [SerializeField] float meleeDamage = 18f;
     [SerializeField] float fireRate = 2.5f;
     [SerializeField] float attackRange = 18f;
+    [SerializeField] float meleeRange = 2.2f;
+    [SerializeField] float meleeRadius = 1.15f;
     [SerializeField] float pelletCount = 1f;
     [SerializeField] float spreadDegrees = 0f;
     [SerializeField] LayerMask hitMask = ~0;
@@ -26,31 +30,49 @@ public class EnemyCombat : MonoBehaviour
 
     float nextFireTime;
     EnemyAnimator animator;
+    bool meleeOnly;
+    readonly RaycastHit[] hitBuffer = new RaycastHit[16];
 
-    public float AttackRange => attackRange;
+    public float AttackRange => meleeOnly ? meleeRange : attackRange;
+    public float MeleeRange => meleeRange;
+    public bool MeleeOnly => meleeOnly;
     public float Damage => damage;
     public EnemyWeaponKind WeaponKind => weaponKind;
     public float PreferredMinRange { get; private set; } = 2f;
 
     void Awake()
     {
-        animator = GetComponent<EnemyAnimator>();
+        animator = null;
         if (muzzle == null)
         {
             GameObject m = new GameObject("Muzzle");
             m.transform.SetParent(transform);
-            m.transform.localPosition = new Vector3(0.25f, 1.4f, 0.55f);
+            m.transform.localPosition = new Vector3(0.25f, 1.4f, 0.85f);
             muzzle = m.transform;
         }
     }
 
     public void ConfigureForArchetype(EnemyArchetype archetype)
     {
+        meleeOnly = archetype == EnemyArchetype.Melee;
         switch (archetype)
         {
+            case EnemyArchetype.Melee:
+                weaponKind = EnemyWeaponKind.Pistol;
+                damage = 0f;
+                meleeDamage = 18f;
+                fireRate = 1.4f;
+                attackRange = 2.2f;
+                meleeRange = 2.4f;
+                pelletCount = 0f;
+                spreadDegrees = 0f;
+                PreferredMinRange = 1.2f;
+                break;
+
             case EnemyArchetype.Pistol:
                 weaponKind = EnemyWeaponKind.Pistol;
                 damage = 10f;
+                meleeDamage = 16f;
                 fireRate = 2.2f;
                 attackRange = 16f;
                 pelletCount = 1f;
@@ -61,6 +83,7 @@ public class EnemyCombat : MonoBehaviour
             case EnemyArchetype.Shotgun:
                 weaponKind = EnemyWeaponKind.Shotgun;
                 damage = 7f;
+                meleeDamage = 22f;
                 fireRate = 1.05f;
                 attackRange = 9f;
                 pelletCount = 7f;
@@ -71,6 +94,7 @@ public class EnemyCombat : MonoBehaviour
             case EnemyArchetype.Rifle:
                 weaponKind = EnemyWeaponKind.Rifle;
                 damage = 14f;
+                meleeDamage = 16f;
                 fireRate = 3.4f;
                 attackRange = 24f;
                 pelletCount = 1f;
@@ -81,6 +105,7 @@ public class EnemyCombat : MonoBehaviour
             case EnemyArchetype.Boss:
                 weaponKind = EnemyWeaponKind.BossGun;
                 damage = 16f;
+                meleeDamage = 28f;
                 fireRate = 3.8f;
                 attackRange = 22f;
                 pelletCount = 2f;
@@ -90,13 +115,74 @@ public class EnemyCombat : MonoBehaviour
         }
     }
 
+    public bool TryAttack(Transform target)
+    {
+        if (target == null)
+            return false;
+
+        float dist = Vector3.Distance(transform.position, target.position);
+        if (meleeOnly || dist <= meleeRange)
+            return TryMeleeAt(target);
+
+        return TryFireAt(target);
+    }
+
+    public bool TryMeleeAt(Transform target)
+    {
+        if (target == null || Time.time < nextFireTime)
+            return false;
+
+        float dist = Vector3.Distance(transform.position, target.position);
+        if (dist > meleeRange + 0.35f)
+            return false;
+
+        nextFireTime = Time.time + 0.7f;
+        animator?.PlayFire();
+
+        Vector3 origin = transform.position + Vector3.up * 1f + transform.forward * 0.55f;
+        AudioManager.MeleeHit(origin);
+        CombatVfx.SpawnOnomatopoeia(origin, "WHACK!");
+
+        Collider[] hits = Physics.OverlapSphere(origin, meleeRadius, hitMask, QueryTriggerInteraction.Collide);
+        bool anyHit = false;
+        Health damaged = null;
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider col = hits[i];
+            if (col == null || IsOwnCollider(col))
+                continue;
+
+            if (col.CompareTag("Breakable") || HasBreakable(col.transform))
+            {
+                Break br = col.GetComponentInParent<Break>();
+                if (br != null)
+                    br.BreakApart(transform.forward * 8f, gameObject);
+                continue;
+            }
+
+            if (!IsPlayerHit(col))
+                continue;
+
+            Health health = col.GetComponentInParent<Health>();
+            if (health == null || health.transform.root == transform.root || health == damaged)
+                continue;
+
+            health.TakeDamage(meleeDamage, col.ClosestPoint(origin), gameObject);
+            CombatVfx.SpawnImpact(col.ClosestPoint(origin), -transform.forward);
+            damaged = health;
+            anyHit = true;
+        }
+
+        return anyHit;
+    }
+
     public bool TryFireAt(Transform target)
     {
         if (target == null || Time.time < nextFireTime)
             return false;
 
-        Vector3 origin = muzzle != null ? muzzle.position : transform.position + Vector3.up * 1.4f;
-        Vector3 aimPoint = target.position + Vector3.up * 1.2f;
+        Vector3 origin = GetMuzzlePosition();
+        Vector3 aimPoint = GetAimPoint(target);
         Vector3 baseDir = aimPoint - origin;
         float dist = baseDir.magnitude;
         if (dist > attackRange)
@@ -117,7 +203,7 @@ public class EnemyCombat : MonoBehaviour
             Vector3 dir = ApplySpread(baseDir.normalized, spreadDegrees);
             Debug.DrawRay(origin, dir * dist, Color.red, 0.08f);
 
-            if (!Physics.Raycast(origin, dir, out RaycastHit hit, attackRange, hitMask, QueryTriggerInteraction.Ignore))
+            if (!TryGetFirstHit(origin, dir, attackRange, out RaycastHit hit))
                 continue;
 
             if (hit.collider.CompareTag("Breakable") || HasBreakable(hit.collider.transform))
@@ -153,17 +239,70 @@ public class EnemyCombat : MonoBehaviour
         if (target == null)
             return false;
 
-        Vector3 origin = muzzle != null ? muzzle.position : transform.position + Vector3.up * 1.4f;
-        Vector3 aimPoint = target.position + Vector3.up * 1.2f;
+        Vector3 origin = GetMuzzlePosition();
+        Vector3 aimPoint = GetAimPoint(target);
         Vector3 dir = aimPoint - origin;
         float dist = dir.magnitude;
         if (dist > attackRange)
             return false;
 
-        if (!Physics.Raycast(origin, dir.normalized, out RaycastHit hit, dist, hitMask, QueryTriggerInteraction.Ignore))
+        if (!TryGetFirstHit(origin, dir.normalized, dist + 0.35f, out RaycastHit hit))
             return false;
 
         return IsPlayerHit(hit.collider);
+    }
+
+    public static Vector3 GetAimPoint(Transform target)
+    {
+        if (target == null)
+            return Vector3.zero;
+
+        Collider col = target.GetComponent<Collider>();
+        if (col == null)
+            col = target.GetComponentInChildren<Collider>();
+
+        if (col != null)
+            return col.bounds.center;
+
+        return target.position + Vector3.up * 0.9f;
+    }
+
+    Vector3 GetMuzzlePosition()
+    {
+        return muzzle != null ? muzzle.position : transform.position + Vector3.up * 1.4f + transform.forward * 0.6f;
+    }
+
+    bool TryGetFirstHit(Vector3 origin, Vector3 dir, float maxDistance, out RaycastHit hit)
+    {
+        int count = Physics.RaycastNonAlloc(origin, dir, hitBuffer, maxDistance, hitMask, QueryTriggerInteraction.Ignore);
+        int best = -1;
+        float bestDist = float.MaxValue;
+        for (int i = 0; i < count; i++)
+        {
+            Collider col = hitBuffer[i].collider;
+            if (col == null || IsOwnCollider(col))
+                continue;
+
+            if (hitBuffer[i].distance < bestDist)
+            {
+                bestDist = hitBuffer[i].distance;
+                best = i;
+            }
+        }
+
+        if (best < 0)
+        {
+            hit = default;
+            return false;
+        }
+
+        hit = hitBuffer[best];
+        return true;
+    }
+
+    bool IsOwnCollider(Collider col)
+    {
+        return col != null && col.transform.root == transform.root;
     }
 
     static Vector3 ApplySpread(Vector3 forward, float degrees)

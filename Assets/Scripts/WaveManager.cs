@@ -34,7 +34,7 @@ public class WaveManager : MonoBehaviour
     [SerializeField] GameObject shotgunPrefab;
     [SerializeField] GameObject riflePrefab;
     [SerializeField] GameObject bossPrefab;
-    [SerializeField] float spawnStagger = 0.15f;
+    [SerializeField] float spawnStagger = 0.35f;
     [SerializeField] List<WaveSpawnPoint> spawnPoints = new List<WaveSpawnPoint>();
     [SerializeField] List<WaveDefinition> waves = new List<WaveDefinition>
     {
@@ -114,6 +114,11 @@ public class WaveManager : MonoBehaviour
     public GameObject RifleEnemyPrefab => riflePrefab;
     public GameObject BossEnemyPrefab => bossPrefab;
 
+    public List<WaveSpawnPoint> GetSpawnPoints()
+    {
+        return spawnPoints ?? new List<WaveSpawnPoint>();
+    }
+
     public event Action OnAllWavesCompleted;
     public event Action<int> OnWaveStarted;
 
@@ -186,13 +191,20 @@ public class WaveManager : MonoBehaviour
 
     public void ConfigureLevel(List<WaveDefinition> newWaves, List<WaveSpawnPoint> newPoints = null)
     {
+        ClearAliveEnemies();
+
         waves = newWaves ?? new List<WaveDefinition>();
         if (newPoints != null && newPoints.Count > 0)
             spawnPoints = newPoints;
 
+        EnsureSpawnPoints();
+
         spawnedAlive.Clear();
         enemiesKilled = 0;
         waveIndex = 0;
+        nextPointIndex = 0;
+        spawnedThisWave = 0;
+        timer = 0f;
         phase = Phase.Delay;
         started = false;
     }
@@ -207,8 +219,11 @@ public class WaveManager : MonoBehaviour
 
     public void BeginConfigured()
     {
+        EnsureSpawnPoints();
+
         if (waves == null || waves.Count == 0 || spawnPoints == null || spawnPoints.Count == 0)
         {
+            Debug.LogWarning("WaveManager: cannot begin — missing waves or spawn points.");
             CompleteWaves();
             return;
         }
@@ -247,6 +262,7 @@ public class WaveManager : MonoBehaviour
     {
         waveIndex = index;
         spawnedThisWave = 0;
+        nextPointIndex = 0;
         timer = 0f;
         phase = Phase.Delay;
         OnWaveStarted?.Invoke(waveIndex);
@@ -271,6 +287,9 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
+        if (!LevelCombatBootstrap.HasNavMeshAt(spawnPoints[0].position, 8f))
+            LevelCombatBootstrap.RebuildPlayableNavMesh();
+
         if (!TrySpawnNext() || spawnedThisWave >= CurrentWave().enemyCount)
             EnterActive();
     }
@@ -289,8 +308,12 @@ public class WaveManager : MonoBehaviour
         timer = 0f;
         if (!TrySpawnNext())
         {
-            EnterActive();
-            return;
+            LevelCombatBootstrap.RebuildPlayableNavMesh();
+            if (!TrySpawnNext())
+            {
+                EnterActive();
+                return;
+            }
         }
 
         if (spawnedThisWave >= CurrentWave().enemyCount)
@@ -327,7 +350,8 @@ public class WaveManager : MonoBehaviour
             return false;
 
         int attempts = 0;
-        while (attempts < spawnPoints.Count)
+        int maxAttempts = Mathf.Max(8, spawnPoints.Count * 4);
+        while (attempts < maxAttempts)
         {
             WaveSpawnPoint point = spawnPoints[nextPointIndex % spawnPoints.Count];
             nextPointIndex++;
@@ -336,7 +360,9 @@ public class WaveManager : MonoBehaviour
             if (point == null)
                 continue;
 
-            Pose pose = GetSpawnPose(point);
+            if (!TryGetClearSpawnPose(point, out Pose pose))
+                continue;
+
             GameObject go = SpawnEnemy(pose.position, pose.rotation, CurrentWave());
             if (go == null)
                 continue;
@@ -345,6 +371,7 @@ public class WaveManager : MonoBehaviour
             if (ai == null)
             {
                 Debug.LogWarning("WaveManager: spawned object has no EnemyAI.", go);
+                Destroy(go);
                 continue;
             }
 
@@ -356,29 +383,118 @@ public class WaveManager : MonoBehaviour
         return false;
     }
 
-    static Pose GetSpawnPose(WaveSpawnPoint point)
+    bool TryGetClearSpawnPose(WaveSpawnPoint point, out Pose pose)
     {
-        Vector3 pos = point.position;
-        if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 4f, NavMesh.AllAreas))
-            pos = hit.position;
-
         Vector3 face = point.facing;
         face.y = 0f;
         if (face.sqrMagnitude < 0.001f)
             face = Vector3.forward;
+        face.Normalize();
+        Quaternion rot = Quaternion.LookRotation(face, Vector3.up);
 
-        return new Pose(pos, Quaternion.LookRotation(face.normalized, Vector3.up));
+        for (int i = 0; i < 16; i++)
+        {
+            float angle = (i % 8) * 45f * Mathf.Deg2Rad;
+            float radius = i == 0 ? 0f : (i < 8 ? 1.7f : 3.2f);
+            Vector3 candidate = point.position + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
+            if (!NavMesh.SamplePosition(candidate, out NavMeshHit hit, 4f, NavMesh.AllAreas))
+                continue;
+
+            if (IsOccupiedByEnemy(hit.position))
+                continue;
+
+            pose = new Pose(hit.position, rot);
+            return true;
+        }
+
+        // Last resort: furthest valid sample from the player so a wave never silently skips.
+        Vector3 playerPos = Vector3.zero;
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            playerPos = player.transform.position;
+
+        Vector3 best = point.position;
+        float bestDist = -1f;
+        bool found = false;
+        for (int i = 0; i < 16; i++)
+        {
+            float angle = (i % 8) * 45f * Mathf.Deg2Rad;
+            float radius = i == 0 ? 0f : (i < 8 ? 1.7f : 3.2f);
+            Vector3 candidate = point.position + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
+            if (!NavMesh.SamplePosition(candidate, out NavMeshHit hit, 4f, NavMesh.AllAreas))
+                continue;
+
+            float dist = Vector3.Distance(hit.position, playerPos);
+            if (dist > bestDist)
+            {
+                bestDist = dist;
+                best = hit.position;
+                found = true;
+            }
+        }
+
+        if (!found && NavMesh.SamplePosition(point.position, out NavMeshHit snap, 8f, NavMesh.AllAreas))
+        {
+            best = snap.position;
+            found = true;
+        }
+
+        if (!found)
+        {
+            pose = new Pose(point.position, rot);
+            return false;
+        }
+
+        pose = new Pose(best, rot);
+        return true;
+    }
+
+    bool IsOccupiedByEnemy(Vector3 position)
+    {
+        const float occupancy = 1.8f;
+        for (int i = 0; i < spawnedAlive.Count; i++)
+        {
+            EnemyAI enemy = spawnedAlive[i];
+            if (enemy == null || enemy.IsDead)
+                continue;
+            if (Vector3.Distance(position, enemy.transform.position) < occupancy)
+                return true;
+        }
+
+        return false;
     }
 
     GameObject SpawnEnemy(Vector3 position, Quaternion rotation, WaveDefinition wave)
     {
+        EnemyArchetype type = wave != null ? wave.archetype : EnemyArchetype.Pistol;
         GameObject prefab = ResolvePrefab(wave);
-        GameObject go = prefab != null
-            ? Instantiate(prefab, position, rotation)
-            : EnemyFactory.Create(position, rotation, wave != null ? wave.archetype : EnemyArchetype.Pistol);
+        GameObject go = null;
+
+        if (prefab != null)
+            go = Instantiate(prefab, position, rotation);
+
+        if (go != null && go.GetComponent<EnemyAI>() == null)
+        {
+            Destroy(go);
+            go = null;
+        }
+
+        if (go == null)
+            go = EnemyFactory.Create(position, rotation, type);
 
         if (go != null && wave != null && wave.useArchetypeProfile)
-            EnemyProfile.ApplyDefaults(go, wave.archetype);
+            EnemyProfile.ApplyDefaults(go, type);
+
+        if (go != null)
+        {
+            NavMeshAgent nav = go.GetComponent<NavMeshAgent>();
+            if (nav != null)
+                nav.enabled = false;
+
+            EnemyAI ai = go.GetComponent<EnemyAI>();
+            if (ai != null)
+                ai.PlaceOnNavMesh();
+        }
 
         return go;
     }
@@ -450,6 +566,55 @@ public class WaveManager : MonoBehaviour
         started = false;
         OnAllWavesCompleted?.Invoke();
         Debug.Log("WaveManager: all waves complete.");
+    }
+
+    void EnsureSpawnPoints()
+    {
+        if (spawnPoints == null)
+            spawnPoints = new List<WaveSpawnPoint>();
+
+        EnemySpawnPoint[] markers = UnityEngine.Object.FindObjectsByType<EnemySpawnPoint>(FindObjectsSortMode.None);
+        for (int i = 0; i < markers.Length; i++)
+        {
+            if (markers[i] == null)
+                continue;
+            AddSpawnIfUnique(markers[i].transform.position, markers[i].transform.forward);
+        }
+    }
+
+    void AddSpawnIfUnique(Vector3 position, Vector3 facing)
+    {
+        for (int i = 0; i < spawnPoints.Count; i++)
+        {
+            if (spawnPoints[i] != null && Vector3.Distance(spawnPoints[i].position, position) < 1.5f)
+                return;
+        }
+
+        Vector3 face = facing;
+        face.y = 0f;
+        if (face.sqrMagnitude < 0.001f)
+            face = Vector3.forward;
+
+        spawnPoints.Add(new WaveSpawnPoint { position = position, facing = face.normalized });
+    }
+
+    void ClearAliveEnemies()
+    {
+        for (int i = spawnedAlive.Count - 1; i >= 0; i--)
+        {
+            EnemyAI enemy = spawnedAlive[i];
+            if (enemy != null)
+                Destroy(enemy.gameObject);
+        }
+
+        spawnedAlive.Clear();
+
+        EnemyAI[] leftovers = UnityEngine.Object.FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
+        for (int i = 0; i < leftovers.Length; i++)
+        {
+            if (leftovers[i] != null)
+                Destroy(leftovers[i].gameObject);
+        }
     }
 
     void OnDrawGizmosSelected()

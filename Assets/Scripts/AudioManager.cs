@@ -62,6 +62,7 @@ public class AudioManager : MonoBehaviour
         Instance = this;
         EnsureSources();
         EnsureFallbackClips();
+        ApplyMasterVolume(GameSettings.Volume);
     }
 
     void Start()
@@ -152,7 +153,7 @@ public class AudioManager : MonoBehaviour
             return;
 
         ambientSource.clip = ambientLoop;
-        ambientSource.volume = ambientVolume;
+        ambientSource.volume = ambientVolume * GameSettings.Volume;
         ambientSource.loop = true;
         if (!ambientSource.isPlaying)
             ambientSource.Play();
@@ -172,7 +173,7 @@ public class AudioManager : MonoBehaviour
             return;
 
         musicSource.clip = combatMusicLoop;
-        musicSource.volume = musicVolume * musicIntensity;
+        musicSource.volume = musicVolume * musicIntensity * GameSettings.Volume;
         musicSource.loop = true;
         if (!musicSource.isPlaying)
             musicSource.Play();
@@ -182,7 +183,7 @@ public class AudioManager : MonoBehaviour
     {
         musicIntensity = Mathf.Clamp(intensity, 0.5f, 2f);
         if (musicSource != null)
-            musicSource.volume = musicVolume * musicIntensity;
+            musicSource.volume = musicVolume * musicIntensity * GameSettings.Volume;
 
         if (musicIntensity > 1.2f && combatMusicLoop != null)
         {
@@ -222,14 +223,24 @@ public class AudioManager : MonoBehaviour
         if (clip == null)
             return;
         EnsureSources();
-        sfxSource.PlayOneShot(clip, Mathf.Clamp01(volumeScale));
+        sfxSource.PlayOneShot(clip, Mathf.Clamp01(volumeScale) * GameSettings.Volume);
     }
 
     public void PlayOneShotAt(AudioClip clip, Vector3 position, float volumeScale = 1f)
     {
         if (clip == null)
             return;
-        AudioSource.PlayClipAtPoint(clip, position, Mathf.Clamp01(volumeScale));
+        AudioSource.PlayClipAtPoint(clip, position, Mathf.Clamp01(volumeScale) * GameSettings.Volume);
+    }
+
+    public void ApplyMasterVolume(float volume)
+    {
+        float master = Mathf.Clamp01(volume);
+        AudioListener.volume = master;
+        if (ambientSource != null)
+            ambientSource.volume = ambientVolume * master;
+        if (musicSource != null)
+            musicSource.volume = musicVolume * musicIntensity * master;
     }
 
     public static void EnsureExists()

@@ -5,7 +5,8 @@ public enum EnemyArchetype
     Pistol,
     Shotgun,
     Rifle,
-    Boss
+    Boss,
+    Melee
 }
 
 /// <summary>
@@ -95,6 +96,19 @@ public class EnemyProfile : MonoBehaviour
                 profile.tint = new Color(0.15f, 0.05f, 0.2f);
                 profile.displayName = "Boss";
                 break;
+
+            case EnemyArchetype.Melee:
+                profile.aggression = 0.95f;
+                profile.coverPreference = 0.1f;
+                profile.flankTendency = 0.35f;
+                profile.holdDistanceBias = 0.05f;
+                profile.moveSpeed = 4.8f;
+                profile.preferredEngageDistance = 2f;
+                profile.weaponDropIndex = 1;
+                profile.weaponDropChance = 0f;
+                profile.tint = new Color(0.72f, 0.18f, 0.16f);
+                profile.displayName = "Bat Thug";
+                break;
         }
 
         profile.ApplyToComponents();
@@ -128,10 +142,12 @@ public class EnemyProfile : MonoBehaviour
                 mat.color = tint;
         }
 
-        EnemyAnimator anim = GetComponent<EnemyAnimator>();
-        if (anim == null)
-            anim = gameObject.AddComponent<EnemyAnimator>();
-        anim.Configure(archetype);
+        EnemyAnimator leftover = GetComponent<EnemyAnimator>();
+        if (leftover != null)
+        {
+            leftover.enabled = false;
+            Destroy(leftover);
+        }
 
         if (archetype == EnemyArchetype.Boss)
         {
@@ -139,5 +155,40 @@ public class EnemyProfile : MonoBehaviour
             if (boss == null)
                 gameObject.AddComponent<BossController>();
         }
+
+        ApplyWeaponVisuals(gameObject, archetype);
+    }
+
+    static void ApplyWeaponVisuals(GameObject go, EnemyArchetype type)
+    {
+        Transform[] transforms = go.GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < transforms.Length; i++)
+        {
+            Transform t = transforms[i];
+            if (t == null || t == go.transform)
+                continue;
+
+            string n = t.name;
+            bool isGun = ContainsIgnoreCase(n, "Rifle")
+                || ContainsIgnoreCase(n, "Shotgun")
+                || ContainsIgnoreCase(n, "Pistol")
+                || ContainsIgnoreCase(n, "Gun")
+                || ContainsIgnoreCase(n, "AR");
+            bool isBat = ContainsIgnoreCase(n, "Bat") && !ContainsIgnoreCase(n, "BatEnemy");
+
+            if (type == EnemyArchetype.Melee)
+            {
+                if (isGun)
+                    t.gameObject.SetActive(false);
+                else if (isBat)
+                    t.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    static bool ContainsIgnoreCase(string value, string token)
+    {
+        return !string.IsNullOrEmpty(value)
+            && value.IndexOf(token, System.StringComparison.OrdinalIgnoreCase) >= 0;
     }
 }

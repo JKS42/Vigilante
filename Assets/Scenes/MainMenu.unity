@@ -3810,7 +3810,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MainMenu
   NewGamePanel: {fileID: 0}
   StartMenuPanel: {fileID: 0}
-  SettingsPanel: {fileID: 0}
+  SettingsPanel: {fileID: 260345252}
 --- !u!1 &1825261273
 GameObject:
   m_ObjectHideFlags: 0

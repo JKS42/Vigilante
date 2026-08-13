@@ -78,32 +78,33 @@ public class TutorialPrompt : MonoBehaviour
         if (promptText != null)
             return;
 
-        Canvas canvas = FindFirstObjectByType<Canvas>();
-        if (canvas == null)
-        {
-            GameObject canvasGo = new GameObject("TutorialCanvas");
-            canvas = canvasGo.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 40;
-            canvasGo.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            canvasGo.AddComponent<GraphicRaycaster>();
-        }
+        GameObject canvasGo = new GameObject("TutorialCanvas");
+        Canvas canvas = canvasGo.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 40;
+        CanvasScaler scaler = canvasGo.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        canvasGo.AddComponent<GraphicRaycaster>();
 
         GameObject panelGo = new GameObject("TutorialPanel");
         panelGo.transform.SetParent(canvas.transform, false);
         panel = panelGo.AddComponent<Image>();
+        Texture2D tex = Texture2D.whiteTexture;
+        panel.sprite = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 4f);
         panel.color = new Color(0f, 0f, 0f, 0.55f);
         RectTransform prt = panel.rectTransform;
-        prt.anchorMin = new Vector2(0.15f, 0.78f);
-        prt.anchorMax = new Vector2(0.85f, 0.92f);
-        prt.offsetMin = Vector2.zero;
-        prt.offsetMax = Vector2.zero;
+        prt.anchorMin = new Vector2(1f, 1f);
+        prt.anchorMax = new Vector2(1f, 1f);
+        prt.pivot = new Vector2(1f, 1f);
+        prt.anchoredPosition = new Vector2(-16f, -78f);
+        prt.sizeDelta = new Vector2(420f, 72f);
 
         GameObject textGo = new GameObject("TutorialText");
         textGo.transform.SetParent(panelGo.transform, false);
         promptText = textGo.AddComponent<TextMeshProUGUI>();
-        promptText.fontSize = 26f;
-        promptText.alignment = TextAlignmentOptions.Center;
+        promptText.fontSize = 20f;
+        promptText.alignment = TextAlignmentOptions.MidlineRight;
         promptText.color = Color.white;
         RectTransform trt = promptText.rectTransform;
         trt.anchorMin = Vector2.zero;

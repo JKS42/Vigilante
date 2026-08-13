@@ -100,8 +100,7 @@ public class PauseMenu : MonoBehaviour
     public void RestartLevel()
     {
         AudioManager.UIClick();
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        GameProgression.RestartCurrentLevel();
     }
 
     public void LoadMainMenu()

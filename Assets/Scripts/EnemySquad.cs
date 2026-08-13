@@ -150,7 +150,7 @@ public class EnemySquad : MonoBehaviour
             return 0.4f;
 
         float score = profile.flankTendency + profile.aggression * 0.5f - profile.coverPreference * 0.35f;
-        if (profile.archetype == EnemyArchetype.Shotgun)
+        if (profile.archetype == EnemyArchetype.Shotgun || profile.archetype == EnemyArchetype.Melee)
             score += 0.5f;
         if (profile.archetype == EnemyArchetype.Rifle)
             score -= 0.35f;

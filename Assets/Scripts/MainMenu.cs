@@ -18,6 +18,9 @@ public class MainMenu : MonoBehaviour
 
         if (GetComponent<LevelSelectUI>() == null)
             gameObject.AddComponent<LevelSelectUI>();
+
+        SettingsMenu.EnsureOn(SettingsPanel);
+        GameSettings.ApplyAll();
     }
 
     public void StartNewGame()
@@ -31,7 +34,11 @@ public class MainMenu : MonoBehaviour
     public void OpenSettings()
     {
         AudioManager.UIClick();
-        if (SettingsPanel != null) SettingsPanel.SetActive(true);
+        if (SettingsPanel != null)
+        {
+            SettingsPanel.SetActive(true);
+            SettingsMenu.EnsureOn(SettingsPanel);
+        }
         if (StartMenuPanel != null) StartMenuPanel.SetActive(false);
         if (NewGamePanel != null) NewGamePanel.SetActive(false);
     }

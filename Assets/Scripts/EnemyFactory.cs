@@ -23,16 +23,23 @@ public static class EnemyFactory
         rb.isKinematic = true;
         rb.useGravity = false;
 
+        enemy.SetActive(false);
         NavMeshAgent agent = enemy.AddComponent<NavMeshAgent>();
+        agent.enabled = false;
         agent.height = 2f;
         agent.radius = 0.4f;
         agent.speed = 3.5f;
         agent.angularSpeed = 360f;
         agent.acceleration = 12f;
         agent.stoppingDistance = 1.2f;
+        enemy.SetActive(true);
 
-        if (NavMesh.SamplePosition(position, out NavMeshHit hit, 4f, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(position, out NavMeshHit hit, 8f, NavMesh.AllAreas))
+        {
             enemy.transform.position = hit.position;
+            agent.enabled = true;
+            agent.Warp(hit.position);
+        }
 
         enemy.AddComponent<Health>();
         enemy.AddComponent<EnemyCombat>();

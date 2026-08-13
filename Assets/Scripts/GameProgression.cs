@@ -33,7 +33,18 @@ public static class GameProgression
     public static void StartLevel(int level)
     {
         SelectedLevel = level;
-        SceneManager.LoadSceneAsync(1);
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(1);
+    }
+
+    public static void RestartCurrentLevel()
+    {
+        Time.timeScale = 1f;
+        UIManager.ResetHealthBinding();
+        int scene = SceneManager.GetActiveScene().buildIndex;
+        if (scene < 1)
+            scene = 1;
+        SceneManager.LoadScene(scene);
     }
 
     public static void CompleteCurrentLevel()

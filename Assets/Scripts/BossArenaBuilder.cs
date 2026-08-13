@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.AI;
-using Unity.AI.Navigation;
 
 /// <summary>
 /// Builds a multi-tier Uncharted-style boss arena around the player at runtime:
@@ -49,16 +47,7 @@ public static class BossArenaBuilder
             CreateBreakableWallSegment(root.transform, pos, Quaternion.LookRotation(center - pos));
         }
 
-        NavMeshSurface surface = Object.FindFirstObjectByType<NavMeshSurface>();
-        if (surface == null)
-        {
-            GameObject go = new GameObject("BossNavMeshSurface");
-            surface = go.AddComponent<NavMeshSurface>();
-            surface.collectObjects = CollectObjects.All;
-            surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-        }
-
-        surface.BuildNavMesh();
+        LevelCombatBootstrap.RebuildPlayableNavMesh();
         DialogueManager.Announcer("BOSS ARENA");
         CombatVfx.SpawnOnomatopoeia(center + Vector3.up * 3f, "FIGHT!");
     }

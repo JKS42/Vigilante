@@ -25,7 +25,7 @@ public class EnemyAnimator : MonoBehaviour
     {
         ai = GetComponent<EnemyAI>();
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-        //CacheVisual();
+        CacheVisual();
     }
 
     void CacheVisual()
@@ -53,7 +53,7 @@ public class EnemyAnimator : MonoBehaviour
     void Update()
     {
         if (visual == null)
-            //CacheVisual();
+            CacheVisual();
         if (visual == null)
             return;
 
@@ -65,7 +65,7 @@ public class EnemyAnimator : MonoBehaviour
 
         float bob = Mathf.Sin(bobPhase) * bobAmp * Mathf.Clamp01(speed / 3f);
         Vector3 lean = Vector3.zero;
-        if (archetype == EnemyArchetype.Shotgun && speed > 1f)
+        if ((archetype == EnemyArchetype.Shotgun || archetype == EnemyArchetype.Melee) && speed > 1f)
             lean = visual.forward * 0.05f;
 
         if (archetype == EnemyArchetype.Rifle && ai != null && ai.CurrentState == EnemyState.Attack)

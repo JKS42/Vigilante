@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using Unity.AI.Navigation;
 
 /// <summary>
 /// Configures LevelDemo for the selected campaign level:
@@ -60,6 +59,8 @@ public class LevelDirector : MonoBehaviour
         // Pause default Start() flow — we rebuild waves then begin.
         waves.SetPaused(true);
 
+        int level = GameProgression.SelectedLevel;
+
         if (pistolEnemyPrefab == null)
             pistolEnemyPrefab = waves.DefaultEnemyPrefab;
         if (shotgunEnemyPrefab == null)
@@ -70,8 +71,6 @@ public class LevelDirector : MonoBehaviour
             bossEnemyPrefab = waves.BossEnemyPrefab;
 
         waves.SetPrefabs(pistolEnemyPrefab, shotgunEnemyPrefab, rifleEnemyPrefab, bossEnemyPrefab);
-
-        int level = GameProgression.SelectedLevel;
         ConfigurePlayerLoadout(level);
 
         switch (level)
@@ -87,6 +86,7 @@ public class LevelDirector : MonoBehaviour
                 break;
         }
 
+        LevelCombatBootstrap.RebuildPlayableNavMesh();
         waves.BeginConfigured();
         waves.OnAllWavesCompleted -= HandleLevelComplete;
         waves.OnAllWavesCompleted += HandleLevelComplete;
@@ -116,12 +116,12 @@ public class LevelDirector : MonoBehaviour
 
         List<WaveDefinition> defs = new List<WaveDefinition>
         {
-            new WaveDefinition { enemyCount = 3, startDelay = 2f, maxWaitBeforeNext = 90f, archetype = EnemyArchetype.Pistol },
+            new WaveDefinition { enemyCount = 3, startDelay = 2f, maxWaitBeforeNext = 90f, archetype = EnemyArchetype.Melee },
             new WaveDefinition { enemyCount = 5, startDelay = 3f, maxWaitBeforeNext = 100f, archetype = EnemyArchetype.Pistol },
             new WaveDefinition { enemyCount = 6, startDelay = 4f, maxWaitBeforeNext = 0f, archetype = EnemyArchetype.Pistol },
         };
 
-        waves.ConfigureLevel(defs, null);
+        waves.ConfigureLevel(defs, ExpandExistingSpawnPoints());
         AudioManager.SetCombatMusicIntensity(0.9f);
     }
 
@@ -168,28 +168,100 @@ public class LevelDirector : MonoBehaviour
         DialogueManager.BossLine("Welcome to the end of the line.");
     }
 
+    List<WaveSpawnPoint> ExpandExistingSpawnPoints()
+    {
+        List<WaveSpawnPoint> points = new List<WaveSpawnPoint>();
+        if (waves == null)
+            return points;
+
+        List<WaveSpawnPoint> source = waves.GetSpawnPoints();
+        MergeSceneSpawnMarkers(source);
+        for (int i = 0; i < source.Count; i++)
+        {
+            WaveSpawnPoint point = source[i];
+            if (point == null)
+                continue;
+
+            TryAddUniqueSpawn(points, point.position, point.facing, 2.5f);
+
+            Vector3 right = Vector3.Cross(Vector3.up, point.facing.sqrMagnitude > 0.01f ? point.facing : Vector3.forward).normalized;
+            TryAddUniqueSpawn(points, point.position + right * 2.2f, point.facing, 2.5f);
+            TryAddUniqueSpawn(points, point.position - right * 2.2f, point.facing, 2.5f);
+        }
+
+        return points.Count > 0 ? points : source;
+    }
+
     List<WaveSpawnPoint> BuildExpandedSpawnPoints()
     {
         List<WaveSpawnPoint> points = new List<WaveSpawnPoint>();
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         Vector3 center = player != null ? player.transform.position : Vector3.zero;
 
-        float[] radii = { 10f, 14f, 18f, 12f, 16f, 20f };
+        float[] radii = { 10f, 14f, 18f, 12f, 16f, 20f, 11f, 15f };
         for (int i = 0; i < radii.Length; i++)
         {
-            float angle = i * 60f * Mathf.Deg2Rad;
-            Vector3 pos = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radii[i];
-            if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 8f, NavMesh.AllAreas))
-                pos = hit.position;
+            float angle = i * (360f / radii.Length) * Mathf.Deg2Rad;
+            Vector3 intended = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radii[i];
+            if (!NavMesh.SamplePosition(intended, out NavMeshHit hit, 8f, NavMesh.AllAreas))
+                continue;
 
-            points.Add(new WaveSpawnPoint
-            {
-                position = pos,
-                facing = (center - pos).normalized
-            });
+            if (Vector3.Distance(intended, hit.position) > 6f)
+                continue;
+
+            TryAddUniqueSpawn(points, hit.position, center - hit.position, 2.5f);
+        }
+
+        if (points.Count < 4)
+        {
+            List<WaveSpawnPoint> fallback = ExpandExistingSpawnPoints();
+            for (int i = 0; i < fallback.Count; i++)
+                TryAddUniqueSpawn(points, fallback[i].position, fallback[i].facing, 2.5f);
         }
 
         return points;
+    }
+
+    static void MergeSceneSpawnMarkers(List<WaveSpawnPoint> points)
+    {
+        EnemySpawnPoint[] markers = Object.FindObjectsByType<EnemySpawnPoint>(FindObjectsSortMode.None);
+        for (int i = 0; i < markers.Length; i++)
+        {
+            if (markers[i] == null)
+                continue;
+            TryAddUniqueSpawn(points, markers[i].transform.position, markers[i].transform.forward, 2.5f);
+        }
+
+        Transform[] all = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
+        for (int i = 0; i < all.Length; i++)
+        {
+            if (all[i] == null || all[i].name != "EnemySpawn")
+                continue;
+            TryAddUniqueSpawn(points, all[i].position, all[i].forward, 2.5f);
+        }
+    }
+
+    static void TryAddUniqueSpawn(List<WaveSpawnPoint> points, Vector3 position, Vector3 facing, float minSeparation)
+    {
+        if (NavMesh.SamplePosition(position, out NavMeshHit hit, 4f, NavMesh.AllAreas))
+            position = hit.position;
+
+        for (int i = 0; i < points.Count; i++)
+        {
+            if (Vector3.Distance(points[i].position, position) < minSeparation)
+                return;
+        }
+
+        Vector3 face = facing;
+        face.y = 0f;
+        if (face.sqrMagnitude < 0.001f)
+            face = Vector3.forward;
+
+        points.Add(new WaveSpawnPoint
+        {
+            position = position,
+            facing = face.normalized
+        });
     }
 
     void ExpandArena(float scale)
@@ -257,11 +329,7 @@ public class LevelDirector : MonoBehaviour
 
     static void RebuildNavMesh()
     {
-        NavMeshSurface surface = Object.FindFirstObjectByType<NavMeshSurface>();
-        if (surface != null)
-            surface.BuildNavMesh();
-        else
-            LevelCombatBootstrap.EnsureNavMesh();
+        LevelCombatBootstrap.RebuildPlayableNavMesh();
     }
 
     void HandleLevelComplete()

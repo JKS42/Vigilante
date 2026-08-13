@@ -75,6 +75,7 @@ public class EnemyAI : MonoBehaviour
     float FlankTend => profile != null ? profile.flankTendency : 0.4f;
     float HoldBias => profile != null ? profile.holdDistanceBias : 0.4f;
     float PreferredDist => profile != null ? profile.preferredEngageDistance : 10f;
+    bool AgentReady => agent != null && agent.enabled && agent.isOnNavMesh;
 
     void Awake()
     {
@@ -82,7 +83,13 @@ public class EnemyAI : MonoBehaviour
         health = GetComponent<Health>();
         combat = GetComponent<EnemyCombat>();
         profile = GetComponent<EnemyProfile>();
-        animator = GetComponent<EnemyAnimator>();
+        animator = null;
+        EnemyAnimator leftover = GetComponent<EnemyAnimator>();
+        if (leftover != null)
+        {
+            leftover.enabled = false;
+            Destroy(leftover);
+        }
         if (combat == null)
             combat = gameObject.AddComponent<EnemyCombat>();
 
@@ -135,15 +142,23 @@ public class EnemyAI : MonoBehaviour
 
         if (GetComponent<EnemyWeaponDrop>() == null)
             gameObject.AddComponent<EnemyWeaponDrop>();
+        if (GetComponent<EnemyHealthBar>() == null)
+            gameObject.AddComponent<EnemyHealthBar>();
+        if (GetComponent<EnemyHurtTint>() == null)
+            gameObject.AddComponent<EnemyHurtTint>();
 
         EnemySquad.EnsureExists().Register(this);
         FindPlayer();
+        PlaceOnNavMesh();
         SetState(EnemyState.Idle);
     }
 
     void Update()
     {
         if (IsDead)
+            return;
+
+        if (!PlaceOnNavMesh())
             return;
 
         if (player == null)
@@ -339,7 +354,7 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.15f)
+        if (ReachedDestination(0.15f))
             SetState(EnemyState.Idle);
     }
 
@@ -351,9 +366,9 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        agent.SetDestination(investigatePos);
+        MoveTo(investigatePos);
 
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.4f)
+        if (ReachedDestination(0.4f))
         {
             stateTimer -= Time.deltaTime;
             transform.Rotate(0f, 90f * Time.deltaTime, 0f);
@@ -408,17 +423,25 @@ public class EnemyAI : MonoBehaviour
                 dest = transform.position + transform.right * (preferLeftFlank ? -3f : 3f);
         }
 
-        agent.SetDestination(dest);
+        MoveTo(dest);
 
         if (canSee && player != null)
         {
             float dist = Vector3.Distance(transform.position, player.position);
             bool inRange = dist <= combat.AttackRange;
 
-            if (inRange && combat.HasLineOfFire(player))
+            if (combat.MeleeOnly)
+            {
+                MoveTo(player.position);
+                if (dist <= combat.MeleeRange + 1.25f)
+                    SetState(EnemyState.Attack);
+                return;
+            }
+
+            if (dist <= combat.MeleeRange || (inRange && combat.HasLineOfFire(player)))
             {
                 float flankChance = FlankTend * (AssignedRole == SquadRole.Flanker ? 1.2f : 0.7f);
-                if (Random.value < flankChance * 0.35f)
+                if (dist > combat.MeleeRange && Random.value < flankChance * 0.35f)
                 {
                     BeginFlank();
                     return;
@@ -432,7 +455,7 @@ public class EnemyAI : MonoBehaviour
             if (Aggression > 0.8f && dist > 2f && reassessTimer <= 0f)
             {
                 reassessTimer = 0.6f;
-                agent.SetDestination(player.position);
+                MoveTo(player.position);
             }
         }
         else if (lostSightTimer >= lostSightGrace)
@@ -450,9 +473,9 @@ public class EnemyAI : MonoBehaviour
             ? dynamicCoverPos
             : (currentCover != null ? currentCover.transform.position : transform.position);
 
-        agent.SetDestination(dest);
+        MoveTo(dest);
 
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.35f)
+        if (ReachedDestination(0.35f))
         {
             if (pendingAttackAfterCover)
             {
@@ -477,16 +500,16 @@ public class EnemyAI : MonoBehaviour
 
     void TickFlank(bool canSee)
     {
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.4f)
+        if (ReachedDestination(0.4f))
         {
             SetState(EnemyState.Attack);
             return;
         }
 
-        if (canSee && player != null && combat.HasLineOfFire(player))
+        if (canSee && player != null)
         {
             FaceTarget(player.position);
-            combat.TryFireAt(player);
+            combat.TryAttack(player);
         }
 
         if (!canSee && lostSightTimer >= lostSightGrace * 2f)
@@ -509,23 +532,28 @@ public class EnemyAI : MonoBehaviour
 
         if (pushIn || backOff)
         {
-            agent.isStopped = false;
+            SetAgentStopped(false);
             if (pushIn)
-                agent.SetDestination(player.position);
+                MoveTo(player.position);
             else
-                agent.SetDestination(transform.position + (transform.position - player.position).normalized * 4f);
+                MoveTo(transform.position + (transform.position - player.position).normalized * 4f);
         }
         else
         {
-            agent.isStopped = true;
+            SetAgentStopped(true);
         }
 
         FaceTarget(canSee ? player.position : lastKnownPlayerPos);
 
         if (canSee)
         {
-            if (combat.HasLineOfFire(player))
-                combat.TryFireAt(player);
+            if (combat.MeleeOnly)
+            {
+                if (dist <= combat.MeleeRange)
+                    combat.TryAttack(player);
+            }
+            else if (dist <= combat.MeleeRange || combat.HasLineOfFire(player))
+                combat.TryAttack(player);
             else if (AssignedRole == SquadRole.Flanker || Random.value < FlankTend)
                 BeginFlank();
             else
@@ -536,7 +564,7 @@ public class EnemyAI : MonoBehaviour
 
             if (dist > combat.AttackRange * 1.15f)
             {
-                agent.isStopped = false;
+                SetAgentStopped(false);
                 SetState(EnemyState.Chase);
             }
             else if (reassessTimer <= 0f && Random.value < FlankTend * 0.15f)
@@ -547,7 +575,7 @@ public class EnemyAI : MonoBehaviour
         }
         else if (lostSightTimer >= lostSightGrace)
         {
-            agent.isStopped = false;
+            SetAgentStopped(false);
             SetState(EnemyState.Search);
         }
     }
@@ -560,10 +588,10 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        agent.SetDestination(lastKnownPlayerPos);
+        MoveTo(lastKnownPlayerPos);
         stateTimer -= Time.deltaTime;
 
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.4f)
+        if (ReachedDestination(0.4f))
         {
             if (NavMesh.SamplePosition(
                     lastKnownPlayerPos + Random.insideUnitSphere * 6f,
@@ -572,7 +600,7 @@ public class EnemyAI : MonoBehaviour
                     NavMesh.AllAreas))
             {
                 lastKnownPlayerPos = hit.position;
-                agent.SetDestination(lastKnownPlayerPos);
+                MoveTo(lastKnownPlayerPos);
             }
         }
 
@@ -619,8 +647,8 @@ public class EnemyAI : MonoBehaviour
         float dist = flankDistance * (0.75f + FlankTend * 0.5f);
         if (CoverFinder.FindFlankPosition(transform.position, threat, dist, preferLeftFlank, out Vector3 flankPos))
         {
-            agent.isStopped = false;
-            agent.SetDestination(flankPos);
+            SetAgentStopped(false);
+            MoveTo(flankPos);
             SetState(EnemyState.Flank);
             DialogueManager.EnemyBark(transform.position, "flank");
         }
@@ -632,8 +660,8 @@ public class EnemyAI : MonoBehaviour
 
     void SetState(EnemyState next)
     {
-        if (state == EnemyState.Attack && next != EnemyState.Attack && agent != null)
-            agent.isStopped = false;
+        if (state == EnemyState.Attack && next != EnemyState.Attack)
+            SetAgentStopped(false);
 
         state = next;
         stateTimer = 0f;
@@ -642,7 +670,7 @@ public class EnemyAI : MonoBehaviour
         {
             case EnemyState.Idle:
                 idleTimer = idleTime + Random.Range(0f, 1f);
-                if (agent.isOnNavMesh)
+                if (AgentReady)
                     agent.ResetPath();
                 break;
             case EnemyState.Patrol:
@@ -650,27 +678,27 @@ public class EnemyAI : MonoBehaviour
                 break;
             case EnemyState.Investigate:
                 stateTimer = investigateLookTime;
-                agent.isStopped = false;
-                agent.SetDestination(investigatePos);
+                SetAgentStopped(false);
+                MoveTo(investigatePos);
                 break;
             case EnemyState.Chase:
-                agent.isStopped = false;
+                SetAgentStopped(false);
                 break;
             case EnemyState.TakeCover:
-                agent.isStopped = false;
+                SetAgentStopped(false);
                 break;
             case EnemyState.Flank:
-                agent.isStopped = false;
+                SetAgentStopped(false);
                 break;
             case EnemyState.Attack:
-                if (agent.isOnNavMesh && Aggression < 0.7f)
-                    agent.isStopped = true;
+                if (Aggression < 0.7f)
+                    SetAgentStopped(true);
                 break;
             case EnemyState.Search:
                 stateTimer = searchGiveUpTime;
-                agent.isStopped = false;
+                SetAgentStopped(false);
                 if (hasLastKnown)
-                    agent.SetDestination(lastKnownPlayerPos);
+                    MoveTo(lastKnownPlayerPos);
                 break;
         }
     }
@@ -680,9 +708,54 @@ public class EnemyAI : MonoBehaviour
         Vector3 random = homePos + Random.insideUnitSphere * patrolRadius;
         random.y = homePos.y;
         if (NavMesh.SamplePosition(random, out NavMeshHit hit, patrolRadius, NavMesh.AllAreas))
-            agent.SetDestination(hit.position);
+            MoveTo(hit.position);
         else
-            agent.SetDestination(homePos);
+            MoveTo(homePos);
+    }
+
+    public bool PlaceOnNavMesh()
+    {
+        if (agent == null)
+            return false;
+
+        if (agent.enabled && agent.isOnNavMesh)
+            return true;
+
+        Vector3 probe = transform.position;
+        if (!NavMesh.SamplePosition(probe, out NavMeshHit hit, 10f, NavMesh.AllAreas)
+            && !NavMesh.SamplePosition(probe + Vector3.up * 3f, out hit, 12f, NavMesh.AllAreas)
+            && !NavMesh.SamplePosition(homePos, out hit, 16f, NavMesh.AllAreas))
+        {
+            agent.enabled = false;
+            return false;
+        }
+
+        transform.position = hit.position;
+        agent.enabled = true;
+        agent.Warp(hit.position);
+        homePos = hit.position;
+        return agent.isOnNavMesh;
+    }
+
+    bool ReachedDestination(float slack)
+    {
+        if (!AgentReady || agent.pathPending)
+            return false;
+        return agent.remainingDistance <= agent.stoppingDistance + slack;
+    }
+
+    void MoveTo(Vector3 destination)
+    {
+        if (!AgentReady)
+            return;
+        agent.SetDestination(destination);
+    }
+
+    void SetAgentStopped(bool stopped)
+    {
+        if (!AgentReady)
+            return;
+        agent.isStopped = stopped;
     }
 
     bool CanSeePlayer()
@@ -691,7 +764,7 @@ public class EnemyAI : MonoBehaviour
             return false;
 
         Vector3 origin = eye != null ? eye.position : transform.position + Vector3.up * 1.5f;
-        Vector3 target = player.position + Vector3.up * 1.2f;
+        Vector3 target = EnemyCombat.GetAimPoint(player);
         Vector3 toTarget = target - origin;
         float dist = toTarget.magnitude;
         if (dist > sightRange)
@@ -708,12 +781,21 @@ public class EnemyAI : MonoBehaviour
                 return false;
         }
 
-        if (Physics.Raycast(origin, toTarget.normalized, out RaycastHit hit, dist, losMask, QueryTriggerInteraction.Ignore))
+        RaycastHit[] hits = Physics.RaycastAll(origin, toTarget.normalized, dist + 0.25f, losMask, QueryTriggerInteraction.Ignore);
+        if (hits == null || hits.Length == 0)
+            return true;
+
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        for (int i = 0; i < hits.Length; i++)
         {
-            if (hit.transform == player || hit.transform.IsChildOf(player))
+            Collider col = hits[i].collider;
+            if (col == null || col.transform.root == transform.root)
+                continue;
+
+            if (hits[i].transform == player || hits[i].transform.IsChildOf(player))
                 return true;
 
-            Health h = hit.collider.GetComponentInParent<Health>();
+            Health h = col.GetComponentInParent<Health>();
             if (h != null && h.transform.root.CompareTag("Player"))
                 return true;
 
