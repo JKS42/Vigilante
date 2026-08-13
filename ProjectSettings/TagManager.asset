@@ -9,6 +9,7 @@ TagManager:
   - Breakable
   - Player
   - Enemy
+  - Bat
   layers:
   - Default
   - TransparentFX

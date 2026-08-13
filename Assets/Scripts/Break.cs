@@ -79,14 +79,17 @@ public class Break : MonoBehaviour
         return s_crackedPropMat;
     }
 
-    void OnTriggerEnter(Collider other)
+   /* void OnTriggerEnter(Collider other)
     {
         if (isBroken)
             return;
 
         if (other.CompareTag("Bullet"))
             BreakApart();
-    }
+
+        if(other.CompareTag("Bat"))
+            BreakApart();
+    }*/
 
     void OnCollisionEnter(Collision collision)
     {
@@ -94,6 +97,8 @@ public class Break : MonoBehaviour
             return;
 
         if (collision.collider.CompareTag("Bullet"))
+            BreakApart();
+        if(collision.collider.CompareTag("Bat"))
             BreakApart();
     }
 

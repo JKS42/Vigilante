@@ -25,7 +25,7 @@ public class EnemyAnimator : MonoBehaviour
     {
         ai = GetComponent<EnemyAI>();
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-        CacheVisual();
+        //CacheVisual();
     }
 
     void CacheVisual()
@@ -53,7 +53,7 @@ public class EnemyAnimator : MonoBehaviour
     void Update()
     {
         if (visual == null)
-            CacheVisual();
+            //CacheVisual();
         if (visual == null)
             return;
 

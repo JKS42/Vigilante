@@ -16051,7 +16051,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 2247adb247cb4234e9200cb969ef9173, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -16825,11 +16825,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f1aaa796db8363f48bd5c2fbf8e22343, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f1aaa796db8363f48bd5c2fbf8e22343, type: 3}
+      propertyPath: m_TagString
+      value: Bat
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: f1aaa796db8363f48bd5c2fbf8e22343, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2094522911}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f1aaa796db8363f48bd5c2fbf8e22343, type: 3}
       insertIndex: -1
@@ -16837,6 +16844,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f1aaa796db8363f48bd5c2fbf8e22343, type: 3}
       insertIndex: -1
       addedObject: {fileID: 616256870}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f1aaa796db8363f48bd5c2fbf8e22343, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 616256871}
   m_SourcePrefab: {fileID: 100100000, guid: f1aaa796db8363f48bd5c2fbf8e22343, type: 3}
 --- !u!4 &474519048 stripped
 Transform:
@@ -22466,11 +22476,32 @@ MonoBehaviour:
   hitMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  attackOrigin: {fileID: 0}
-  attackCamera: {fileID: 0}
+  attackOrigin: {fileID: 2094522911}
+  attackCamera: {fileID: 20869410}
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   animator: {fileID: 616256869}
   swingSound: {fileID: 0}
+--- !u!65 &616256871
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 616256868}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.98, y: 0.14, z: 3.76}
+  m_Center: {x: -9.584628e-10, y: -0.00000006818503, z: -0.18999992}
 --- !u!1001 &621545305
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43471,7 +43502,7 @@ MonoBehaviour:
   shotNoiseRadius: 45
   pelletCount: 8
   spreadAngle: 6
-  shotSound: {fileID: 0}
+  shotSound: {fileID: 8300000, guid: 0a4e48f3fb399a94f8387c61d19d2978, type: 3}
 --- !u!1001 &1149454455
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -45987,7 +46018,7 @@ Transform:
   m_GameObject: {fileID: 1212039477}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -20.44906, y: 2.0533, z: 11.04937}
+  m_LocalPosition: {x: -20.44906, y: 3, z: 11.04937}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -54134,7 +54165,7 @@ MonoBehaviour:
   debrisDamage: 18
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
-  isWallTile: 0
+  isWallTile: 1
 --- !u!1 &1452237488 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -56107,7 +56138,7 @@ MonoBehaviour:
   bulletScale: 0.7
   shotNoiseRadius: 40
   muzzleFlash: {fileID: 0}
-  shotSound: {fileID: 0}
+  shotSound: {fileID: 8300000, guid: ca1738d677f94a24eb3fa3f6c26d68df, type: 3}
 --- !u!1001 &1497221794
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -62028,7 +62059,7 @@ MonoBehaviour:
   bulletSpeed: 20
   bulletScale: 2
   shotNoiseRadius: 35
-  shotSound: {fileID: 0}
+  shotSound: {fileID: 8300000, guid: 0ae64ffb2db2f7c43a6403755ebcb594, type: 3}
 --- !u!1 &1651586272 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -74168,7 +74199,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: fd7c08904a0d94749bc60c52ce5ac804, type: 2}
+  m_NavMeshData: {fileID: 0}
   m_BuildHeightMesh: 0
 --- !u!114 &1989174044
 MonoBehaviour:
@@ -78054,6 +78085,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2020992140052417456, guid: c7f39adc5c1e646448ce0285f2eb7879, type: 3}
   m_PrefabInstance: {fileID: 2024949529}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2094522910
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2094522911}
+  m_Layer: 0
+  m_Name: Attackpoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2094522911
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2094522910}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.003, y: -0.144, z: 1.15}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 474519048}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!64 &2095812288
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -78453,16 +78515,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveManager
   enemyPrefab: {fileID: 3471822538585445616, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
-  shotgunPrefab: {fileID: 0}
-  riflePrefab: {fileID: 0}
+  shotgunPrefab: {fileID: 919132149155446097, guid: dcf559d602c507b40832b2ee0edad97a, type: 3}
+  riflePrefab: {fileID: 919132149155446097, guid: 4ed70686d2b979840b8faaba9e4d5c00, type: 3}
   bossPrefab: {fileID: 0}
   spawnStagger: 0.15
   spawnPoints:
-  - position: {x: -13.4, y: 2.0533, z: 45.7}
+  - position: {x: -13.4, y: 3.55, z: 45.7}
     facing: {x: 0, y: 0, z: 0}
-  - position: {x: -9.1, y: 2.0533, z: 5.4}
+  - position: {x: -9.1, y: 3, z: 5.4}
     facing: {x: 0, y: 0, z: 0}
-  - position: {x: 15, y: 2.0533, z: 43.1}
+  - position: {x: 15, y: 4.09, z: 43.1}
     facing: {x: 0, y: 0, z: 0}
   waves:
   - enemyCount: 10
