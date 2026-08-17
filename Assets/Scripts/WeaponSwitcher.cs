@@ -107,6 +107,9 @@ public class WeaponSwitcher : MonoBehaviour
 
     void Update()
     {
+        if (Time.timeScale <= 0f)
+            return;
+
         if (weapons == null || weapons.Length == 0)
             return;
 
@@ -216,11 +219,15 @@ public class WeaponSwitcher : MonoBehaviour
 
     void OnPrevious(InputAction.CallbackContext context)
     {
+        if (Time.timeScale <= 0f)
+            return;
         CycleWeapon(-1);
     }
 
     void OnNext(InputAction.CallbackContext context)
     {
+        if (Time.timeScale <= 0f)
+            return;
         CycleWeapon(1);
     }
 

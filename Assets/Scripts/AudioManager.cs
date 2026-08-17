@@ -153,7 +153,7 @@ public class AudioManager : MonoBehaviour
             return;
 
         ambientSource.clip = ambientLoop;
-        ambientSource.volume = ambientVolume * GameSettings.Volume;
+        ambientSource.volume = ambientVolume;
         ambientSource.loop = true;
         if (!ambientSource.isPlaying)
             ambientSource.Play();
@@ -173,7 +173,7 @@ public class AudioManager : MonoBehaviour
             return;
 
         musicSource.clip = combatMusicLoop;
-        musicSource.volume = musicVolume * musicIntensity * GameSettings.Volume;
+        musicSource.volume = musicVolume * musicIntensity;
         musicSource.loop = true;
         if (!musicSource.isPlaying)
             musicSource.Play();
@@ -183,7 +183,7 @@ public class AudioManager : MonoBehaviour
     {
         musicIntensity = Mathf.Clamp(intensity, 0.5f, 2f);
         if (musicSource != null)
-            musicSource.volume = musicVolume * musicIntensity * GameSettings.Volume;
+            musicSource.volume = musicVolume * musicIntensity;
 
         if (musicIntensity > 1.2f && combatMusicLoop != null)
         {
@@ -223,24 +223,23 @@ public class AudioManager : MonoBehaviour
         if (clip == null)
             return;
         EnsureSources();
-        sfxSource.PlayOneShot(clip, Mathf.Clamp01(volumeScale) * GameSettings.Volume);
+        sfxSource.PlayOneShot(clip, Mathf.Clamp01(volumeScale));
     }
 
     public void PlayOneShotAt(AudioClip clip, Vector3 position, float volumeScale = 1f)
     {
         if (clip == null)
             return;
-        AudioSource.PlayClipAtPoint(clip, position, Mathf.Clamp01(volumeScale) * GameSettings.Volume);
+        AudioSource.PlayClipAtPoint(clip, position, Mathf.Clamp01(volumeScale));
     }
 
     public void ApplyMasterVolume(float volume)
     {
-        float master = Mathf.Clamp01(volume);
-        AudioListener.volume = master;
+        AudioListener.volume = Mathf.Clamp01(volume);
         if (ambientSource != null)
-            ambientSource.volume = ambientVolume * master;
+            ambientSource.volume = ambientVolume;
         if (musicSource != null)
-            musicSource.volume = musicVolume * musicIntensity * master;
+            musicSource.volume = musicVolume * musicIntensity;
     }
 
     public static void EnsureExists()

@@ -29,6 +29,16 @@ public class Shotgun : Weapon
             FireCooldown = 0.9f;
         if (magazineSize <= 0)
             magazineSize = 6;
+        if (idleSpread <= 0f)
+            idleSpread = spreadAngle;
+        if (movingSpread <= 0f)
+            movingSpread = spreadAngle + 1.2f;
+        if (sprintSpread <= 0f)
+            sprintSpread = spreadAngle + 2.2f;
+        if (fireBloomPerShot <= 0f)
+            fireBloomPerShot = 0.5f;
+        if (maxSpread <= 0f)
+            maxSpread = spreadAngle + 4f;
         base.Awake();
     }
 
@@ -56,7 +66,7 @@ public class Shotgun : Weapon
 
         for (int i = 0; i < count; i++)
         {
-            Vector3 pelletDir = ApplySpread(aimDir, spreadAngle);
+            Vector3 pelletDir = GetSpreadAim(aimDir);
             Bullet.Spawn(bulletPrefab, spawnPos, pelletDir, bulletSpeed, DamagePerPellet, instigator, bulletScale);
         }
 
@@ -68,19 +78,5 @@ public class Shotgun : Weapon
         CombatVfx.SpawnMuzzleFlash(spawnPos, aimDir);
         CombatVfx.SpawnOnomatopoeia(spawnPos + aimDir * 0.5f, "BOOM!");
         NoiseEmitter.Emit(spawnPos, shotNoiseRadius, StimulusType.Gunfire);
-    }
-
-    static Vector3 ApplySpread(Vector3 direction, float angleDegrees)
-    {
-        if (angleDegrees <= 0f)
-            return direction.normalized;
-
-        // Spread relative to aim direction, not world axes.
-        Quaternion aim = Quaternion.LookRotation(direction.normalized);
-        Vector3 right = aim * Vector3.right;
-        Vector3 up = aim * Vector3.up;
-        Quaternion yaw = Quaternion.AngleAxis(Random.Range(-angleDegrees, angleDegrees), up);
-        Quaternion pitch = Quaternion.AngleAxis(Random.Range(-angleDegrees, angleDegrees), right);
-        return (yaw * pitch * direction.normalized).normalized;
     }
 }

@@ -45,6 +45,7 @@ public class UIManager : MonoBehaviour
     Image damageVignette;
     GameObject deathPanel;
     bool playerDead;
+    public bool IsPlayerDead => playerDead;
     float vignetteAlpha;
     static bool healthBound;
 
@@ -103,6 +104,10 @@ public class UIManager : MonoBehaviour
             UpdateInventoryHighlight(boundIndex);
             RefreshAmmo();
         }
+
+        WeaponAccuracy.EnsureExists();
+        CrosshairUI.EnsureExists();
+        PauseMenu.EnsureExists();
 
         RefreshWaveTimer();
         RefreshEnemyCount();

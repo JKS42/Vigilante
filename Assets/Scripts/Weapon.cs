@@ -11,6 +11,18 @@ public class Weapon : MonoBehaviour
     public int magazineSize = 12;
     public float reloadTime = 1.5f;
 
+    [Header("Accuracy (degrees)")]
+    public float idleSpread;
+    public float movingSpread = 1.5f;
+    public float sprintSpread = 2.5f;
+    public float airSpreadBonus = 1.15f;
+    public float crouchSpreadMultiplier = 0.55f;
+    public float fireBloomPerShot;
+    public float fireBloomRecovery = 10f;
+    public float maxSpread = 5f;
+
+    float fireBloom;
+
     [Header("Input")]
     public InputActionReference fireActionReference;
     public InputActionReference reloadActionReference;
@@ -41,6 +53,56 @@ public class Weapon : MonoBehaviour
 
         currentCooldown = 0f;
         currentAmmo = magazineSize;
+        EnsureAccuracyDefaults();
+    }
+
+    protected virtual void EnsureAccuracyDefaults()
+    {
+        if (movingSpread <= 0f)
+            movingSpread = 1.5f;
+        if (sprintSpread <= 0f)
+            sprintSpread = 2.5f;
+        if (airSpreadBonus <= 0f)
+            airSpreadBonus = 1.15f;
+        if (crouchSpreadMultiplier <= 0.01f)
+            crouchSpreadMultiplier = 0.55f;
+        if (fireBloomRecovery <= 0f)
+            fireBloomRecovery = 10f;
+        if (maxSpread <= 0f)
+            maxSpread = 5f;
+    }
+
+    public float EvaluateSpread(PlayerMovement move)
+    {
+        float spread = idleSpread;
+        if (move != null)
+        {
+            float speed = move.HorizontalSpeed;
+            float walk = Mathf.Max(0.01f, move.walkSpeed);
+            float sprint = Mathf.Max(walk + 0.01f, move.sprintSpeed);
+
+            if (speed <= walk)
+                spread = Mathf.Lerp(idleSpread, movingSpread, Mathf.InverseLerp(0.35f, walk, speed));
+            else
+                spread = Mathf.Lerp(movingSpread, sprintSpread, Mathf.InverseLerp(walk, sprint, speed));
+
+            if (!move.IsGrounded || move.IsDashing)
+                spread += airSpreadBonus;
+
+            if (move.IsCrouching)
+                spread *= crouchSpreadMultiplier;
+        }
+
+        spread += fireBloom;
+        if (maxSpread > 0f)
+            spread = Mathf.Min(spread, maxSpread);
+        return Mathf.Max(0f, spread);
+    }
+
+    protected Vector3 GetSpreadAim(Vector3 direction)
+    {
+        float cone = WeaponAccuracy.CurrentSpreadOr(EvaluateSpread(null));
+        return WeaponAccuracy.ApplySpread(direction, cone);
     }
 
     protected virtual void Start()
@@ -95,6 +157,8 @@ public class Weapon : MonoBehaviour
             reloadRoutine = null;
             isReloading = false;
         }
+
+        fireBloom = 0f;
     }
 
     void BindActions()
@@ -136,6 +200,9 @@ public class Weapon : MonoBehaviour
         if (currentCooldown > 0f)
             currentCooldown -= Time.deltaTime;
 
+        if (fireBloom > 0f)
+            fireBloom = Mathf.MoveTowards(fireBloom, 0f, fireBloomRecovery * Time.deltaTime);
+
         if (fireAction == null)
             return;
 
@@ -152,6 +219,9 @@ public class Weapon : MonoBehaviour
 
     void TryShoot()
     {
+        if (Time.timeScale <= 0f)
+            return;
+
         if (isReloading || currentAmmo <= 0)
             return;
 
@@ -160,6 +230,12 @@ public class Weapon : MonoBehaviour
 
         currentAmmo--;
         FireShot();
+        if (fireBloomPerShot > 0f)
+        {
+            fireBloom += fireBloomPerShot;
+            if (maxSpread > 0f)
+                fireBloom = Mathf.Min(fireBloom, maxSpread);
+        }
         currentCooldown = Mathf.Max(0.01f, FireCooldown);
     }
 

@@ -5,7 +5,7 @@ using UnityEngine.AI;
 /// <summary>
 /// Configures LevelDemo for the selected campaign level:
 /// L1 tutorial (pistols, bat start, prompts),
-/// L2 larger mixed shotgun/rifle,
+/// L2 larger mixed shotgun/rifle (player starts with pistol),
 /// L3 Uncharted-style boss arena finale.
 /// </summary>
 public class LevelDirector : MonoBehaviour
@@ -98,14 +98,17 @@ public class LevelDirector : MonoBehaviour
         if (switcher == null)
             return;
 
-        // Always start on bat for Level 1; Level 2/3 unlock guns the enemies bring.
-        switcher.SelectWeapon(0, force: true);
-
-        if (level >= 2)
+        if (level == 2)
         {
-            // Level 2+: player may still start melee-only, but enemies drop all kits.
-            // Optionally pre-unlock nothing — loot teaches the fantasy.
+            // Slot 1 is the pistol. Set starting index so WeaponSwitcher.Start
+            // cannot overwrite this if it runs after LevelDirector.
+            switcher.startingWeaponIndex = 1;
+            switcher.UnlockWeapon(1, equip: true);
+            return;
         }
+
+        // Level 1 tutorial: bat only. Level 3 still starts melee; guns come from drops.
+        switcher.SelectWeapon(0, force: true);
     }
 
     void SetupLevel1()
@@ -128,7 +131,7 @@ public class LevelDirector : MonoBehaviour
     void SetupLevel2()
     {
         DialogueManager.Announcer("LEVEL 2 — CROSSFIRE");
-        DialogueManager.PlayerLine("Shotgunners rush. Riflemen hold the angles.");
+        DialogueManager.PlayerLine("Pistol's loaded. Shotgunners rush. Riflemen hold the angles.");
 
         ExpandArena(1.35f);
         EnsureExtraCover(8);

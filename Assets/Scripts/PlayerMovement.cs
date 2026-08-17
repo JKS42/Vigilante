@@ -56,6 +56,19 @@ public class PlayerMovement : MonoBehaviour
     public bool IsCrouching => crouching;
     public bool IsSprinting { get; private set; }
     public bool IsDashing => dashing;
+    public bool IsGrounded => grounded;
+
+    public float HorizontalSpeed
+    {
+        get
+        {
+            if (rb == null)
+                return 0f;
+            Vector3 flat = rb.linearVelocity;
+            flat.y = 0f;
+            return flat.magnitude;
+        }
+    }
 
     void Awake()
     {
@@ -166,6 +179,9 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        if (Time.timeScale <= 0f)
+            return;
+
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
 
         if (moveAction != null)
@@ -212,6 +228,9 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (Time.timeScale <= 0f)
+            return;
+
         if (dashing)
         {
             Vector3 vel = dashDirection * dashForce;

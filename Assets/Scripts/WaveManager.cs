@@ -310,6 +310,8 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
+        DialogueManager.Announcer("Enemies spawning!");
+
         if (!LevelCombatBootstrap.HasNavMeshAt(spawnPoints[0].position, 8f))
             LevelCombatBootstrap.RebuildPlayableNavMesh();
 

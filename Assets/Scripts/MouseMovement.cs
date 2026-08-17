@@ -13,12 +13,15 @@ public class MouseMovement : MonoBehaviour
 
 	private void Start()
 	{
-		Cursor.lockState = CursorLockMode.Locked;
-		Cursor.visible = false;
-	}
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
 
 	private void Update()
 	{
+		if (Time.timeScale <= 0f)
+			return;
+
 		float mouseX = Mouse.current.delta.x.ReadValue() * senx * Time.deltaTime;
 		float mouseY = Mouse.current.delta.y.ReadValue() * seny * Time.deltaTime;
 

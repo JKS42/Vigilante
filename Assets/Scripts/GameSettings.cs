@@ -14,6 +14,12 @@ public static class GameSettings
     static ColorAdjustments colorAdjustments;
     static CanvasGroup overlay;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void ApplyOnLoad()
+    {
+        ApplyAll();
+    }
+
     public static float Volume
     {
         get => Mathf.Clamp01(PlayerPrefs.GetFloat(VolumeKey, 0.8f));
@@ -100,6 +106,10 @@ public static class GameSettings
             if (existing != null)
             {
                 overlay = existing.GetComponent<CanvasGroup>();
+                if (overlay == null)
+                    overlay = existing.AddComponent<CanvasGroup>();
+                overlay.blocksRaycasts = false;
+                overlay.interactable = false;
                 return;
             }
 
@@ -107,7 +117,8 @@ public static class GameSettings
             Object.DontDestroyOnLoad(canvasGo);
             canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 300;
+            // Stay behind HUD / pause / settings canvases so menus stay readable.
+            canvas.sortingOrder = -50;
             overlay = canvasGo.AddComponent<CanvasGroup>();
             overlay.blocksRaycasts = false;
             overlay.interactable = false;

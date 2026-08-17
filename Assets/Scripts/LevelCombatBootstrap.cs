@@ -48,6 +48,7 @@ public static class LevelCombatBootstrap
 
         AudioManager.EnsureExists();
         DialogueManager.EnsureExists();
+        PauseMenu.EnsureExists();
 
         WaveManager waves = Object.FindFirstObjectByType<WaveManager>();
         LevelDirector director = Object.FindFirstObjectByType<LevelDirector>();
@@ -89,6 +90,9 @@ public static class LevelCombatBootstrap
 
         if (player.GetComponent<Health>() == null)
             player.AddComponent<Health>();
+
+        if (player.GetComponent<WeaponAccuracy>() == null)
+            player.AddComponent<WeaponAccuracy>();
     }
 
     public static void EnsureNavMesh()
@@ -117,6 +121,9 @@ public static class LevelCombatBootstrap
             surface.collectObjects = CollectObjects.Children;
             surface.BuildNavMesh();
         }
+
+        // Collider is only for baking. Leaving it in the scene blocks the player jump.
+        RemoveRuntimeFloorCollider(surface.transform);
 
         EnemyAI[] ais = Object.FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
         for (int i = 0; i < ais.Length; i++)
@@ -180,10 +187,11 @@ public static class LevelCombatBootstrap
         Transform existing = parent.Find("RuntimeNavFloor");
         GameObject floor = existing != null ? existing.gameObject : new GameObject("RuntimeNavFloor");
         if (existing == null)
-        {
             floor.transform.SetParent(parent, false);
-            floor.AddComponent<BoxCollider>();
-        }
+
+        BoxCollider box = floor.GetComponent<BoxCollider>();
+        if (box == null)
+            box = floor.AddComponent<BoxCollider>();
 
         Bounds bounds = new Bounds();
         bool any = false;
@@ -207,9 +215,25 @@ public static class LevelCombatBootstrap
 
         const float pad = 18f;
         floor.transform.position = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z);
-        BoxCollider box = floor.GetComponent<BoxCollider>();
         box.size = new Vector3(Mathf.Max(24f, bounds.size.x + pad * 2f), 0.2f, Mathf.Max(24f, bounds.size.z + pad * 2f));
         box.center = Vector3.zero;
+    }
+
+    static void RemoveRuntimeFloorCollider(Transform parent)
+    {
+        if (parent == null)
+            return;
+
+        Transform existing = parent.Find("RuntimeNavFloor");
+        if (existing == null)
+            return;
+
+        BoxCollider box = existing.GetComponent<BoxCollider>();
+        if (box == null)
+            return;
+
+        box.enabled = false;
+        Object.Destroy(box);
     }
 
     static void EncapsulateFloorPoint(ref Bounds bounds, ref bool any, Vector3 probe)
@@ -240,6 +264,8 @@ public static class LevelCombatBootstrap
             if (col.GetComponentInParent<PlayerMovement>() != null)
                 continue;
             if (col.GetComponentInParent<EnemyAI>() != null)
+                continue;
+            if (col.gameObject.name == "RuntimeNavFloor")
                 continue;
 
             float y = hits[i].point.y;

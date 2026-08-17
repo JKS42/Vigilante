@@ -26,6 +26,16 @@ public class AR : Weapon
             FireCooldown = 0.1f;
         if (magazineSize <= 0)
             magazineSize = 30;
+        if (idleSpread <= 0f)
+            idleSpread = 0.3f;
+        if (movingSpread <= 0f)
+            movingSpread = 2f;
+        if (sprintSpread <= 0f)
+            sprintSpread = 3.5f;
+        if (fireBloomPerShot <= 0f)
+            fireBloomPerShot = 0.45f;
+        if (maxSpread <= 0f)
+            maxSpread = 6.5f;
         base.Awake();
     }
 
@@ -43,7 +53,8 @@ public class AR : Weapon
         if (cam == null)
             cam = Camera.main != null ? Camera.main.transform : null;
 
-        Vector3 aimDir = cam != null ? cam.forward : transform.forward;
+        Vector3 lookDir = cam != null ? cam.forward : transform.forward;
+        Vector3 aimDir = GetSpreadAim(lookDir);
         Vector3 spawnPos = bulletSpawnPoint != null
             ? bulletSpawnPoint.position
             : (cam != null ? cam.position + cam.forward * 0.5f : transform.position);
@@ -62,7 +73,7 @@ public class AR : Weapon
             AudioManager.EnemyGunshot(spawnPos, EnemyWeaponKind.Rifle);
 
         if (muzzleFlash == null)
-            CombatVfx.SpawnMuzzleFlash(spawnPos, aimDir);
+            CombatVfx.SpawnMuzzleFlash(spawnPos, lookDir);
 
         NoiseEmitter.Emit(spawnPos, shotNoiseRadius, StimulusType.Gunfire);
     }

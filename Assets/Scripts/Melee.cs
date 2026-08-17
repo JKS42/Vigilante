@@ -98,6 +98,9 @@ public class Melee : MonoBehaviour
         if (attackAction == null)
             return;
 
+        if (Time.timeScale <= 0f)
+            return;
+
         if (attackAction.WasPressedThisFrame())
             TryAttack();
     }

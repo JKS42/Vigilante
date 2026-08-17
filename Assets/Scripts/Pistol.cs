@@ -32,7 +32,8 @@ public class Pistol : Weapon
 
     protected override void FireShot()
     {
-        Vector3 aimDir = cam != null ? cam.forward : transform.forward;
+        Vector3 lookDir = cam != null ? cam.forward : transform.forward;
+        Vector3 aimDir = GetSpreadAim(lookDir);
         Vector3 spawnPos = bulletSpawnPoint != null
             ? bulletSpawnPoint.position
             : (cam != null ? cam.position + cam.forward * 0.5f : transform.position);
@@ -44,8 +45,8 @@ public class Pistol : Weapon
         else
             AudioManager.EnemyGunshot(spawnPos, EnemyWeaponKind.Pistol);
 
-        CombatVfx.SpawnMuzzleFlash(spawnPos, aimDir);
-        CombatVfx.SpawnOnomatopoeia(spawnPos + aimDir * 0.6f, "BLAM!");
+        CombatVfx.SpawnMuzzleFlash(spawnPos, lookDir);
+        CombatVfx.SpawnOnomatopoeia(spawnPos + lookDir * 0.6f, "BLAM!");
         NoiseEmitter.Emit(spawnPos, shotNoiseRadius, StimulusType.Gunfire);
     }
 }

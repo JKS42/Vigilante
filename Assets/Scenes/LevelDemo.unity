@@ -7047,6 +7047,7 @@ RectTransform:
   - {fileID: 1572255323}
   - {fileID: 1122597130}
   - {fileID: 1463917563}
+  - {fileID: 1539980251}
   m_Father: {fileID: 1240592808}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -42648,7 +42649,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5584430602951008351, guid: 2d85ee961aae85346be51a0927ebbd9f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.49562025
+      value: -0.01999998
       objectReference: {fileID: 0}
     - target: {fileID: 5584430602951008351, guid: 2d85ee961aae85346be51a0927ebbd9f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -42843,14 +42844,14 @@ RectTransform:
   m_GameObject: {fileID: 1122597129}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3, y: 1, z: 1}
+  m_LocalScale: {x: 6, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 177594879}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -156, y: 68}
+  m_AnchoredPosition: {x: -301.67993, y: 115.04999}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1122597131
@@ -43939,6 +43940,14 @@ MonoBehaviour:
   Auto: 0
   magazineSize: 6
   reloadTime: 1.5
+  idleSpread: 0
+  movingSpread: 1.5
+  sprintSpread: 2.5
+  airSpreadBonus: 1.15
+  crouchSpreadMultiplier: 0.55
+  fireBloomPerShot: 0
+  fireBloomRecovery: 10
+  maxSpread: 5
   fireActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   reloadActionReference: {fileID: 1506216217208338517, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   DamagePerPellet: 10
@@ -56811,6 +56820,14 @@ MonoBehaviour:
   Auto: 1
   magazineSize: 30
   reloadTime: 1.5
+  idleSpread: 0
+  movingSpread: 1.5
+  sprintSpread: 2.5
+  airSpreadBonus: 1.15
+  crouchSpreadMultiplier: 0.55
+  fireBloomPerShot: 0
+  fireBloomRecovery: 10
+  maxSpread: 5
   fireActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   reloadActionReference: {fileID: 1506216217208338517, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   Damage: 20
@@ -58415,6 +58432,81 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
   m_PrefabInstance: {fileID: 1539543143}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1539980250
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1539980251}
+  - component: {fileID: 1539980253}
+  - component: {fileID: 1539980252}
+  m_Layer: 5
+  m_Name: Settings
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1539980251
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1539980250}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 177594879}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 600, y: 700}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1539980252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1539980250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1539980253
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1539980250}
+  m_CullTransparentMesh: 1
 --- !u!1 &1541384962 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -58666,7 +58758,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseMenu
   pauseMenuPanel: {fileID: 1546361169}
-  settingsPanel: {fileID: 0}
+  settingsPanel: {fileID: 1539980250}
   resumeButton: {fileID: 1048191262}
   settingsButton: {fileID: 1598985151}
   restartLevelButton: {fileID: 2034620000}
@@ -59882,7 +59974,7 @@ RectTransform:
   m_GameObject: {fileID: 1572255322}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.62, y: 0.62, z: 0.62}
+  m_LocalScale: {x: 1.24, y: 1.24, z: 1.24}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 742374564}
@@ -59894,7 +59986,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -155.4, y: 60.699997}
+  m_AnchoredPosition: {x: -300.47998, y: 100.45001}
   m_SizeDelta: {x: 354.2, y: 100.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1572255324
@@ -62783,12 +62875,20 @@ MonoBehaviour:
   Auto: 0
   magazineSize: 12
   reloadTime: 1.5
+  idleSpread: 0
+  movingSpread: 1.5
+  sprintSpread: 2.5
+  airSpreadBonus: 1.15
+  crouchSpreadMultiplier: 0.55
+  fireBloomPerShot: 0
+  fireBloomRecovery: 10
+  maxSpread: 5
   fireActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   reloadActionReference: {fileID: 1506216217208338517, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  Damage: 10
+  Damage: 20
   bulletPrefab: {fileID: 5105248726194294323, guid: 9fc93dc948c5cbd4ea2164dceea7580b, type: 3}
   bulletSpawnPoint: {fileID: 280574290}
-  bulletSpeed: 20
+  bulletSpeed: 30
   bulletScale: 2
   shotNoiseRadius: 35
   shotSound: {fileID: 8300000, guid: 0ae64ffb2db2f7c43a6403755ebcb594, type: 3}
@@ -72212,7 +72312,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Settings
+  m_text: Restart Level
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5390c8fec8ec79b4d96e866ce819dd60, type: 2}
   m_sharedMaterial: {fileID: -7128238973521468846, guid: 5390c8fec8ec79b4d96e866ce819dd60, type: 2}
@@ -75630,7 +75730,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5584430602951008351, guid: 2d85ee961aae85346be51a0927ebbd9f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.49562025
+      value: -0.02
       objectReference: {fileID: 0}
     - target: {fileID: 5584430602951008351, guid: 2d85ee961aae85346be51a0927ebbd9f, type: 3}
       propertyPath: m_LocalPosition.z
