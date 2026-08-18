@@ -63,7 +63,7 @@ PrefabInstance:
     - target: {fileID: 8345518629259483132, guid: 8753b24dc2e749244a5308cb8d231d70, type: 3}
       propertyPath: pickupPrefab
       value: 
-      objectReference: {fileID: 919132149155446097, guid: dcf559d602c507b40832b2ee0edad97a, type: 3}
+      objectReference: {fileID: 7041346914447478889, guid: d040ef1b309d5e74ea0c6b4df191ed31, type: 3}
     - target: {fileID: 8798795069454935743, guid: 8753b24dc2e749244a5308cb8d231d70, type: 3}
       propertyPath: m_Mesh
       value: 

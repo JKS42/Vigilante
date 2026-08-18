@@ -113,7 +113,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25b20029e0c226b4390cd4ad5c76c495, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MedKitPickup
-  healAmount: 15
+  healAmount: 50
   spinSpeed: 90
   bobAmplitude: 0.15
   bobSpeed: 2.5
