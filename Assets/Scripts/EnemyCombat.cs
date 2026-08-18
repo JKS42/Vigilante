@@ -31,6 +31,7 @@ public class EnemyCombat : MonoBehaviour
     float nextFireTime;
     EnemyAnimator animator;
     bool meleeOnly;
+    WeaponSwitcher playerLoadout;
     readonly RaycastHit[] hitBuffer = new RaycastHit[16];
 
     public float AttackRange => meleeOnly ? meleeRange : attackRange;
@@ -71,7 +72,7 @@ public class EnemyCombat : MonoBehaviour
 
             case EnemyArchetype.Pistol:
                 weaponKind = EnemyWeaponKind.Pistol;
-                damage = 10f;
+                damage = 6f;
                 meleeDamage = 16f;
                 fireRate = 2.2f;
                 attackRange = 16f;
@@ -224,7 +225,7 @@ public class EnemyCombat : MonoBehaviour
             Health health = hit.collider.GetComponentInParent<Health>();
             if (health != null)
             {
-                health.TakeDamage(damage, hit.point, gameObject);
+                health.TakeDamage(GetShotDamage(), hit.point, gameObject);
                 CombatVfx.SpawnImpact(hit.point, hit.normal);
                 CombatVfx.SpawnOnomatopoeia(hit.point, "BANG!");
                 anyHit = true;
@@ -270,6 +271,26 @@ public class EnemyCombat : MonoBehaviour
     Vector3 GetMuzzlePosition()
     {
         return muzzle != null ? muzzle.position : transform.position + Vector3.up * 1.4f + transform.forward * 0.6f;
+    }
+
+    float GetShotDamage()
+    {
+        if (weaponKind != EnemyWeaponKind.Pistol)
+            return damage;
+
+        if (playerLoadout == null)
+            playerLoadout = FindFirstObjectByType<WeaponSwitcher>();
+
+        float shotDamage = damage;
+        if (playerLoadout != null)
+        {
+            if (playerLoadout.IsUnlocked(2)) // shotgun
+                shotDamage += 1f;
+            if (playerLoadout.IsUnlocked(3)) // AR
+                shotDamage += 1f;
+        }
+
+        return shotDamage;
     }
 
     bool TryGetFirstHit(Vector3 origin, Vector3 dir, float maxDistance, out RaycastHit hit)
