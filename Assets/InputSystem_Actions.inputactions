@@ -494,6 +494,17 @@
                 },
                 {
                     "name": "",
+                    "id": "7a1c4e2f-9b80-4d31-8e6a-2c5f0d91b447",
+                    "path": "<Keyboard>/leftCtrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "bc711094-eac7-4418-9013-6715d719a04f",
                     "path": "<Keyboard>/r",
                     "interactions": "",

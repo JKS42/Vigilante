@@ -68,7 +68,7 @@ public class TutorialPrompt : MonoBehaviour
             new Tip { id = "melee", message = "You start with the bat. Left click to melee.", duration = 5f },
             new Tip { id = "break", message = "Shoot or smash breakable walls (cracked texture) for new routes.", duration = 5f },
             new Tip { id = "loot", message = "Kill pistol enemies and walk over their dropped gun to arm up.", duration = 6f, waitForEvent = true, eventId = "weapon_pickup" },
-            new Tip { id = "cover", message = "Enemies take cover and flank — use debris and corners.", duration = 5f },
+            new Tip { id = "cover", message = "Enemies take cover and flank — crouch (C / Ctrl) behind debris and furniture.", duration = 5f },
             new Tip { id = "clear", message = "Clear every wave to finish the tutorial level.", duration = 5f },
         };
     }

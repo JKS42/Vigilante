@@ -30,6 +30,11 @@ public class PlayerMovement : MonoBehaviour
     bool grounded;
     public Transform orientation;
 
+    [Header("Camera")]
+    public Transform cameraHolder;
+    public float crouchCameraHeight = 0.5f;
+    public float crouchCameraLerpSpeed = 14f;
+
     [Header("Input")]
     public InputActionReference moveAction;
     public InputActionReference jumpAction;
@@ -43,6 +48,7 @@ public class PlayerMovement : MonoBehaviour
     CapsuleCollider bodyCapsule;
     float standingHeight;
     float standingCenterY;
+    float standingCameraHeight;
     bool crouching;
     bool dashing;
     float dashTimer;
@@ -52,6 +58,7 @@ public class PlayerMovement : MonoBehaviour
     InputAction ownedDash;
     bool ownsCrouch;
     bool ownsDash;
+    readonly Collider[] overlapHits = new Collider[16];
 
     public bool IsCrouching => crouching;
     public bool IsSprinting { get; private set; }
@@ -82,6 +89,16 @@ public class PlayerMovement : MonoBehaviour
             standingHeight = bodyCapsule.height;
             standingCenterY = bodyCapsule.center.y;
         }
+
+        if (cameraHolder == null)
+        {
+            Transform found = transform.Find("CamHolder");
+            if (found != null)
+                cameraHolder = found;
+        }
+
+        if (cameraHolder != null)
+            standingCameraHeight = cameraHolder.localPosition.y;
     }
 
     void OnEnable()
@@ -182,7 +199,12 @@ public class PlayerMovement : MonoBehaviour
         if (Time.timeScale <= 0f)
             return;
 
-        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
+        grounded = Physics.Raycast(
+            transform.position,
+            Vector3.down,
+            GroundProbeLength(),
+            whatIsGround,
+            QueryTriggerInteraction.Ignore);
 
         if (moveAction != null)
             moveInput = moveAction.action.ReadValue<Vector2>();
@@ -224,6 +246,18 @@ public class PlayerMovement : MonoBehaviour
 
         rb.linearDamping = grounded ? groundDrag : 0f;
         SpeedControl();
+    }
+
+    void LateUpdate()
+    {
+        if (cameraHolder == null || Time.timeScale <= 0f)
+            return;
+
+        float targetY = crouching ? crouchCameraHeight : standingCameraHeight;
+        Vector3 localPos = cameraHolder.localPosition;
+        float t = 1f - Mathf.Exp(-crouchCameraLerpSpeed * Time.deltaTime);
+        localPos.y = Mathf.Lerp(localPos.y, targetY, t);
+        cameraHolder.localPosition = localPos;
     }
 
     void FixedUpdate()
@@ -269,20 +303,79 @@ public class PlayerMovement : MonoBehaviour
         if (crouching == value)
             return;
 
+        if (!value && !CanStandUp())
+            return;
+
         crouching = value;
+        ApplyCapsuleStance();
+    }
+
+    void ApplyCapsuleStance()
+    {
         if (bodyCapsule == null)
             return;
 
         if (crouching)
         {
+            float standH = standingHeight > 0.1f ? standingHeight : playerHeight;
             bodyCapsule.height = crouchHeight;
-            bodyCapsule.center = new Vector3(bodyCapsule.center.x, crouchHeight * 0.5f, bodyCapsule.center.z);
+            float centerY = standingCenterY - (standH - crouchHeight) * 0.5f;
+            bodyCapsule.center = new Vector3(bodyCapsule.center.x, centerY, bodyCapsule.center.z);
         }
         else
         {
             bodyCapsule.height = standingHeight > 0.1f ? standingHeight : playerHeight;
             bodyCapsule.center = new Vector3(bodyCapsule.center.x, standingCenterY, bodyCapsule.center.z);
         }
+    }
+
+    float GroundProbeLength()
+    {
+        if (bodyCapsule == null)
+            return playerHeight * 0.5f + 0.2f;
+
+        Vector3 localBottom = bodyCapsule.center + Vector3.down * (bodyCapsule.height * 0.5f);
+        Vector3 worldBottom = bodyCapsule.transform.TransformPoint(localBottom);
+        float toFeet = Mathf.Abs(transform.position.y - worldBottom.y);
+        return toFeet + 0.2f;
+    }
+
+    bool CanStandUp()
+    {
+        if (bodyCapsule == null)
+            return true;
+
+        float standH = standingHeight > 0.1f ? standingHeight : playerHeight;
+        Vector3 localCenter = new Vector3(bodyCapsule.center.x, standingCenterY, bodyCapsule.center.z);
+        Transform capT = bodyCapsule.transform;
+        Vector3 worldCenter = capT.TransformPoint(localCenter);
+
+        float halfHeight = capT.TransformVector(Vector3.up * (standH * 0.5f)).magnitude;
+        float worldRadius = capT.TransformVector(Vector3.right * bodyCapsule.radius).magnitude;
+        float shaft = Mathf.Max(0f, halfHeight - worldRadius);
+        Vector3 p1 = worldCenter + capT.up * shaft;
+        Vector3 p2 = worldCenter - capT.up * shaft;
+        float checkRadius = worldRadius * 0.92f;
+
+        int count = Physics.OverlapCapsuleNonAlloc(
+            p1,
+            p2,
+            checkRadius,
+            overlapHits,
+            ~0,
+            QueryTriggerInteraction.Ignore);
+
+        for (int i = 0; i < count; i++)
+        {
+            Collider hit = overlapHits[i];
+            if (hit == null || hit == bodyCapsule)
+                continue;
+            if (hit.transform == transform || hit.transform.IsChildOf(transform))
+                continue;
+            return false;
+        }
+
+        return true;
     }
 
     void MovePlayer()
