@@ -13,6 +13,8 @@ public class EnemyHurtTint : MonoBehaviour
     Renderer[] renderers;
     MaterialPropertyBlock block;
     float flash;
+    bool dead;
+    static readonly Color DeadTint = new Color(0.25f, 0.25f, 0.25f);
 
     Color BaseTint => profile != null ? profile.tint : new Color(0.75f, 0.2f, 0.2f);
 
@@ -35,7 +37,10 @@ public class EnemyHurtTint : MonoBehaviour
             renderers = GetComponentsInChildren<Renderer>();
 
         if (health != null)
+        {
             health.OnDamaged += HandleDamaged;
+            health.OnDied += HandleDied;
+        }
 
         ApplyColor(0f);
     }
@@ -43,12 +48,15 @@ public class EnemyHurtTint : MonoBehaviour
     void OnDisable()
     {
         if (health != null)
+        {
             health.OnDamaged -= HandleDamaged;
+            health.OnDied -= HandleDied;
+        }
     }
 
     void Update()
     {
-        if (flash <= 0f)
+        if (dead || flash <= 0f)
             return;
 
         flash = Mathf.MoveTowards(flash, 0f, Time.deltaTime / 0.15f);
@@ -57,8 +65,18 @@ public class EnemyHurtTint : MonoBehaviour
 
     void HandleDamaged(float amount, Vector3 hitPoint, GameObject instigator)
     {
+        if (dead)
+            return;
+
         flash = 1f;
         ApplyColor(flash);
+    }
+
+    void HandleDied()
+    {
+        dead = true;
+        flash = 0f;
+        ApplyColor(0f);
     }
 
     void ApplyColor(float flashAmount)
@@ -66,12 +84,20 @@ public class EnemyHurtTint : MonoBehaviour
         if (renderers == null)
             return;
 
-        float hp = 1f;
-        if (health != null)
-            hp = Mathf.Clamp01(health.CurrentHealth / Mathf.Max(1f, health.MaxHealth));
+        Color color;
+        if (dead)
+        {
+            color = DeadTint;
+        }
+        else
+        {
+            float hp = 1f;
+            if (health != null)
+                hp = Mathf.Clamp01(health.CurrentHealth / Mathf.Max(1f, health.MaxHealth));
 
-        Color wounded = Color.Lerp(BaseTint, new Color(1f, 0.72f, 0.68f), 1f - hp);
-        Color color = Color.Lerp(wounded, Color.white, flashAmount * 0.85f);
+            Color wounded = Color.Lerp(BaseTint, new Color(1f, 0.72f, 0.68f), 1f - hp);
+            color = Color.Lerp(wounded, Color.white, flashAmount * 0.85f);
+        }
 
         for (int i = 0; i < renderers.Length; i++)
         {

@@ -29,6 +29,8 @@ public class Shotgun : Weapon
             FireCooldown = 0.9f;
         if (magazineSize <= 0)
             magazineSize = 6;
+        if (startingReserve <= 0)
+            startingReserve = 18;
         if (idleSpread <= 0f)
             idleSpread = spreadAngle;
         if (movingSpread <= 0f)

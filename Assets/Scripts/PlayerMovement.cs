@@ -190,7 +190,29 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        if (rb != null) rb.freezeRotation = true;
+        if (rb != null)
+        {
+            rb.freezeRotation = true;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+        }
+
+        if (bodyCapsule != null)
+        {
+            if (bodyCapsule.radius > 0.35f)
+                bodyCapsule.radius = 0.3f;
+
+            PhysicsMaterial slip = new PhysicsMaterial("PlayerSlip")
+            {
+                dynamicFriction = 0f,
+                staticFriction = 0f,
+                bounciness = 0f,
+                frictionCombine = PhysicsMaterialCombine.Minimum,
+                bounceCombine = PhysicsMaterialCombine.Minimum
+            };
+            bodyCapsule.sharedMaterial = slip;
+        }
+
         readyToJump = true;
     }
 
@@ -275,6 +297,7 @@ public class PlayerMovement : MonoBehaviour
 
         MovePlayer();
         ApplyExtraGravity();
+        UnstickFromOverlaps();
     }
 
     void TryDash()
@@ -388,6 +411,60 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
         else
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
+    }
+
+    void UnstickFromOverlaps()
+    {
+        if (rb == null || bodyCapsule == null || dashing)
+            return;
+
+        Vector3 flatVel = rb.linearVelocity;
+        flatVel.y = 0f;
+        if (flatVel.magnitude > moveSpeed * 0.85f)
+            return;
+
+        Transform capT = bodyCapsule.transform;
+        Vector3 worldCenter = capT.TransformPoint(bodyCapsule.center);
+        float halfHeight = capT.TransformVector(Vector3.up * (bodyCapsule.height * 0.5f)).magnitude;
+        float worldRadius = capT.TransformVector(Vector3.right * bodyCapsule.radius).magnitude;
+        float shaft = Mathf.Max(0f, halfHeight - worldRadius);
+        Vector3 p1 = worldCenter + capT.up * shaft;
+        Vector3 p2 = worldCenter - capT.up * shaft;
+
+        int count = Physics.OverlapCapsuleNonAlloc(
+            p1,
+            p2,
+            worldRadius,
+            overlapHits,
+            ~0,
+            QueryTriggerInteraction.Ignore);
+
+        Vector3 push = Vector3.zero;
+        for (int i = 0; i < count; i++)
+        {
+            Collider hit = overlapHits[i];
+            if (hit == null || hit == bodyCapsule || hit.isTrigger)
+                continue;
+            if (hit.transform == transform || hit.transform.IsChildOf(transform))
+                continue;
+
+            if (Physics.ComputePenetration(
+                bodyCapsule,
+                capT.position,
+                capT.rotation,
+                hit,
+                hit.transform.position,
+                hit.transform.rotation,
+                out Vector3 dir,
+                out float dist))
+            {
+                push += dir * dist;
+            }
+        }
+
+        push.y = 0f;
+        if (push.sqrMagnitude > 0.0001f)
+            rb.MovePosition(rb.position + push);
     }
 
     void Jump()

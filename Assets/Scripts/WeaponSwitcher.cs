@@ -142,11 +142,25 @@ public class WeaponSwitcher : MonoBehaviour
 
         if (newlyUnlocked)
             WeaponUnlocked?.Invoke(index);
+        else
+            RefillWeaponReserve(index);
 
         if (equip)
             SelectWeapon(index, force: true);
 
         return newlyUnlocked;
+    }
+
+    void RefillWeaponReserve(int index)
+    {
+        if (weapons == null || index < 0 || index >= weapons.Length || weapons[index] == null)
+            return;
+
+        Weapon weapon = weapons[index].GetComponent<Weapon>();
+        if (weapon == null)
+            return;
+
+        weapon.AddReserveAmmo(Mathf.Max(1, weapon.MagazineSize));
     }
 
     void InitUnlocked()

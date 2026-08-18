@@ -120,6 +120,7 @@ public class LevelDirector : MonoBehaviour
         List<WaveDefinition> defs = new List<WaveDefinition>
         {
             new WaveDefinition { enemyCount = 3, startDelay = 2f, maxWaitBeforeNext = 90f, archetype = EnemyArchetype.Melee },
+            new WaveDefinition { enemyCount = 1, startDelay = 3f, maxWaitBeforeNext = 90f, archetype = EnemyArchetype.Pistol },
             new WaveDefinition { enemyCount = 5, startDelay = 3f, maxWaitBeforeNext = 100f, archetype = EnemyArchetype.Pistol },
             new WaveDefinition { enemyCount = 6, startDelay = 4f, maxWaitBeforeNext = 0f, archetype = EnemyArchetype.Pistol },
         };

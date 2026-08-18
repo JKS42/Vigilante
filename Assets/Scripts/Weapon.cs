@@ -9,6 +9,7 @@ public class Weapon : MonoBehaviour
 
     [Header("Ammo")]
     public int magazineSize = 12;
+    public int startingReserve = 36;
     public float reloadTime = 1.5f;
 
     [Header("Accuracy (degrees)")]
@@ -29,6 +30,7 @@ public class Weapon : MonoBehaviour
 
     float currentCooldown;
     int currentAmmo;
+    int reserveAmmo;
     bool isReloading;
     Coroutine reloadRoutine;
 
@@ -39,6 +41,7 @@ public class Weapon : MonoBehaviour
 
     public int CurrentAmmo => currentAmmo;
     public int MagazineSize => magazineSize;
+    public int ReserveAmmo => reserveAmmo;
     public bool IsReloading => isReloading;
 
     protected virtual void Awake()
@@ -52,6 +55,9 @@ public class Weapon : MonoBehaviour
             reloadTime = 1.5f;
 
         currentCooldown = 0f;
+        if (startingReserve <= 0)
+            startingReserve = magazineSize * 3;
+        reserveAmmo = startingReserve;
         currentAmmo = magazineSize;
         EnsureAccuracyDefaults();
     }
@@ -237,11 +243,14 @@ public class Weapon : MonoBehaviour
                 fireBloom = Mathf.Min(fireBloom, maxSpread);
         }
         currentCooldown = Mathf.Max(0.01f, FireCooldown);
+
+        if (currentAmmo <= 0)
+            TryReload();
     }
 
     void TryReload()
     {
-        if (isReloading || currentAmmo >= magazineSize)
+        if (isReloading || currentAmmo >= magazineSize || reserveAmmo <= 0)
             return;
 
         reloadRoutine = StartCoroutine(ReloadRoutine());
@@ -251,9 +260,24 @@ public class Weapon : MonoBehaviour
     {
         isReloading = true;
         yield return new WaitForSeconds(reloadTime);
-        currentAmmo = magazineSize;
+        int needed = magazineSize - currentAmmo;
+        int take = Mathf.Min(needed, reserveAmmo);
+        currentAmmo += take;
+        reserveAmmo -= take;
         isReloading = false;
         reloadRoutine = null;
+    }
+
+    public int AddReserveAmmo(int amount)
+    {
+        if (amount <= 0)
+            return 0;
+
+        int cap = Mathf.Max(startingReserve, magazineSize * 6);
+        int room = Mathf.Max(0, cap - reserveAmmo);
+        int added = Mathf.Min(amount, room);
+        reserveAmmo += added;
+        return added;
     }
 
     protected virtual void FireShot()

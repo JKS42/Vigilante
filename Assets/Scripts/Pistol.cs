@@ -21,6 +21,15 @@ public class Pistol : Weapon
     Transform cam;
     AudioSource audioSource;
 
+    protected override void Awake()
+    {
+        if (magazineSize <= 0)
+            magazineSize = 12;
+        if (startingReserve <= 0)
+            startingReserve = 36;
+        base.Awake();
+    }
+
     protected override void Start()
     {
         base.Start();

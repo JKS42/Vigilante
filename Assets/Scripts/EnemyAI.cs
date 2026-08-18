@@ -24,6 +24,7 @@ public class EnemyAI : MonoBehaviour
     [Header("Perception")]
     [SerializeField] float sightRange = 28f;
     [SerializeField] float sightFov = 110f;
+    [SerializeField] float proximityRange = 2.5f;
     [SerializeField] float hearRange = 40f;
     [SerializeField] float breachReactRange = 22f;
     [SerializeField] LayerMask losMask = ~0;
@@ -321,16 +322,17 @@ public class EnemyAI : MonoBehaviour
             agent.enabled = false;
         }
 
-        Collider col = GetComponent<Collider>();
-        if (col != null)
-            col.enabled = false;
+        EnemyDeathPose pose = GetComponent<EnemyDeathPose>();
+        if (pose == null)
+            pose = gameObject.AddComponent<EnemyDeathPose>();
+        pose.Play();
 
         CombatStimulus.NotifyEnemyDied(this);
         EnemySquad.Instance?.Unregister(this);
         DialogueManager.EnemyBark(transform.position, "death");
-        CombatVfx.SpawnOnomatopoeia(transform.position + Vector3.up * 1.5f, "THUD!");
+        CombatVfx.SpawnDeathKo(transform.position + Vector3.up * 1.5f);
         enabled = false;
-        Destroy(gameObject, 2.5f);
+        Destroy(gameObject, 0.85f);
     }
 
     void TickIdle(bool canSee)
@@ -770,15 +772,19 @@ public class EnemyAI : MonoBehaviour
         if (dist > sightRange)
             return false;
 
-        Vector3 flatForward = transform.forward;
-        flatForward.y = 0f;
-        Vector3 flatDir = toTarget;
-        flatDir.y = 0f;
-        if (flatForward.sqrMagnitude > 0.001f && flatDir.sqrMagnitude > 0.001f)
+        bool closeEnoughToSense = dist <= proximityRange;
+        if (!closeEnoughToSense)
         {
-            float angle = Vector3.Angle(flatForward, flatDir);
-            if (angle > sightFov * 0.5f)
-                return false;
+            Vector3 flatForward = transform.forward;
+            flatForward.y = 0f;
+            Vector3 flatDir = toTarget;
+            flatDir.y = 0f;
+            if (flatForward.sqrMagnitude > 0.001f && flatDir.sqrMagnitude > 0.001f)
+            {
+                float angle = Vector3.Angle(flatForward, flatDir);
+                if (angle > sightFov * 0.5f)
+                    return false;
+            }
         }
 
         RaycastHit[] hits = Physics.RaycastAll(origin, toTarget.normalized, dist + 0.25f, losMask, QueryTriggerInteraction.Ignore);

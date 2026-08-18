@@ -26,6 +26,8 @@ public class AR : Weapon
             FireCooldown = 0.1f;
         if (magazineSize <= 0)
             magazineSize = 30;
+        if (startingReserve <= 0)
+            startingReserve = 90;
         if (idleSpread <= 0f)
             idleSpread = 0.3f;
         if (movingSpread <= 0f)

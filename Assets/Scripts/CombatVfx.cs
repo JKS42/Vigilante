@@ -26,23 +26,33 @@ public static class CombatVfx
 
     public static void SpawnOnomatopoeia(Vector3 position, string text)
     {
+        SpawnOnomatopoeia(position, text, 6f, new Color(1f, 0.85f, 0.2f), 1.1f, 1.6f);
+    }
+
+    public static void SpawnDeathKo(Vector3 position)
+    {
+        SpawnOnomatopoeia(position, "KO!", 10f, new Color(0.95f, 0.15f, 0.12f), 1.15f, 2.2f);
+    }
+
+    public static void SpawnOnomatopoeia(Vector3 position, string text, float fontSize, Color color, float lifetime, float riseSpeed)
+    {
         GameObject go = new GameObject("SFXText_" + text);
         go.transform.SetParent(Root, false);
         go.transform.position = position + Random.insideUnitSphere * 0.15f;
 
         TextMeshPro tmp = go.AddComponent<TextMeshPro>();
         tmp.text = text;
-        tmp.fontSize = 6f;
+        tmp.fontSize = fontSize;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = new Color(1f, 0.85f, 0.2f);
+        tmp.color = color;
         tmp.outlineWidth = 0.2f;
         tmp.outlineColor = Color.black;
 
         RectTransform rt = go.GetComponent<RectTransform>();
         if (rt != null)
-            rt.sizeDelta = new Vector2(4f, 1.5f);
+            rt.sizeDelta = fontSize > 7f ? new Vector2(6f, 2.2f) : new Vector2(4f, 1.5f);
 
-        go.AddComponent<BillboardVfx>().Init(1.1f, 1.6f);
+        go.AddComponent<BillboardVfx>().Init(lifetime, riseSpeed);
     }
 
     public static void SpawnImpact(Vector3 position, Vector3 normal)

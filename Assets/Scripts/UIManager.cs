@@ -107,6 +107,7 @@ public class UIManager : MonoBehaviour
 
         WeaponAccuracy.EnsureExists();
         CrosshairUI.EnsureExists();
+        MinimapUI.EnsureExists();
         PauseMenu.EnsureExists();
 
         RefreshWaveTimer();
@@ -365,8 +366,8 @@ public class UIManager : MonoBehaviour
         if (ranged != null)
         {
             label.text = ranged.IsReloading
-                ? $".../{ranged.MagazineSize}"
-                : $"{ranged.CurrentAmmo}/{ranged.MagazineSize}";
+                ? $".../{ranged.ReserveAmmo}"
+                : $"{ranged.CurrentAmmo}/{ranged.ReserveAmmo}";
             return;
         }
 

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// World-space HP bar above an enemy. Hidden until damaged, then fades out.
+/// Unparented so it billboards toward the player camera instead of rotating with the enemy.
 /// </summary>
 public class EnemyHealthBar : MonoBehaviour
 {
@@ -44,6 +45,11 @@ public class EnemyHealthBar : MonoBehaviour
         }
     }
 
+    void OnDestroy()
+    {
+        DestroyBar();
+    }
+
     void LateUpdate()
     {
         if (barRoot == null)
@@ -54,7 +60,14 @@ public class EnemyHealthBar : MonoBehaviour
         Camera cam = Camera.main;
         if (cam != null)
         {
-            barRoot.rotation = Quaternion.LookRotation(barRoot.position - cam.transform.position);
+            Vector3 toCam = cam.transform.position - barRoot.position;
+            toCam.y = 0f;
+            if (toCam.sqrMagnitude > 0.0001f)
+            {
+                barRoot.rotation = Quaternion.LookRotation(toCam)
+                    * Quaternion.Euler(0f, 180f, 0f);
+            }
+
             float dist = Vector3.Distance(cam.transform.position, barRoot.position);
             float scale = Mathf.Clamp(dist * 0.014f, 0.01f, 0.028f);
             barRoot.localScale = Vector3.one * scale;
@@ -74,6 +87,7 @@ public class EnemyHealthBar : MonoBehaviour
     void HandleDied()
     {
         SetVisible(false);
+        DestroyBar();
     }
 
     void RefreshFill()
@@ -95,11 +109,21 @@ public class EnemyHealthBar : MonoBehaviour
             barRoot.gameObject.SetActive(on);
     }
 
+    void DestroyBar()
+    {
+        if (barRoot == null)
+            return;
+
+        Destroy(barRoot.gameObject);
+        barRoot = null;
+        fill = null;
+        group = null;
+    }
+
     void BuildUi()
     {
         GameObject root = new GameObject("EnemyHealthBar");
-        root.transform.SetParent(transform, false);
-        root.transform.localPosition = Vector3.up * height;
+        root.transform.position = transform.position + Vector3.up * height;
         barRoot = root.transform;
 
         Canvas canvas = root.AddComponent<Canvas>();
