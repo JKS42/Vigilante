@@ -218,9 +218,14 @@ public class Melee : MonoBehaviour
         if (!damagedIds.Add(id))
             return;
 
-        health.TakeDamage(damage, point, playerRoot);
+        float dealt = damage;
+        bool headshot = HeadshotUtility.TryApply(health, other, point, ref dealt);
+        health.TakeDamage(dealt, point, playerRoot);
         AudioManager.MeleeHit(point);
-        CombatVfx.SpawnOnomatopoeia(point, "POW!");
+        if (headshot)
+            HeadshotUtility.Announce(point, health);
+        else
+            CombatVfx.SpawnOnomatopoeia(point, "POW!");
         CombatVfx.SpawnImpact(point, normal);
     }
 

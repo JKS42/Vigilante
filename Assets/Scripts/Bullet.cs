@@ -102,7 +102,7 @@ public class Bullet : MonoBehaviour
                     ~0,
                     QueryTriggerInteraction.Ignore))
             {
-                HandleHit(hit.collider);
+                HandleHit(hit.collider, hit.point);
                 if (consumed)
                     return;
             }
@@ -113,15 +113,20 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        HandleHit(other);
+        HandleHit(other, other != null ? other.ClosestPoint(transform.position) : transform.position);
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        HandleHit(collision.collider);
+        Vector3 point = transform.position;
+        if (collision.contactCount > 0)
+            point = collision.GetContact(0).point;
+        else if (collision.collider != null)
+            point = collision.collider.ClosestPoint(transform.position);
+        HandleHit(collision.collider, point);
     }
 
-    void HandleHit(Collider other)
+    void HandleHit(Collider other, Vector3 hitPoint)
     {
         if (consumed || other == null)
             return;
@@ -155,7 +160,12 @@ public class Bullet : MonoBehaviour
         {
             Health health = other.GetComponentInParent<Health>();
             if (health != null)
-                health.TakeDamage(damage, other.ClosestPoint(transform.position), instigator);
+            {
+                float dealt = damage;
+                if (hitEnemy && HeadshotUtility.TryApply(health, other, hitPoint, ref dealt))
+                    HeadshotUtility.Announce(hitPoint, health);
+                health.TakeDamage(dealt, hitPoint, instigator);
+            }
         }
 
         // Sweep can destroy the bullet before trigger overlap notifies Break.
@@ -168,7 +178,6 @@ public class Bullet : MonoBehaviour
                 Rigidbody body = GetComponent<Rigidbody>();
                 if (body != null && body.linearVelocity.sqrMagnitude > 0.01f)
                     hitDir = body.linearVelocity.normalized;
-                Vector3 hitPoint = other.ClosestPoint(transform.position);
                 breakable.BreakApart(hitDir * 14f, instigator, hitPoint);
             }
         }

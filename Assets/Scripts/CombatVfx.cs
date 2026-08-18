@@ -34,6 +34,11 @@ public static class CombatVfx
         SpawnOnomatopoeia(position, "KO!", 10f, new Color(0.95f, 0.15f, 0.12f), 1.15f, 2.2f);
     }
 
+    public static void SpawnHeadshot(Vector3 position)
+    {
+        SpawnOnomatopoeia(position + Vector3.up * 0.25f, "HEADSHOT!", 8.5f, new Color(1f, 0.32f, 0.12f), 1.25f, 2.1f);
+    }
+
     public static void SpawnOnomatopoeia(Vector3 position, string text, float fontSize, Color color, float lifetime, float riseSpeed)
     {
         GameObject go = new GameObject("SFXText_" + text);
