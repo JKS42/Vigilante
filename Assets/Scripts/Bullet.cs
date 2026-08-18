@@ -163,7 +163,14 @@ public class Bullet : MonoBehaviour
         {
             Break breakable = other.GetComponentInParent<Break>();
             if (breakable != null)
-                breakable.BreakApart();
+            {
+                Vector3 hitDir = transform.forward;
+                Rigidbody body = GetComponent<Rigidbody>();
+                if (body != null && body.linearVelocity.sqrMagnitude > 0.01f)
+                    hitDir = body.linearVelocity.normalized;
+                Vector3 hitPoint = other.ClosestPoint(transform.position);
+                breakable.BreakApart(hitDir * 14f, instigator, hitPoint);
+            }
         }
 
         Consume();

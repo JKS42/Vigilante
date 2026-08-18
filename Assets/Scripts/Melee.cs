@@ -200,7 +200,7 @@ public class Melee : MonoBehaviour
             Break br = other.GetComponentInParent<Break>();
             if (br != null)
             {
-                br.BreakApart(ResolveAttackOrigin().forward * 8f, playerRoot);
+                br.BreakApart(ResolveAttackOrigin().forward * 14f, playerRoot, point);
                 CombatVfx.SpawnOnomatopoeia(point, "CRACK!");
             }
             return;

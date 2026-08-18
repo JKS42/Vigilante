@@ -156,7 +156,7 @@ public class EnemyCombat : MonoBehaviour
             {
                 Break br = col.GetComponentInParent<Break>();
                 if (br != null)
-                    br.BreakApart(transform.forward * 8f, gameObject);
+                    br.BreakApart(transform.forward * 14f, gameObject, col.ClosestPoint(origin));
                 continue;
             }
 
@@ -210,7 +210,7 @@ public class EnemyCombat : MonoBehaviour
             {
                 Break br = hit.collider.GetComponentInParent<Break>();
                 if (br != null)
-                    br.BreakApart(dir * 8f, gameObject);
+                    br.BreakApart(dir * 14f, gameObject, hit.point);
                 CombatVfx.SpawnImpact(hit.point, hit.normal);
                 continue;
             }
