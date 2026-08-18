@@ -154,6 +154,7 @@ public class UIManager : MonoBehaviour
 
         healthBound = true;
         playerHealth.OnDamaged += HandlePlayerDamaged;
+        playerHealth.OnHealed += HandlePlayerHealed;
         playerHealth.OnDied += HandlePlayerDied;
         RefreshHealthSlider();
         EnsureDamageVignette();
@@ -165,6 +166,7 @@ public class UIManager : MonoBehaviour
             return;
 
         playerHealth.OnDamaged -= HandlePlayerDamaged;
+        playerHealth.OnHealed -= HandlePlayerHealed;
         playerHealth.OnDied -= HandlePlayerDied;
         if (healthBound && playerHealth != null)
             healthBound = false;
@@ -174,6 +176,11 @@ public class UIManager : MonoBehaviour
     {
         RefreshHealthSlider();
         vignetteAlpha = Mathf.Max(vignetteAlpha, 0.55f);
+    }
+
+    void HandlePlayerHealed(float amount)
+    {
+        RefreshHealthSlider();
     }
 
     void HandlePlayerDied()

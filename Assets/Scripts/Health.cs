@@ -10,6 +10,7 @@ public class Health : MonoBehaviour
     public bool IsDead => CurrentHealth <= 0f;
 
     public event Action<float, Vector3, GameObject> OnDamaged;
+    public event Action<float> OnHealed;
     public event Action OnDied;
 
     void Awake()
@@ -40,7 +41,11 @@ public class Health : MonoBehaviour
         if (IsDead || amount <= 0f)
             return;
 
+        float before = CurrentHealth;
         CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + amount);
+        float restored = CurrentHealth - before;
+        if (restored > 0f)
+            OnHealed?.Invoke(restored);
     }
 
     public void ResetHealth()

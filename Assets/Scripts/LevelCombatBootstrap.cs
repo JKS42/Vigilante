@@ -64,6 +64,20 @@ public static class LevelCombatBootstrap
 
         director.Configure();
         GameSettings.ApplyAll();
+        EnsureMedKitSpawns();
+    }
+
+    static void EnsureMedKitSpawns()
+    {
+        GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
+        for (int i = 0; i < roots.Length; i++)
+        {
+            GameObject go = roots[i];
+            if (go == null || !go.name.StartsWith("MedKitSpawn"))
+                continue;
+            if (go.GetComponent<MedKitSpawnPoint>() == null)
+                go.AddComponent<MedKitSpawnPoint>();
+        }
     }
 
     public static void SetupPlayer()

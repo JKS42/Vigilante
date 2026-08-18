@@ -36,6 +36,56 @@ public static class VigilanteWeaponPickupMenu
         Debug.Log("Vigilante: Weapon pickup prefabs created/updated in " + PickupsFolder);
     }
 
+    [MenuItem("Vigilante/Create Med Kit Pickup Prefab")]
+    public static void CreateMedKitPickupPrefab()
+    {
+        const string meshPath = "Assets/Prefabs/Environment/MedPack.fbx";
+        const string prefabPath = "Assets/Prefabs/Environment/MedKitPickup.prefab";
+
+        EnsureFolder("Assets/Prefabs");
+        EnsureFolder("Assets/Prefabs/Environment");
+
+        GameObject meshAsset = AssetDatabase.LoadAssetAtPath<GameObject>(meshPath);
+        if (meshAsset == null)
+        {
+            Debug.LogError("Vigilante: Missing med pack mesh at " + meshPath);
+            return;
+        }
+
+        GameObject root = new GameObject("MedKitPickup");
+        try
+        {
+            SphereCollider trigger = root.AddComponent<SphereCollider>();
+            trigger.isTrigger = true;
+            trigger.radius = 1.25f;
+            trigger.center = new Vector3(0f, 0.4f, 0f);
+
+            Rigidbody rb = root.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+
+            MedKitPickup pickup = root.AddComponent<MedKitPickup>();
+            pickup.healAmount = 15f;
+
+            GameObject visual = (GameObject)PrefabUtility.InstantiatePrefab(meshAsset);
+            visual.name = meshAsset.name;
+            visual.transform.SetParent(root.transform, false);
+            visual.transform.localPosition = new Vector3(0f, 0.2f, 0f);
+            visual.transform.localRotation = Quaternion.identity;
+            visual.transform.localScale = Vector3.one;
+
+            PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+        }
+        finally
+        {
+            Object.DestroyImmediate(root);
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("Vigilante: Med kit pickup prefab created/updated at " + prefabPath);
+    }
+
     static void CreatePickup(string prefabName, string meshPath, int weaponIndex, float visualScale)
     {
         GameObject meshAsset = AssetDatabase.LoadAssetAtPath<GameObject>(meshPath);
