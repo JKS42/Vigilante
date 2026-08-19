@@ -37,6 +37,7 @@ public class Break : MonoBehaviour
             rb.isKinematic = true;
 
         EnsureBreakableLook();
+        CelShadeSiblingMeshes();
     }
 
     void EnsureBreakableLook()
@@ -56,6 +57,41 @@ public class Break : MonoBehaviour
         bool wall = IsWallPiece();
         Material mat = wall ? GetCrackedWallMaterial() : GetCrackedPropMaterial();
         renderer.sharedMaterial = mat;
+    }
+
+    /// <summary>
+    /// Breakable wall tiles keep a non-breakable baseboard mesh as a sibling.
+    /// Convert that leftover Lit material to cel without changing its color.
+    /// </summary>
+    void CelShadeSiblingMeshes()
+    {
+        Transform root = transform.parent != null ? transform.parent : transform;
+        Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer r = renderers[i];
+            if (r == null || r.GetComponent<Break>() != null)
+                continue;
+
+            Material[] shared = r.sharedMaterials;
+            if (shared == null)
+                continue;
+
+            bool changed = false;
+            for (int m = 0; m < shared.Length; m++)
+            {
+                Material mat = shared[m];
+                if (mat == null)
+                    continue;
+                Shader before = mat.shader;
+                CelMaterial.Convert(mat);
+                if (mat.shader != before)
+                    changed = true;
+            }
+
+            if (changed)
+                r.sharedMaterials = shared;
+        }
     }
 
     bool IsWallPiece()

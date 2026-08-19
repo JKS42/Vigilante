@@ -107,6 +107,31 @@ public static class LevelCombatBootstrap
 
         if (player.GetComponent<WeaponAccuracy>() == null)
             player.AddComponent<WeaponAccuracy>();
+
+        SnapPlayerToFloor(player);
+    }
+
+    static void SnapPlayerToFloor(GameObject player)
+    {
+        Vector3 pos = player.transform.position;
+        Vector3 snapped = SnapToFloor(pos);
+        CapsuleCollider cap = player.GetComponent<CapsuleCollider>();
+        if (cap == null)
+            cap = player.GetComponentInChildren<CapsuleCollider>();
+
+        float half = 1f;
+        if (cap != null)
+            half = cap.height * 0.5f * cap.transform.lossyScale.y;
+
+        pos.y = snapped.y + half + 0.05f;
+        player.transform.position = pos;
+        Rigidbody rb = player.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            Vector3 v = rb.linearVelocity;
+            v.y = 0f;
+            rb.linearVelocity = v;
+        }
     }
 
     public static void EnsureNavMesh()
@@ -118,7 +143,14 @@ public static class LevelCombatBootstrap
 
     public static bool HasNavMeshAt(Vector3 position, float maxDistance = 8f)
     {
-        return NavMesh.SamplePosition(position, out _, maxDistance, NavMesh.AllAreas);
+        Vector3 probe = SnapToFloor(position);
+        return NavMesh.SamplePosition(probe, out _, maxDistance, NavMesh.AllAreas);
+    }
+
+    public static Vector3 SnapToFloor(Vector3 probe)
+    {
+        probe.y = FindFloorY(probe);
+        return probe;
     }
 
     public static void RebuildPlayableNavMesh()
@@ -228,9 +260,39 @@ public static class LevelCombatBootstrap
         }
 
         const float pad = 3.5f;
-        floor.transform.position = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z);
+        float floorY = GetLevelFloorY();
+        floor.transform.position = new Vector3(bounds.center.x, floorY, bounds.center.z);
         box.size = new Vector3(Mathf.Max(24f, bounds.size.x + pad * 2f), 0.2f, Mathf.Max(24f, bounds.size.z + pad * 2f));
         box.center = Vector3.zero;
+    }
+
+    static float GetLevelFloorY()
+    {
+        GameObject tiles = GameObject.Find("FloorTiles");
+        if (tiles != null)
+        {
+            Collider col = tiles.GetComponent<Collider>();
+            if (col != null)
+                return col.bounds.max.y;
+
+            Renderer[] renderers = tiles.GetComponentsInChildren<Renderer>();
+            if (renderers != null && renderers.Length > 0)
+            {
+                Bounds b = renderers[0].bounds;
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    if (renderers[i] != null)
+                        b.Encapsulate(renderers[i].bounds);
+                }
+                return b.max.y;
+            }
+        }
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            return FindFloorY(player.transform.position);
+
+        return 0f;
     }
 
     static void RemoveRuntimeFloorCollider(Transform parent)
@@ -268,7 +330,7 @@ public static class LevelCombatBootstrap
     static float FindFloorY(Vector3 probe)
     {
         Vector3 origin = probe + Vector3.up * 3f;
-        RaycastHit[] hits = Physics.RaycastAll(origin, Vector3.down, 24f, ~0, QueryTriggerInteraction.Ignore);
+        RaycastHit[] hits = Physics.RaycastAll(origin, Vector3.down, 40f, ~0, QueryTriggerInteraction.Ignore);
         float bestY = float.NegativeInfinity;
         for (int i = 0; i < hits.Length; i++)
         {
@@ -283,7 +345,7 @@ public static class LevelCombatBootstrap
                 continue;
 
             float y = hits[i].point.y;
-            if (y > probe.y + 2f || y < probe.y - 4f)
+            if (y > probe.y + 2f || y < probe.y - 12f)
                 continue;
             if (y > bestY)
                 bestY = y;

@@ -11,6 +11,7 @@ public class EnemyWeaponDrop : MonoBehaviour
     Health health;
     EnemyProfile profile;
     bool dropped;
+    const float DropHover = 0.08f;
 
     void Awake()
     {
@@ -39,10 +40,38 @@ public class EnemyWeaponDrop : MonoBehaviour
             return;
 
         dropped = true;
-        Vector3 pos = transform.position + Vector3.up * 0.35f;
+        Vector3 pos = ResolveDropPosition();
         WeaponPickup.Spawn(pos, profile.weaponDropIndex, pickupPrefab);
 
         CombatVfx.SpawnOnomatopoeia(pos + Vector3.up, "LOOT!");
         DialogueManager.PlayerLine("I'll take that.");
+    }
+
+    Vector3 ResolveDropPosition()
+    {
+        Vector3 origin = transform.position + Vector3.up * 2f;
+        RaycastHit[] hits = Physics.RaycastAll(origin, Vector3.down, 6f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+
+        bool found = false;
+        Vector3 ground = transform.position;
+        float bestY = float.PositiveInfinity;
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider col = hits[i].collider;
+            if (col == null || col.transform.root == transform.root)
+                continue;
+
+            if (hits[i].point.y < bestY)
+            {
+                bestY = hits[i].point.y;
+                ground = hits[i].point;
+                found = true;
+            }
+        }
+
+        if (found)
+            return ground + Vector3.up * DropHover;
+
+        return transform.position + Vector3.up * DropHover;
     }
 }

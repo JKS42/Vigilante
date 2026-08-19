@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public enum EnemyWeaponKind
@@ -34,12 +35,18 @@ public class EnemyCombat : MonoBehaviour
     [SerializeField] LayerMask hitMask = ~0;
     [SerializeField] Transform muzzle;
     [SerializeField] AudioClip shotClip;
+    [Header("Ammo (0 magazine = unlimited)")]
+    [SerializeField] int magazineSize;
+    [SerializeField] float reloadTime = 1.5f;
 
     float nextFireTime;
     EnemyAnimator animator;
     bool meleeOnly;
     WeaponSwitcher playerLoadout;
     PlayerMovement playerMove;
+    int shotsRemaining;
+    bool isReloading;
+    Coroutine reloadRoutine;
     readonly RaycastHit[] hitBuffer = new RaycastHit[16];
 
     public float AttackRange => meleeOnly ? meleeRange : attackRange;
@@ -47,6 +54,7 @@ public class EnemyCombat : MonoBehaviour
     public bool MeleeOnly => meleeOnly;
     public float Damage => damage;
     public EnemyWeaponKind WeaponKind => weaponKind;
+    public bool IsReloading => isReloading;
     public float PreferredMinRange { get; private set; } = 2f;
 
     void Awake()
@@ -76,6 +84,7 @@ public class EnemyCombat : MonoBehaviour
                 pelletCount = 0f;
                 spreadDegrees = 0f;
                 SetShotError(0f, 0f, 0f, 0f, 0f, 0f);
+                SetMagazine(0);
                 PreferredMinRange = 1.2f;
                 break;
 
@@ -88,6 +97,7 @@ public class EnemyCombat : MonoBehaviour
                 pelletCount = 1f;
                 spreadDegrees = 0.4f;
                 SetShotError(2.8f, 0.18f, 3.5f, 2f, 4f, 9f);
+                SetMagazine(10);
                 PreferredMinRange = 3f;
                 break;
 
@@ -100,6 +110,7 @@ public class EnemyCombat : MonoBehaviour
                 pelletCount = 7f;
                 spreadDegrees = 9f;
                 SetShotError(1.2f, 0.08f, 2f, 1.5f, 2.5f, 6f);
+                SetMagazine(0);
                 PreferredMinRange = 1.5f;
                 break;
 
@@ -112,6 +123,7 @@ public class EnemyCombat : MonoBehaviour
                 pelletCount = 1f;
                 spreadDegrees = 0.4f;
                 SetShotError(1f, 0.10f, 2.5f, 1.5f, 3f, 6f);
+                SetMagazine(0);
                 PreferredMinRange = 8f;
                 break;
 
@@ -124,6 +136,7 @@ public class EnemyCombat : MonoBehaviour
                 pelletCount = 2f;
                 spreadDegrees = 1.5f;
                 SetShotError(1.6f, 0.12f, 2.5f, 1.5f, 3f, 7f);
+                SetMagazine(0);
                 PreferredMinRange = 4f;
                 break;
         }
@@ -192,8 +205,14 @@ public class EnemyCombat : MonoBehaviour
 
     public bool TryFireAt(Transform target)
     {
-        if (target == null || Time.time < nextFireTime)
+        if (target == null || isReloading || Time.time < nextFireTime)
             return false;
+
+        if (magazineSize > 0 && shotsRemaining <= 0)
+        {
+            BeginReload();
+            return false;
+        }
 
         Vector3 origin = GetMuzzlePosition();
         Vector3 aimPoint = GetAimPoint(target);
@@ -248,6 +267,7 @@ public class EnemyCombat : MonoBehaviour
             }
         }
 
+        ConsumeShot();
         return anyHit;
     }
 
@@ -287,6 +307,49 @@ public class EnemyCombat : MonoBehaviour
     Vector3 GetMuzzlePosition()
     {
         return muzzle != null ? muzzle.position : transform.position + Vector3.up * 1.4f + transform.forward * 0.6f;
+    }
+
+    void SetMagazine(int size)
+    {
+        magazineSize = Mathf.Max(0, size);
+        shotsRemaining = magazineSize;
+        isReloading = false;
+        if (reloadRoutine != null)
+        {
+            StopCoroutine(reloadRoutine);
+            reloadRoutine = null;
+        }
+    }
+
+    void ConsumeShot()
+    {
+        if (magazineSize <= 0)
+            return;
+
+        shotsRemaining = Mathf.Max(0, shotsRemaining - 1);
+        if (shotsRemaining <= 0)
+            BeginReload();
+    }
+
+    void BeginReload()
+    {
+        if (isReloading || magazineSize <= 0)
+            return;
+
+        if (reloadRoutine != null)
+            StopCoroutine(reloadRoutine);
+
+        reloadRoutine = StartCoroutine(ReloadRoutine());
+    }
+
+    IEnumerator ReloadRoutine()
+    {
+        isReloading = true;
+        CombatVfx.SpawnOnomatopoeia(GetMuzzlePosition(), "CHK!");
+        yield return new WaitForSeconds(Mathf.Max(0.1f, reloadTime));
+        shotsRemaining = magazineSize;
+        isReloading = false;
+        reloadRoutine = null;
     }
 
     void SetShotError(float baseError, float perMeter, float moving, float air, float dash, float maxError)

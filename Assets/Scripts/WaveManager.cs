@@ -482,6 +482,8 @@ public class WaveManager : MonoBehaviour
     bool TryResolveClearPosition(Vector3 candidate, Vector3 anchor, out Vector3 cleared, EnemyAI ignore = null)
     {
         cleared = candidate;
+        candidate = LevelCombatBootstrap.SnapToFloor(candidate);
+        anchor = LevelCombatBootstrap.SnapToFloor(anchor);
         if (!NavMesh.SamplePosition(candidate, out NavMeshHit hit, 2.2f, NavMesh.AllAreas))
             return false;
         if (HorizontalDistance(candidate, hit.position) > 2.2f)
@@ -495,8 +497,8 @@ public class WaveManager : MonoBehaviour
 
     static bool LooksPlayable(Vector3 position)
     {
-        Vector3 origin = position + Vector3.up * 1.35f;
-        if (!Physics.Raycast(origin, Vector3.down, out RaycastHit floor, 3.5f, ~0, QueryTriggerInteraction.Ignore))
+        Vector3 origin = LevelCombatBootstrap.SnapToFloor(position) + Vector3.up * 1.35f;
+        if (!Physics.Raycast(origin, Vector3.down, out RaycastHit floor, 8f, ~0, QueryTriggerInteraction.Ignore))
             return false;
 
         Collider col = floor.collider;

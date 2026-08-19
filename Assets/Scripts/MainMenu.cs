@@ -51,7 +51,10 @@ public class MainMenu : MonoBehaviour
         if (NewGamePanel != null) NewGamePanel.SetActive(false);
     }
 
-    /// <summary>Starts Level 1 tutorial (bat + pistol enemies).</summary>
+    /// <summary>
+    /// New Game always starts campaign Level 1.
+    /// Does not read leftover SelectedLevel or unlock progress.
+    /// </summary>
     public void NewGame()
     {
         AudioManager.UIClick();

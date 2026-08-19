@@ -1,21 +1,27 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 /// <summary>
 /// World-space HP bar above an enemy. Hidden until damaged, then fades out.
 /// Unparented so it billboards toward the player camera instead of rotating with the enemy.
+/// Drawn with ZTest Always so enemy meshes never cover it.
 /// </summary>
 public class EnemyHealthBar : MonoBehaviour
 {
     [SerializeField] float height = 1.9f;
+    [SerializeField] float headPadding = 0.28f;
     [SerializeField] float hideDelay = 3f;
 
     Health health;
     Transform barRoot;
     Image fill;
     CanvasGroup group;
+    Camera cam;
+    Renderer[] bodyRenderers;
     float hideAt;
     bool visible;
+    static Material overlayMat;
 
     void Awake()
     {
@@ -55,17 +61,18 @@ public class EnemyHealthBar : MonoBehaviour
         if (barRoot == null)
             return;
 
-        barRoot.position = transform.position + Vector3.up * height;
+        barRoot.position = transform.position + Vector3.up * CurrentHeight();
 
-        Camera cam = Camera.main;
+        if (cam == null)
+            cam = Camera.main;
+
         if (cam != null)
         {
-            Vector3 toCam = cam.transform.position - barRoot.position;
-            toCam.y = 0f;
-            if (toCam.sqrMagnitude > 0.0001f)
+            Vector3 awayFromCam = barRoot.position - cam.transform.position;
+            if (awayFromCam.sqrMagnitude > 0.0001f)
             {
-                barRoot.rotation = Quaternion.LookRotation(toCam)
-                    * Quaternion.Euler(0f, 180f, 0f);
+                barRoot.rotation = Quaternion.LookRotation(awayFromCam);
+                barRoot.position += -awayFromCam.normalized * 0.35f;
             }
 
             float dist = Vector3.Distance(cam.transform.position, barRoot.position);
@@ -128,7 +135,8 @@ public class EnemyHealthBar : MonoBehaviour
 
         Canvas canvas = root.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;
-        canvas.sortingOrder = 20;
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 200;
 
         RectTransform canvasRt = root.GetComponent<RectTransform>();
         canvasRt.sizeDelta = new Vector2(160f, 22f);
@@ -145,6 +153,7 @@ public class EnemyHealthBar : MonoBehaviour
         bgGo.transform.SetParent(root.transform, false);
         Image bg = bgGo.AddComponent<Image>();
         bg.sprite = white;
+        bg.material = OverlayMaterial();
         bg.color = new Color(0.08f, 0.08f, 0.08f, 0.85f);
         RectTransform bgRt = bg.rectTransform;
         bgRt.anchorMin = Vector2.zero;
@@ -156,6 +165,7 @@ public class EnemyHealthBar : MonoBehaviour
         fillGo.transform.SetParent(root.transform, false);
         fill = fillGo.AddComponent<Image>();
         fill.sprite = white;
+        fill.material = OverlayMaterial();
         fill.color = new Color(0.25f, 0.8f, 0.28f);
         fill.type = Image.Type.Filled;
         fill.fillMethod = Image.FillMethod.Horizontal;
@@ -166,6 +176,50 @@ public class EnemyHealthBar : MonoBehaviour
         fillRt.anchorMax = Vector2.one;
         fillRt.offsetMin = new Vector2(3f, 3f);
         fillRt.offsetMax = new Vector2(-3f, -3f);
+    }
+
+    float CurrentHeight()
+    {
+        if (bodyRenderers == null)
+            bodyRenderers = GetComponentsInChildren<Renderer>(true);
+
+        float top = transform.position.y;
+        bool any = false;
+        for (int i = 0; i < bodyRenderers.Length; i++)
+        {
+            Renderer r = bodyRenderers[i];
+            if (r == null || !r.enabled || r is ParticleSystemRenderer)
+                continue;
+
+            float y = r.bounds.max.y;
+            if (!any || y > top)
+            {
+                top = y;
+                any = true;
+            }
+        }
+
+        if (!any)
+            return height;
+
+        return (top - transform.position.y) + headPadding;
+    }
+
+    static Material OverlayMaterial()
+    {
+        if (overlayMat == null)
+        {
+            Shader shader = Shader.Find("UI/Default");
+            if (shader == null)
+                return null;
+
+            overlayMat = new Material(shader);
+            overlayMat.SetInt("_ZTest", (int)CompareFunction.Always);
+            overlayMat.SetInt("_ZWrite", 0);
+            overlayMat.renderQueue = 4000;
+        }
+
+        return overlayMat;
     }
 
     static Sprite CreateWhiteSprite()

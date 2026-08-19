@@ -104,7 +104,7 @@ public class WeaponPickup : MonoBehaviour
 
     static GameObject ResolvePrefab(int index, GameObject preferred)
     {
-        if (IsPickupPrefab(preferred))
+        if (MatchesIndex(preferred, index))
             return preferred;
 
         switch (index)
@@ -114,6 +114,18 @@ public class WeaponPickup : MonoBehaviour
             case 3: return riflePrefab;
             default: return null;
         }
+    }
+
+    static bool MatchesIndex(GameObject prefab, int index)
+    {
+        if (!IsPickupPrefab(prefab))
+            return false;
+
+        WeaponPickup pickup = prefab.GetComponent<WeaponPickup>();
+        if (pickup == null)
+            pickup = prefab.GetComponentInChildren<WeaponPickup>();
+
+        return pickup != null && pickup.weaponIndex == index;
     }
 
     static bool IsPickupPrefab(GameObject prefab)
