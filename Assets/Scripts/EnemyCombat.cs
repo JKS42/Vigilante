@@ -24,6 +24,13 @@ public class EnemyCombat : MonoBehaviour
     [SerializeField] float meleeRadius = 1.15f;
     [SerializeField] float pelletCount = 1f;
     [SerializeField] float spreadDegrees = 0f;
+    [Header("Shot error (degrees)")]
+    [SerializeField] float shotErrorDegrees = 0f;
+    [SerializeField] float shotErrorPerMeter = 0f;
+    [SerializeField] float movingShotError = 0f;
+    [SerializeField] float airShotError = 0f;
+    [SerializeField] float dashShotError = 0f;
+    [SerializeField] float maxShotError = 0f;
     [SerializeField] LayerMask hitMask = ~0;
     [SerializeField] Transform muzzle;
     [SerializeField] AudioClip shotClip;
@@ -32,6 +39,7 @@ public class EnemyCombat : MonoBehaviour
     EnemyAnimator animator;
     bool meleeOnly;
     WeaponSwitcher playerLoadout;
+    PlayerMovement playerMove;
     readonly RaycastHit[] hitBuffer = new RaycastHit[16];
 
     public float AttackRange => meleeOnly ? meleeRange : attackRange;
@@ -67,6 +75,7 @@ public class EnemyCombat : MonoBehaviour
                 meleeRange = 2.4f;
                 pelletCount = 0f;
                 spreadDegrees = 0f;
+                SetShotError(0f, 0f, 0f, 0f, 0f, 0f);
                 PreferredMinRange = 1.2f;
                 break;
 
@@ -77,7 +86,8 @@ public class EnemyCombat : MonoBehaviour
                 fireRate = 2.2f;
                 attackRange = 16f;
                 pelletCount = 1f;
-                spreadDegrees = 2.5f;
+                spreadDegrees = 0.4f;
+                SetShotError(2.8f, 0.18f, 3.5f, 2f, 4f, 9f);
                 PreferredMinRange = 3f;
                 break;
 
@@ -89,6 +99,7 @@ public class EnemyCombat : MonoBehaviour
                 attackRange = 9f;
                 pelletCount = 7f;
                 spreadDegrees = 9f;
+                SetShotError(1.2f, 0.08f, 2f, 1.5f, 2.5f, 6f);
                 PreferredMinRange = 1.5f;
                 break;
 
@@ -99,7 +110,8 @@ public class EnemyCombat : MonoBehaviour
                 fireRate = 3.4f;
                 attackRange = 24f;
                 pelletCount = 1f;
-                spreadDegrees = 1.2f;
+                spreadDegrees = 0.4f;
+                SetShotError(1f, 0.10f, 2.5f, 1.5f, 3f, 6f);
                 PreferredMinRange = 8f;
                 break;
 
@@ -110,7 +122,8 @@ public class EnemyCombat : MonoBehaviour
                 fireRate = 3.8f;
                 attackRange = 22f;
                 pelletCount = 2f;
-                spreadDegrees = 3.5f;
+                spreadDegrees = 1.5f;
+                SetShotError(1.6f, 0.12f, 2.5f, 1.5f, 3f, 7f);
                 PreferredMinRange = 4f;
                 break;
         }
@@ -189,19 +202,21 @@ public class EnemyCombat : MonoBehaviour
         if (dist > attackRange)
             return false;
 
+        Vector3 aimDir = ApplySpread(baseDir.normalized, EvaluateShotError(dist, GetPlayerMovement(target)));
+
         nextFireTime = Time.time + 1f / Mathf.Max(0.1f, fireRate);
         animator?.PlayFire();
 
         CombatStimulus.EmitNoise(origin, weaponKind == EnemyWeaponKind.Shotgun ? 28f : 22f, StimulusType.Gunfire);
         AudioManager.EnemyGunshot(origin, weaponKind);
-        CombatVfx.SpawnMuzzleFlash(origin, baseDir.normalized);
+        CombatVfx.SpawnMuzzleFlash(origin, aimDir);
         DialogueManager.EnemyBark(transform.position, "fire");
 
         bool anyHit = false;
         int pellets = Mathf.Max(1, Mathf.RoundToInt(pelletCount));
         for (int i = 0; i < pellets; i++)
         {
-            Vector3 dir = ApplySpread(baseDir.normalized, spreadDegrees);
+            Vector3 dir = ApplySpread(aimDir, spreadDegrees);
             Debug.DrawRay(origin, dir * dist, Color.red, 0.08f);
 
             if (!TryGetFirstHit(origin, dir, attackRange, out RaycastHit hit))
@@ -273,6 +288,46 @@ public class EnemyCombat : MonoBehaviour
         return muzzle != null ? muzzle.position : transform.position + Vector3.up * 1.4f + transform.forward * 0.6f;
     }
 
+    void SetShotError(float baseError, float perMeter, float moving, float air, float dash, float maxError)
+    {
+        shotErrorDegrees = baseError;
+        shotErrorPerMeter = perMeter;
+        movingShotError = moving;
+        airShotError = air;
+        dashShotError = dash;
+        maxShotError = maxError;
+    }
+
+    float EvaluateShotError(float distance, PlayerMovement move)
+    {
+        float error = shotErrorDegrees + shotErrorPerMeter * Mathf.Max(0f, distance);
+        if (move != null)
+        {
+            float sprint = Mathf.Max(0.01f, move.sprintSpeed);
+            error += movingShotError * Mathf.InverseLerp(0f, sprint, move.HorizontalSpeed);
+            if (!move.IsGrounded)
+                error += airShotError;
+            if (move.IsDashing)
+                error += dashShotError;
+        }
+
+        if (maxShotError > 0f)
+            error = Mathf.Min(error, maxShotError);
+        return Mathf.Max(0f, error);
+    }
+
+    PlayerMovement GetPlayerMovement(Transform target)
+    {
+        if (playerMove != null)
+            return playerMove;
+
+        if (target != null)
+            playerMove = target.GetComponentInParent<PlayerMovement>();
+        if (playerMove == null)
+            playerMove = FindFirstObjectByType<PlayerMovement>();
+        return playerMove;
+    }
+
     float GetShotDamage()
     {
         if (weaponKind != EnemyWeaponKind.Pistol)
@@ -328,13 +383,19 @@ public class EnemyCombat : MonoBehaviour
 
     static Vector3 ApplySpread(Vector3 forward, float degrees)
     {
-        if (degrees <= 0.01f)
-            return forward;
+        if (forward.sqrMagnitude < 0.0001f)
+            return Vector3.forward;
 
-        float yaw = Random.Range(-degrees, degrees);
-        float pitch = Random.Range(-degrees, degrees);
-        Quaternion rot = Quaternion.AngleAxis(yaw, Vector3.up) * Quaternion.AngleAxis(pitch, Vector3.right);
-        return (rot * forward).normalized;
+        Vector3 dir = forward.normalized;
+        if (degrees <= 0.01f)
+            return dir;
+
+        Quaternion aim = Quaternion.LookRotation(dir);
+        Vector3 right = aim * Vector3.right;
+        Vector3 up = aim * Vector3.up;
+        Quaternion yaw = Quaternion.AngleAxis(Random.Range(-degrees, degrees), up);
+        Quaternion pitch = Quaternion.AngleAxis(Random.Range(-degrees, degrees), right);
+        return (yaw * pitch * dir).normalized;
     }
 
     static bool IsPlayerHit(Collider col)

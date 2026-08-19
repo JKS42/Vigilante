@@ -136,10 +136,8 @@ public class EnemyProfile : MonoBehaviour
                 continue;
 
             Material mat = renderers[i].material;
-            if (mat.HasProperty("_BaseColor"))
-                mat.SetColor("_BaseColor", tint);
-            if (mat.HasProperty("_Color"))
-                mat.color = tint;
+            CelMaterial.Convert(mat);
+            CelMaterial.ApplyColor(mat, tint);
         }
 
         EnemyAnimator leftover = GetComponent<EnemyAnimator>();

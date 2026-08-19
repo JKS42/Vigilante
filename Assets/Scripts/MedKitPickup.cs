@@ -96,13 +96,9 @@ public class MedKitPickup : MonoBehaviour
         Renderer r = go.GetComponent<Renderer>();
         if (r != null)
         {
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-            if (shader != null)
-            {
-                Material mat = new Material(shader);
-                mat.color = new Color(0.85f, 0.2f, 0.22f);
+            Material mat = CelMaterial.Create(new Color(0.85f, 0.2f, 0.22f), "MedKit");
+            if (mat != null)
                 r.sharedMaterial = mat;
-            }
         }
 
         MedKitPickup pickup = go.AddComponent<MedKitPickup>();

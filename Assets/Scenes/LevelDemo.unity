@@ -209,6 +209,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &4595538
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -370,6 +374,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &7390072 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 4ed70686d2b979840b8faaba9e4d5c00, type: 3}
@@ -833,6 +841,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &11200577 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -1333,6 +1345,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &28378653
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2251,6 +2267,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &45135858
 GameObject:
   m_ObjectHideFlags: 0
@@ -3059,6 +3079,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!4 &66715066 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 343638e4dbe4b024aa9a2f97c1a5601f, type: 3}
@@ -3861,6 +3885,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &89927189
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4540,6 +4568,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &116031389
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5250,6 +5282,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &143693563
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5466,6 +5502,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &145954957
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6449,6 +6489,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &173051811
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6830,6 +6874,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &189048352
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7720,6 +7768,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &234552727
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8025,6 +8077,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &254863150
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8181,6 +8237,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &257491136
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9150,6 +9210,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &280574289
 GameObject:
   m_ObjectHideFlags: 0
@@ -9271,6 +9335,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &283948067
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9529,6 +9597,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &299292002
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10291,6 +10363,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &331885525
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10451,6 +10527,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &340192720
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10541,6 +10621,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &340251700
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10631,6 +10715,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!4 &342717163 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: bed8b23fc54befe4fb04becb9f45025b, type: 3}
@@ -10747,6 +10835,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &346844510
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10837,6 +10929,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &349094930
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12111,6 +12207,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &396775974
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12272,6 +12372,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &404401348
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12973,6 +13077,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &415117703
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -13063,6 +13171,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &417653362
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13643,6 +13755,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &435210091
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15073,6 +15189,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &466844284 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 6b14791c8deca3d4b8916f1210a0603f, type: 3}
@@ -15168,6 +15288,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &470340555
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16321,6 +16445,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &505187037 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -16580,6 +16708,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &513298440
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -16670,6 +16802,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &513648057
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -16760,6 +16896,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &515186883
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16981,6 +17121,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &521923903
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17169,6 +17313,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &527369262
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17829,6 +17977,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &546548779
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18315,6 +18467,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &558287525
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -18405,6 +18561,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &559026140
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18891,6 +19051,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &575982987
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19150,6 +19314,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!4 &580322383 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f181942ca5db2cb4d9c7761b4ba89546, type: 3}
@@ -19467,6 +19635,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &593861886
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -19557,6 +19729,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &594220667
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -19647,6 +19823,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &597343665
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20148,6 +20328,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &611526482
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21433,6 +21617,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &639227137
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21621,6 +21809,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &647210102
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -21711,6 +21903,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &648004143
 GameObject:
   m_ObjectHideFlags: 0
@@ -22266,6 +22462,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &652614588
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23917,6 +24117,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &706155628
 GameObject:
   m_ObjectHideFlags: 0
@@ -24200,6 +24404,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &716769219
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -24356,6 +24564,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &719303736
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -24711,6 +24923,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &725116818
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26621,6 +26837,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &787002638
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27414,6 +27634,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &823749562
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27806,6 +28030,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &824004882
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -28280,6 +28508,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &835415803
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29497,6 +29729,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &871435830 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -30363,6 +30599,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &909655830 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -31062,6 +31302,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &927533868
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -32831,6 +33075,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &993529316
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -33256,6 +33504,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1005248016
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -33478,6 +33730,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1008942312
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -33634,6 +33890,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!4 &1011884546 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2020992140052417456, guid: c7f39adc5c1e646448ce0285f2eb7879, type: 3}
@@ -34512,6 +34772,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1037724583
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35027,6 +35291,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1058419155
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35614,6 +35882,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1074141337 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -35775,6 +36047,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1085645883
 GameObject:
   m_ObjectHideFlags: 0
@@ -37215,6 +37491,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1130846979
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38016,6 +38296,7 @@ MonoBehaviour:
   FireCooldown: 0.9
   Auto: 0
   magazineSize: 6
+  startingReserve: 36
   reloadTime: 1.5
   idleSpread: 0
   movingSpread: 1.5
@@ -38263,6 +38544,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1156084740
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38667,6 +38952,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1156357733
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -39225,6 +39514,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1176234791
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -39315,6 +39608,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1178765164
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -39569,6 +39866,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1187809645
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -39856,6 +40157,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1197794703 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -40174,6 +40479,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1204812972
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -40264,6 +40573,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1207202138
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -40766,6 +41079,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1223529187
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -40856,6 +41173,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1223540203
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -40946,6 +41267,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1225569711
 GameObject:
   m_ObjectHideFlags: 0
@@ -41291,6 +41616,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1238275507
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -41447,6 +41776,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1240592804
 GameObject:
   m_ObjectHideFlags: 0
@@ -41950,6 +42283,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1261537044
 GameObject:
   m_ObjectHideFlags: 0
@@ -42441,6 +42778,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1270248860
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -42531,6 +42872,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1270890225
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -42860,6 +43205,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1281130014
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43286,6 +43635,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!4 &1293733597 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 46a48407b230d1042a2208438239e8fb, type: 3}
@@ -43753,6 +44106,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1302500649
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -44234,6 +44591,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1310602773
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -45557,6 +45918,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1357679077
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -45647,6 +46012,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1360004366
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -46358,6 +46727,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1374074753
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -46580,6 +46953,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1385088717
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -46965,6 +47342,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1411047336
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -47436,6 +47817,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1428989857
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -47592,6 +47977,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1435500865 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -48070,6 +48459,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1443682207
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -48321,6 +48714,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 1
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1452237488 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -49271,6 +49668,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1475127281
 GameObject:
   m_ObjectHideFlags: 0
@@ -49691,6 +50092,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1487076575
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -50150,6 +50555,7 @@ MonoBehaviour:
   FireCooldown: 0.1
   Auto: 1
   magazineSize: 30
+  startingReserve: 36
   reloadTime: 1.5
   idleSpread: 0
   movingSpread: 1.5
@@ -50932,6 +51338,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!4 &1522002499 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 46a48407b230d1042a2208438239e8fb, type: 3}
@@ -51204,6 +51614,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1532634343
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -52075,6 +52489,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1552221748
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53154,6 +53572,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1574038847
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -53244,6 +53666,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1575553026
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -53334,6 +53760,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1584317586
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53743,6 +54173,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1594165910
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -54031,6 +54465,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1598985149
 GameObject:
   m_ObjectHideFlags: 0
@@ -55243,6 +55681,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1649504632
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -55395,6 +55837,7 @@ MonoBehaviour:
   FireCooldown: 0.25
   Auto: 0
   magazineSize: 12
+  startingReserve: 36
   reloadTime: 1.5
   idleSpread: 0
   movingSpread: 1.5
@@ -55785,6 +56228,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1680067249
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -55875,6 +56322,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1680149303
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -56373,6 +56824,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!4 &1691190797 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0dd9ea0afd5576a4d900b04501b37c46, type: 3}
@@ -57022,6 +57477,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1729819874
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -57758,6 +58217,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1753351148 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -57940,6 +58403,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1759584039 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1677539219903222026, guid: c7f39adc5c1e646448ce0285f2eb7879, type: 3}
@@ -58056,6 +58523,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1764481121 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}
@@ -59012,6 +59483,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1789351202
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -60739,6 +61214,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1845930195
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -60961,6 +61440,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1851311926
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -61778,6 +62261,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1867167341
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -62464,6 +62951,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1879401757
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -62554,6 +63045,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1879891042
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -62644,6 +63139,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1880620233
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -63498,6 +63997,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1922864323
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -63720,6 +64223,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1927694718
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -64294,6 +64801,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &1937403632
 GameObject:
   m_ObjectHideFlags: 0
@@ -64581,6 +65092,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1943302068
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -65698,6 +66213,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &1976611661
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -65788,6 +66307,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1976750329
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -65944,6 +66467,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1982617540
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -66763,6 +67290,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &1995840136
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -67133,6 +67664,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &2007684939
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -67777,6 +68312,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &2026519483
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -68025,6 +68564,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!64 &2031951001
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -68115,6 +68658,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &2033124450
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -68573,6 +69120,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &2034619998
 GameObject:
   m_ObjectHideFlags: 0
@@ -69014,6 +69565,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!4 &2046885837 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0babc876efffe7b48a53c6f5b77c7d44, type: 3}
@@ -70043,6 +70598,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!4 &2093982713 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2020992140052417456, guid: c7f39adc5c1e646448ce0285f2eb7879, type: 3}
@@ -70169,6 +70728,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &2096404327
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -70780,6 +71343,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1001 &2112689622
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -70936,6 +71503,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &2113249459
 GameObject:
   m_ObjectHideFlags: 0
@@ -71846,6 +72417,10 @@ MonoBehaviour:
   debrisLifetime: 0.7
   brokenMaterial: {fileID: 0}
   isWallTile: 0
+  launchSpeed: 12
+  launchUpSpeed: 4.5
+  launchSpin: 10
+  pieceLifetime: 8
 --- !u!1 &2145326111 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c08fd387e8f031d40890cda4f35ac0c7, type: 3}

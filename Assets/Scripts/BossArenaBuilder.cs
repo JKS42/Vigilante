@@ -136,14 +136,8 @@ public static class BossArenaBuilder
         if (r == null)
             return;
 
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-        if (shader == null)
-            return;
-
-        Material mat = new Material(shader);
-        mat.color = color;
-        if (mat.HasProperty("_BaseColor"))
-            mat.SetColor("_BaseColor", color);
-        r.sharedMaterial = mat;
+        Material mat = CelMaterial.Create(color);
+        if (mat != null)
+            r.sharedMaterial = mat;
     }
 }

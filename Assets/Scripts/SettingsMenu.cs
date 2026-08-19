@@ -3,13 +3,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Binds Volume and Brightness sliders to GameSettings.
+/// Binds Volume, Brightness, and Mouse Sensitivity sliders to GameSettings.
 /// Builds the in-game settings panel when the scene panel is empty.
 /// </summary>
 public class SettingsMenu : MonoBehaviour
 {
     public Slider volumeSlider;
     public Slider brightnessSlider;
+    public Slider sensitivitySlider;
     public Button backButton;
 
     bool suppress;
@@ -42,6 +43,7 @@ public class SettingsMenu : MonoBehaviour
         FindSliders();
         Wire(volumeSlider, OnVolumeChanged);
         Wire(brightnessSlider, OnBrightnessChanged);
+        Wire(sensitivitySlider, OnSensitivityChanged);
         RefreshFromPrefs();
     }
 
@@ -49,12 +51,16 @@ public class SettingsMenu : MonoBehaviour
     {
         Unwire(volumeSlider, OnVolumeChanged);
         Unwire(brightnessSlider, OnBrightnessChanged);
+        Unwire(sensitivitySlider, OnSensitivityChanged);
     }
 
     void BuildIfNeeded()
     {
         if (GetComponentInChildren<Slider>(true) != null)
+        {
+            EnsureSensitivitySlider();
             return;
+        }
 
         Image panelImage = GetComponent<Image>();
         if (panelImage != null)
@@ -64,7 +70,69 @@ public class SettingsMenu : MonoBehaviour
 
         volumeSlider = CreateLabeledSlider(transform, "Volume", "VOLUME", new Vector2(0f, 80f));
         brightnessSlider = CreateLabeledSlider(transform, "Brightness", "BRIGHTNESS", new Vector2(0f, -40f));
-        backButton = CreateBackButton(transform, new Vector2(0f, -220f));
+        sensitivitySlider = CreateLabeledSlider(transform, "Sensitivity", "SENSITIVITY", new Vector2(0f, -160f));
+        backButton = CreateBackButton(transform, new Vector2(0f, -280f));
+    }
+
+    void EnsureSensitivitySlider()
+    {
+        if (FindChildByName(transform, "Sensitivity") != null)
+            return;
+
+        Transform volume = FindChildByName(transform, "Volume");
+        if (volume == null)
+            return;
+
+        GameObject clone = Instantiate(volume.gameObject, volume.parent);
+        clone.name = "Sensitivity";
+        clone.transform.SetSiblingIndex(volume.GetSiblingIndex() + 2);
+
+        RectTransform cloneRt = clone.GetComponent<RectTransform>();
+        RectTransform volumeRt = volume.GetComponent<RectTransform>();
+        Transform brightness = FindChildByName(transform, "Brightness");
+        RectTransform brightnessRt = brightness != null ? brightness.GetComponent<RectTransform>() : null;
+
+        Vector2 spacing = brightnessRt != null
+            ? brightnessRt.anchoredPosition - volumeRt.anchoredPosition
+            : new Vector2(0f, -136f);
+        Vector2 origin = brightnessRt != null ? brightnessRt.anchoredPosition : volumeRt.anchoredPosition;
+        cloneRt.anchoredPosition = origin + spacing;
+
+        RelabelClonedSlider(clone.transform, "SENSITIVITY");
+
+        sensitivitySlider = clone.GetComponent<Slider>();
+        if (sensitivitySlider == null)
+            sensitivitySlider = clone.GetComponentInChildren<Slider>(true);
+        if (sensitivitySlider != null)
+            sensitivitySlider.onValueChanged.RemoveAllListeners();
+
+        Transform back = FindChildByName(transform, "Back");
+        if (back != null)
+        {
+            RectTransform backRt = back.GetComponent<RectTransform>();
+            float desiredY = Mathf.Min(backRt.anchoredPosition.y, cloneRt.anchoredPosition.y - 86f);
+            backRt.anchoredPosition = new Vector2(backRt.anchoredPosition.x, desiredY);
+        }
+    }
+
+    static void RelabelClonedSlider(Transform root, string label)
+    {
+        TextMeshProUGUI[] labels = root.GetComponentsInChildren<TextMeshProUGUI>(true);
+        if (labels == null || labels.Length == 0)
+            return;
+
+        TextMeshProUGUI tmp = labels[0];
+        tmp.text = label;
+        tmp.gameObject.name = "SensitivityLabel";
+
+        RectTransform rt = tmp.rectTransform;
+        const float minWidth = 280f;
+        if (rt.sizeDelta.x < minWidth)
+        {
+            float left = rt.anchoredPosition.x - rt.sizeDelta.x * 0.5f;
+            rt.sizeDelta = new Vector2(minWidth, rt.sizeDelta.y);
+            rt.anchoredPosition = new Vector2(left + minWidth * 0.5f, rt.anchoredPosition.y);
+        }
     }
 
     void FindSliders()
@@ -88,6 +156,17 @@ public class SettingsMenu : MonoBehaviour
                 brightnessSlider = t.GetComponent<Slider>();
                 if (brightnessSlider == null)
                     brightnessSlider = t.GetComponentInChildren<Slider>(true);
+            }
+        }
+
+        if (sensitivitySlider == null)
+        {
+            Transform t = FindChildByName(transform, "Sensitivity");
+            if (t != null)
+            {
+                sensitivitySlider = t.GetComponent<Slider>();
+                if (sensitivitySlider == null)
+                    sensitivitySlider = t.GetComponentInChildren<Slider>(true);
             }
         }
 
@@ -117,6 +196,7 @@ public class SettingsMenu : MonoBehaviour
         suppress = true;
         SetSlider(volumeSlider, GameSettings.Volume);
         SetSlider(brightnessSlider, GameSettings.Brightness);
+        SetSlider(sensitivitySlider, GameSettings.MouseSensitivity);
         suppress = false;
         GameSettings.ApplyAll();
     }
@@ -133,6 +213,13 @@ public class SettingsMenu : MonoBehaviour
         if (suppress || brightnessSlider == null)
             return;
         GameSettings.Brightness = SliderToUnit(brightnessSlider, value);
+    }
+
+    void OnSensitivityChanged(float value)
+    {
+        if (suppress || sensitivitySlider == null)
+            return;
+        GameSettings.MouseSensitivity = SliderToUnit(sensitivitySlider, value);
     }
 
     static Slider CreateLabeledSlider(Transform parent, string objectName, string label, Vector2 position)

@@ -79,12 +79,7 @@ public class Break : MonoBehaviour
         if (s_crackedWallMat != null)
             return s_crackedWallMat;
 
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-        s_crackedWallMat = new Material(shader);
-        s_crackedWallMat.name = "BreakableWall_Cracked";
-        s_crackedWallMat.color = new Color(0.72f, 0.62f, 0.48f);
-        if (s_crackedWallMat.HasProperty("_BaseColor"))
-            s_crackedWallMat.SetColor("_BaseColor", new Color(0.72f, 0.62f, 0.48f));
+        s_crackedWallMat = CelMaterial.Create(new Color(0.72f, 0.62f, 0.48f), "BreakableWall_Cracked");
         return s_crackedWallMat;
     }
 
@@ -93,12 +88,7 @@ public class Break : MonoBehaviour
         if (s_crackedPropMat != null)
             return s_crackedPropMat;
 
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-        s_crackedPropMat = new Material(shader);
-        s_crackedPropMat.name = "BreakableProp_Cracked";
-        s_crackedPropMat.color = new Color(0.55f, 0.4f, 0.32f);
-        if (s_crackedPropMat.HasProperty("_BaseColor"))
-            s_crackedPropMat.SetColor("_BaseColor", new Color(0.55f, 0.4f, 0.32f));
+        s_crackedPropMat = CelMaterial.Create(new Color(0.55f, 0.4f, 0.32f), "BreakableProp_Cracked");
         return s_crackedPropMat;
     }
 

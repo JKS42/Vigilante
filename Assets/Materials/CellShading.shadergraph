@@ -1480,7 +1480,7 @@
         "b": 1.0,
         "a": 1.0
     },
-    "isMainColor": false,
+    "isMainColor": true,
     "m_ColorMode": 0
 }
 
@@ -2167,7 +2167,7 @@
         "m_SerializedTexture": "",
         "m_Guid": ""
     },
-    "isMainTexture": false,
+    "isMainTexture": true,
     "useTilingAndOffset": false,
     "useTexelSize": true,
     "m_Modifiable": true,

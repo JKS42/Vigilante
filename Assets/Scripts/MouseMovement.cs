@@ -22,8 +22,9 @@ public class MouseMovement : MonoBehaviour
 		if (Time.timeScale <= 0f)
 			return;
 
-		float mouseX = Mouse.current.delta.x.ReadValue() * senx * Time.deltaTime;
-		float mouseY = Mouse.current.delta.y.ReadValue() * seny * Time.deltaTime;
+		float sens = GameSettings.MouseSensitivityMultiplier;
+		float mouseX = Mouse.current.delta.x.ReadValue() * senx * sens * Time.deltaTime;
+		float mouseY = Mouse.current.delta.y.ReadValue() * seny * sens * Time.deltaTime;
 
 		yRotation += mouseX;
 		xRotation -= mouseY;

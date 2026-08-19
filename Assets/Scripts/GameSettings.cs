@@ -3,12 +3,15 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 /// <summary>
-/// Persisted master volume and brightness. Applied in every scene.
+/// Persisted master volume, brightness, and mouse look sensitivity. Applied in every scene.
 /// </summary>
 public static class GameSettings
 {
     const string VolumeKey = "Vigilante.Volume";
     const string BrightnessKey = "Vigilante.Brightness";
+    const string MouseSensitivityKey = "Vigilante.MouseSensitivity";
+    const float MouseSensitivityMin = 0.01f;
+    const float MouseSensitivityMax = 2f;
 
     static Volume brightnessVolume;
     static ColorAdjustments colorAdjustments;
@@ -41,6 +44,22 @@ public static class GameSettings
             ApplyBrightness();
         }
     }
+
+    /// <summary>
+    /// Slider unit 0–1. Default 0.5 maps to the current inspector look speed.
+    /// </summary>
+    public static float MouseSensitivity
+    {
+        get => Mathf.Clamp01(PlayerPrefs.GetFloat(MouseSensitivityKey, 0.5f));
+        set
+        {
+            PlayerPrefs.SetFloat(MouseSensitivityKey, Mathf.Clamp01(value));
+            PlayerPrefs.Save();
+        }
+    }
+
+    public static float MouseSensitivityMultiplier =>
+        Mathf.Lerp(MouseSensitivityMin, MouseSensitivityMax, MouseSensitivity);
 
     public static void ApplyAll()
     {

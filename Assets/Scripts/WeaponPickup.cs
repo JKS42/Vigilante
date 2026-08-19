@@ -86,15 +86,12 @@ public class WeaponPickup : MonoBehaviour
         Renderer r = go.GetComponent<Renderer>();
         if (r != null)
         {
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-            if (shader != null)
-            {
-                Material mat = new Material(shader);
-                mat.color = index == 1 ? new Color(0.85f, 0.75f, 0.2f)
-                    : index == 2 ? new Color(0.9f, 0.4f, 0.1f)
-                    : new Color(0.3f, 0.55f, 0.95f);
+            Color color = index == 1 ? new Color(0.85f, 0.75f, 0.2f)
+                : index == 2 ? new Color(0.9f, 0.4f, 0.1f)
+                : new Color(0.3f, 0.55f, 0.95f);
+            Material mat = CelMaterial.Create(color, "WeaponPickup");
+            if (mat != null)
                 r.sharedMaterial = mat;
-            }
         }
 
         WeaponPickup pickup = go.AddComponent<WeaponPickup>();

@@ -312,13 +312,9 @@ public class LevelDirector : MonoBehaviour
         Renderer r = pad.GetComponent<Renderer>();
         if (r != null)
         {
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-            if (shader != null)
-            {
-                Material mat = new Material(shader);
-                mat.color = new Color(0.25f, 0.25f, 0.28f);
+            Material mat = CelMaterial.Create(new Color(0.25f, 0.25f, 0.28f), "ExpandedFloor");
+            if (mat != null)
                 r.sharedMaterial = mat;
-            }
         }
     }
 
