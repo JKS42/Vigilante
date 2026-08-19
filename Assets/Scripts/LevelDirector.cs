@@ -61,14 +61,14 @@ public class LevelDirector : MonoBehaviour
 
         int level = GameProgression.SelectedLevel;
 
-        if (pistolEnemyPrefab == null)
-            pistolEnemyPrefab = waves.DefaultEnemyPrefab;
-        if (shotgunEnemyPrefab == null)
-            shotgunEnemyPrefab = waves.ShotgunEnemyPrefab;
-        if (rifleEnemyPrefab == null)
-            rifleEnemyPrefab = waves.RifleEnemyPrefab;
-        if (bossEnemyPrefab == null)
-            bossEnemyPrefab = waves.BossEnemyPrefab;
+        if (UsableEnemyPrefab(pistolEnemyPrefab) == null)
+            pistolEnemyPrefab = UsableEnemyPrefab(waves.DefaultEnemyPrefab);
+        if (UsableEnemyPrefab(shotgunEnemyPrefab) == null)
+            shotgunEnemyPrefab = UsableEnemyPrefab(waves.ShotgunEnemyPrefab);
+        if (UsableEnemyPrefab(rifleEnemyPrefab) == null)
+            rifleEnemyPrefab = UsableEnemyPrefab(waves.RifleEnemyPrefab);
+        if (UsableEnemyPrefab(bossEnemyPrefab) == null)
+            bossEnemyPrefab = UsableEnemyPrefab(waves.BossEnemyPrefab);
 
         waves.SetPrefabs(pistolEnemyPrefab, shotgunEnemyPrefab, rifleEnemyPrefab, bossEnemyPrefab);
         ConfigurePlayerLoadout(level);
@@ -125,7 +125,7 @@ public class LevelDirector : MonoBehaviour
             new WaveDefinition { enemyCount = 6, startDelay = 4f, maxWaitBeforeNext = 0f, archetype = EnemyArchetype.Pistol },
         };
 
-        waves.ConfigureLevel(defs, ExpandExistingSpawnPoints());
+        waves.ConfigureLevel(defs, CollectSceneSpawnPoints());
         AudioManager.SetCombatMusicIntensity(0.9f);
     }
 
@@ -134,7 +134,6 @@ public class LevelDirector : MonoBehaviour
         DialogueManager.Announcer("LEVEL 2 — CROSSFIRE");
         DialogueManager.PlayerLine("Pistol's loaded. Shotgunners rush. Riflemen hold the angles.");
 
-        ExpandArena(1.35f);
         EnsureExtraCover(8);
 
         List<WaveDefinition> defs = new List<WaveDefinition>
@@ -147,7 +146,7 @@ public class LevelDirector : MonoBehaviour
             new WaveDefinition { enemyCount = 3, startDelay = 2f, maxWaitBeforeNext = 0f, archetype = EnemyArchetype.Shotgun },
         };
 
-        waves.ConfigureLevel(defs, BuildExpandedSpawnPoints());
+        waves.ConfigureLevel(defs, CollectSceneSpawnPoints());
         AudioManager.SetCombatMusicIntensity(1.1f);
     }
 
@@ -172,7 +171,7 @@ public class LevelDirector : MonoBehaviour
         DialogueManager.BossLine("Welcome to the end of the line.");
     }
 
-    List<WaveSpawnPoint> ExpandExistingSpawnPoints()
+    List<WaveSpawnPoint> CollectSceneSpawnPoints()
     {
         List<WaveSpawnPoint> points = new List<WaveSpawnPoint>();
         if (waves == null)
@@ -185,18 +184,29 @@ public class LevelDirector : MonoBehaviour
             WaveSpawnPoint point = source[i];
             if (point == null)
                 continue;
-
             TryAddUniqueSpawn(points, point.position, point.facing, 2.5f);
-
-            Vector3 right = Vector3.Cross(Vector3.up, point.facing.sqrMagnitude > 0.01f ? point.facing : Vector3.forward).normalized;
-            TryAddUniqueSpawn(points, point.position + right * 2.2f, point.facing, 2.5f);
-            TryAddUniqueSpawn(points, point.position - right * 2.2f, point.facing, 2.5f);
         }
 
         if (points.Count == 0)
             AddRingAroundPlayer(points, source.Count > 0 ? source[0].position : Vector3.zero);
 
         return points.Count > 0 ? points : source;
+    }
+
+    static GameObject UsableEnemyPrefab(GameObject prefab)
+    {
+        if (prefab == null)
+            return null;
+        if (prefab.GetComponent<EnemyAI>() != null)
+            return prefab;
+        if (prefab.GetComponentInChildren<EnemyAI>(true) != null)
+            return prefab;
+        return null;
+    }
+
+    List<WaveSpawnPoint> ExpandExistingSpawnPoints()
+    {
+        return CollectSceneSpawnPoints();
     }
 
     List<WaveSpawnPoint> BuildExpandedSpawnPoints()
@@ -266,7 +276,8 @@ public class LevelDirector : MonoBehaviour
 
     static void TryAddUniqueSpawn(List<WaveSpawnPoint> points, Vector3 position, Vector3 facing, float minSeparation)
     {
-        if (NavMesh.SamplePosition(position, out NavMeshHit hit, 4f, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(position, out NavMeshHit hit, 2.2f, NavMesh.AllAreas)
+            && Vector3.Distance(new Vector3(position.x, 0f, position.z), new Vector3(hit.position.x, 0f, hit.position.z)) <= 2.2f)
             position = hit.position;
 
         for (int i = 0; i < points.Count; i++)
@@ -327,8 +338,11 @@ public class LevelDirector : MonoBehaviour
         {
             float angle = (i / (float)count) * Mathf.PI * 2f;
             Vector3 pos = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * Random.Range(7f, 15f);
-            if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 6f, NavMesh.AllAreas))
-                pos = hit.position;
+            if (!NavMesh.SamplePosition(pos, out NavMeshHit hit, 3f, NavMesh.AllAreas))
+                continue;
+            if (Vector3.Distance(new Vector3(pos.x, 0f, pos.z), new Vector3(hit.position.x, 0f, hit.position.z)) > 3f)
+                continue;
+            pos = hit.position;
 
             GameObject crate = GameObject.CreatePrimitive(PrimitiveType.Cube);
             crate.name = "CoverCrate";

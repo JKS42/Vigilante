@@ -227,7 +227,7 @@ public static class LevelCombatBootstrap
             any = true;
         }
 
-        const float pad = 18f;
+        const float pad = 3.5f;
         floor.transform.position = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z);
         box.size = new Vector3(Mathf.Max(24f, bounds.size.x + pad * 2f), 0.2f, Mathf.Max(24f, bounds.size.z + pad * 2f));
         box.center = Vector3.zero;

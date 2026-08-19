@@ -34,7 +34,7 @@ public static class EnemyFactory
         agent.stoppingDistance = 1.2f;
         enemy.SetActive(true);
 
-        if (NavMesh.SamplePosition(position, out NavMeshHit hit, 8f, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(position, out NavMeshHit hit, 2.5f, NavMesh.AllAreas))
         {
             enemy.transform.position = hit.position;
             agent.enabled = true;

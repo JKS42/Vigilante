@@ -60,10 +60,18 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 096683acb7054a248b37c1714474ba47, type: 2}
-    - target: {fileID: 8345518629259483132, guid: 8753b24dc2e749244a5308cb8d231d70, type: 3}
+    - target: {fileID: 4975115454148350142, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
       propertyPath: pickupPrefab
       value: 
-      objectReference: {fileID: 7041346914447478889, guid: d040ef1b309d5e74ea0c6b4df191ed31, type: 3}
+      objectReference: {fileID: 2000010001, guid: f9b2d5e8c3a05172b6f4d0a1e7c8b923, type: 3}
+    - target: {fileID: 2915080414910063984, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+      propertyPath: archetype
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915080414910063984, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+      propertyPath: weaponDropIndex
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8798795069454935743, guid: 8753b24dc2e749244a5308cb8d231d70, type: 3}
       propertyPath: m_Mesh
       value: 

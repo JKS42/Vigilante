@@ -40,17 +40,7 @@ public class EnemyWeaponDrop : MonoBehaviour
 
         dropped = true;
         Vector3 pos = transform.position + Vector3.up * 0.35f;
-        if (pickupPrefab != null)
-        {
-            GameObject go = Instantiate(pickupPrefab, pos, Quaternion.identity);
-            WeaponPickup pickup = go.GetComponent<WeaponPickup>();
-            if (pickup != null)
-                pickup.weaponIndex = profile.weaponDropIndex;
-        }
-        else
-        {
-            WeaponPickup.SpawnRuntime(pos, profile.weaponDropIndex);
-        }
+        WeaponPickup.Spawn(pos, profile.weaponDropIndex, pickupPrefab);
 
         CombatVfx.SpawnOnomatopoeia(pos + Vector3.up, "LOOT!");
         DialogueManager.PlayerLine("I'll take that.");

@@ -35,6 +35,9 @@ public class WaveManager : MonoBehaviour
     [SerializeField] GameObject shotgunPrefab;
     [SerializeField] GameObject riflePrefab;
     [SerializeField] GameObject bossPrefab;
+    [SerializeField] GameObject pistolPickupPrefab;
+    [SerializeField] GameObject shotgunPickupPrefab;
+    [SerializeField] GameObject riflePickupPrefab;
     [SerializeField] float spawnStagger = 0.35f;
     [SerializeField] List<WaveSpawnPoint> spawnPoints = new List<WaveSpawnPoint>();
     [SerializeField] List<WaveDefinition> waves = new List<WaveDefinition>
@@ -133,6 +136,7 @@ public class WaveManager : MonoBehaviour
         }
 
         Instance = this;
+        RegisterLootPrefabs();
     }
 
     void OnEnable()
@@ -232,10 +236,24 @@ public class WaveManager : MonoBehaviour
 
     public void SetPrefabs(GameObject pistol, GameObject shotgun, GameObject rifle, GameObject boss)
     {
-        if (pistol != null) enemyPrefab = pistol;
-        if (shotgun != null) shotgunPrefab = shotgun;
-        if (rifle != null) riflePrefab = rifle;
-        if (boss != null) bossPrefab = boss;
+        if (UsableEnemyPrefab(pistol) != null) enemyPrefab = pistol;
+        if (UsableEnemyPrefab(shotgun) != null) shotgunPrefab = shotgun;
+        if (UsableEnemyPrefab(rifle) != null) riflePrefab = rifle;
+        if (UsableEnemyPrefab(boss) != null) bossPrefab = boss;
+        RegisterLootPrefabs();
+    }
+
+    public void SetPickupPrefabs(GameObject pistol, GameObject shotgun, GameObject rifle)
+    {
+        if (pistol != null) pistolPickupPrefab = pistol;
+        if (shotgun != null) shotgunPickupPrefab = shotgun;
+        if (rifle != null) riflePickupPrefab = rifle;
+        RegisterLootPrefabs();
+    }
+
+    void RegisterLootPrefabs()
+    {
+        WeaponPickup.RegisterPrefabs(pistolPickupPrefab, shotgunPickupPrefab, riflePickupPrefab);
     }
 
     public void BeginConfigured()
@@ -413,7 +431,7 @@ public class WaveManager : MonoBehaviour
         return false;
     }
 
-    const float SpawnSeparation = 2.4f;
+    const float SpawnSeparation = 1.8f;
 
     bool TryGetClearSpawnPose(WaveSpawnPoint point, out Pose pose)
     {
@@ -425,9 +443,10 @@ public class WaveManager : MonoBehaviour
         face.Normalize();
         Quaternion rot = Quaternion.LookRotation(face, Vector3.up);
 
-        // Prefer clear rings around the spawn marker first.
-        float[] radii = { 0f, 2.2f, 3.6f, 5.2f, 7f, 9f };
-        int sectors = 8;
+        // Stay on the authored marker. Wide rings walk enemies through walls
+        // onto the outdoor navmesh pad.
+        float[] radii = { 0f, 1.1f, 2f };
+        int sectors = 6;
         for (int r = 0; r < radii.Length; r++)
         {
             int steps = r == 0 ? 1 : sectors;
@@ -435,7 +454,9 @@ public class WaveManager : MonoBehaviour
             {
                 float angle = s * (360f / steps) * Mathf.Deg2Rad;
                 Vector3 candidate = point.position + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radii[r];
-                if (!TryResolveClearPosition(candidate, out Vector3 cleared))
+                if (!TryResolveClearPosition(candidate, point.position, out Vector3 cleared))
+                    continue;
+                if (!LooksPlayable(cleared))
                     continue;
 
                 pose = new Pose(cleared, rot);
@@ -443,48 +464,67 @@ public class WaveManager : MonoBehaviour
             }
         }
 
-        // Fallback: any clear navmesh sample near the marker, farthest from the player.
-        Vector3 playerPos = Vector3.zero;
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-            playerPos = player.transform.position;
-
-        Vector3 best = Vector3.zero;
-        float bestDist = -1f;
-        bool found = false;
-        for (int i = 0; i < 24; i++)
+        if (TryResolveClearPosition(point.position, point.position, out Vector3 fallback)
+            && HorizontalDistance(fallback, point.position) <= 2.2f)
         {
-            float angle = i * 15f * Mathf.Deg2Rad;
-            float radius = 2f + (i % 6) * 1.5f;
-            Vector3 candidate = point.position + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
-            if (!TryResolveClearPosition(candidate, out Vector3 cleared))
-                continue;
-
-            float dist = HorizontalDistance(cleared, playerPos);
-            if (dist > bestDist)
-            {
-                bestDist = dist;
-                best = cleared;
-                found = true;
-            }
+            pose = new Pose(fallback, rot);
+            return true;
         }
 
-        if (!found)
-            return false;
-
-        pose = new Pose(best, rot);
-        return true;
+        return false;
     }
 
     bool TryResolveClearPosition(Vector3 candidate, out Vector3 cleared, EnemyAI ignore = null)
     {
-        cleared = candidate;
-        if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 5f, NavMesh.AllAreas))
-            cleared = hit.position;
-        else if (!NavMesh.SamplePosition(candidate, out hit, 12f, NavMesh.AllAreas))
-            cleared = candidate;
+        return TryResolveClearPosition(candidate, candidate, out cleared, ignore);
+    }
 
+    bool TryResolveClearPosition(Vector3 candidate, Vector3 anchor, out Vector3 cleared, EnemyAI ignore = null)
+    {
+        cleared = candidate;
+        if (!NavMesh.SamplePosition(candidate, out NavMeshHit hit, 2.2f, NavMesh.AllAreas))
+            return false;
+        if (HorizontalDistance(candidate, hit.position) > 2.2f)
+            return false;
+        if (HorizontalDistance(anchor, hit.position) > 2.5f)
+            return false;
+
+        cleared = hit.position;
         return !IsOccupiedByEnemy(cleared, ignore);
+    }
+
+    static bool LooksPlayable(Vector3 position)
+    {
+        Vector3 origin = position + Vector3.up * 1.35f;
+        if (!Physics.Raycast(origin, Vector3.down, out RaycastHit floor, 3.5f, ~0, QueryTriggerInteraction.Ignore))
+            return false;
+
+        Collider col = floor.collider;
+        if (col == null)
+            return false;
+        if (col.GetComponentInParent<PlayerMovement>() != null)
+            return false;
+        if (col.GetComponentInParent<EnemyAI>() != null)
+            return false;
+
+        string n = col.gameObject.name;
+        if (n.Contains("ExpandedFloor") || n.Contains("RuntimeNav"))
+            return false;
+
+        int wallHits = 0;
+        for (int i = 0; i < 8; i++)
+        {
+            float angle = i * 45f * Mathf.Deg2Rad;
+            Vector3 dir = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+            if (!Physics.Raycast(origin, dir, out RaycastHit wall, 14f, ~0, QueryTriggerInteraction.Ignore))
+                continue;
+            if (wall.collider == null)
+                continue;
+            if (Mathf.Abs(wall.normal.y) < 0.55f)
+                wallHits++;
+        }
+
+        return wallHits >= 2;
     }
 
     bool IsOccupiedByEnemy(Vector3 position, EnemyAI ignore = null)
@@ -564,14 +604,14 @@ public class WaveManager : MonoBehaviour
     bool TryFindNearbyClear(Vector3 around, EnemyAI ignore, out Vector3 cleared)
     {
         cleared = around;
-        float[] radii = { 2.2f, 3.6f, 5.2f, 7f };
+        float[] radii = { 1.1f, 2f };
         for (int r = 0; r < radii.Length; r++)
         {
             for (int s = 0; s < 8; s++)
             {
                 float angle = s * 45f * Mathf.Deg2Rad;
                 Vector3 candidate = around + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radii[r];
-                if (TryResolveClearPosition(candidate, out cleared, ignore))
+                if (TryResolveClearPosition(candidate, around, out cleared, ignore) && LooksPlayable(cleared))
                     return true;
             }
         }
@@ -581,23 +621,47 @@ public class WaveManager : MonoBehaviour
 
     GameObject ResolvePrefab(WaveDefinition wave)
     {
-        if (wave != null && wave.enemyPrefabOverride != null)
-            return wave.enemyPrefabOverride;
+        if (wave != null)
+        {
+            GameObject overridePrefab = UsableEnemyPrefab(wave.enemyPrefabOverride);
+            if (overridePrefab != null)
+                return overridePrefab;
+        }
 
         if (wave == null)
-            return enemyPrefab;
+            return UsableEnemyPrefab(enemyPrefab);
 
         switch (wave.archetype)
         {
             case EnemyArchetype.Shotgun:
-                return shotgunPrefab != null ? shotgunPrefab : enemyPrefab;
+            {
+                GameObject shotgun = UsableEnemyPrefab(shotgunPrefab);
+                return shotgun != null ? shotgun : UsableEnemyPrefab(enemyPrefab);
+            }
             case EnemyArchetype.Rifle:
-                return riflePrefab != null ? riflePrefab : enemyPrefab;
+            {
+                GameObject rifle = UsableEnemyPrefab(riflePrefab);
+                return rifle != null ? rifle : UsableEnemyPrefab(enemyPrefab);
+            }
             case EnemyArchetype.Boss:
-                return bossPrefab != null ? bossPrefab : enemyPrefab;
+            {
+                GameObject boss = UsableEnemyPrefab(bossPrefab);
+                return boss != null ? boss : UsableEnemyPrefab(enemyPrefab);
+            }
             default:
-                return enemyPrefab;
+                return UsableEnemyPrefab(enemyPrefab);
         }
+    }
+
+    static GameObject UsableEnemyPrefab(GameObject prefab)
+    {
+        if (prefab == null)
+            return null;
+        if (prefab.GetComponent<EnemyAI>() != null)
+            return prefab;
+        if (prefab.GetComponentInChildren<EnemyAI>(true) != null)
+            return prefab;
+        return null;
     }
 
     void HandleEnemyDied(EnemyAI enemy)
@@ -668,6 +732,8 @@ public class WaveManager : MonoBehaviour
                 continue;
             AddSpawnIfUnique(all[i].position, all[i].forward);
         }
+
+        FilterUnplayableSpawnPoints();
     }
 
     void EnsureFallbackSpawnPoints()
@@ -701,6 +767,25 @@ public class WaveManager : MonoBehaviour
             face = Vector3.forward;
 
         spawnPoints.Add(new WaveSpawnPoint { position = position, facing = face.normalized });
+    }
+
+    void FilterUnplayableSpawnPoints()
+    {
+        if (spawnPoints == null || spawnPoints.Count <= 1)
+            return;
+
+        List<WaveSpawnPoint> indoor = new List<WaveSpawnPoint>();
+        for (int i = 0; i < spawnPoints.Count; i++)
+        {
+            WaveSpawnPoint point = spawnPoints[i];
+            if (point == null)
+                continue;
+            if (LooksPlayable(point.position))
+                indoor.Add(point);
+        }
+
+        if (indoor.Count > 0)
+            spawnPoints = indoor;
     }
 
     void ClearAliveEnemies()

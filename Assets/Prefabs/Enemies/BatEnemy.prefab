@@ -1542,4 +1542,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea5dfe59ad24bbc4ab27652032284715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyWeaponDrop
-  pickupPrefab: {fileID: 4769231629614553279, guid: aae11725fc733ec428a2c6aa8d6ac844, type: 3}
+  pickupPrefab: {fileID: 1000010001, guid: e8a1c4f7b2d94061a5e3c9f0d6b7a812, type: 3}

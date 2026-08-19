@@ -19,6 +19,10 @@ public class WeaponPickup : MonoBehaviour
     Vector3 basePos;
     float bobPhase;
 
+    static GameObject pistolPrefab;
+    static GameObject shotgunPrefab;
+    static GameObject riflePrefab;
+
     void Reset()
     {
         Collider col = GetComponent<Collider>();
@@ -66,6 +70,58 @@ public class WeaponPickup : MonoBehaviour
         }
 
         Destroy(gameObject);
+    }
+
+    public static void RegisterPrefabs(GameObject pistol, GameObject shotgun, GameObject rifle)
+    {
+        if (IsPickupPrefab(pistol))
+            pistolPrefab = pistol;
+        if (IsPickupPrefab(shotgun))
+            shotgunPrefab = shotgun;
+        if (IsPickupPrefab(rifle))
+            riflePrefab = rifle;
+    }
+
+    public static WeaponPickup Spawn(Vector3 position, int index, GameObject preferredPrefab = null)
+    {
+        GameObject prefab = ResolvePrefab(index, preferredPrefab);
+        if (prefab == null)
+            return SpawnRuntime(position, index);
+
+        GameObject go = Object.Instantiate(prefab, position, Quaternion.identity);
+        WeaponPickup pickup = go.GetComponent<WeaponPickup>();
+        if (pickup == null)
+            pickup = go.GetComponentInChildren<WeaponPickup>();
+        if (pickup == null)
+            pickup = go.AddComponent<WeaponPickup>();
+
+        pickup.weaponIndex = index;
+        pickup.basePos = position;
+        pickup.collected = false;
+        Object.Destroy(go, 90f);
+        return pickup;
+    }
+
+    static GameObject ResolvePrefab(int index, GameObject preferred)
+    {
+        if (IsPickupPrefab(preferred))
+            return preferred;
+
+        switch (index)
+        {
+            case 1: return pistolPrefab;
+            case 2: return shotgunPrefab;
+            case 3: return riflePrefab;
+            default: return null;
+        }
+    }
+
+    static bool IsPickupPrefab(GameObject prefab)
+    {
+        if (prefab == null)
+            return false;
+        return prefab.GetComponent<WeaponPickup>() != null
+            || prefab.GetComponentInChildren<WeaponPickup>() != null;
     }
 
     public static WeaponPickup SpawnRuntime(Vector3 position, int index)

@@ -724,9 +724,9 @@ public class EnemyAI : MonoBehaviour
             return true;
 
         Vector3 probe = transform.position;
-        if (!NavMesh.SamplePosition(probe, out NavMeshHit hit, 10f, NavMesh.AllAreas)
-            && !NavMesh.SamplePosition(probe + Vector3.up * 3f, out hit, 12f, NavMesh.AllAreas)
-            && !NavMesh.SamplePosition(homePos, out hit, 16f, NavMesh.AllAreas))
+        if (!NavMesh.SamplePosition(probe, out NavMeshHit hit, 2.5f, NavMesh.AllAreas)
+            && !NavMesh.SamplePosition(probe + Vector3.up * 2f, out hit, 3f, NavMesh.AllAreas)
+            && !NavMesh.SamplePosition(homePos, out hit, 3f, NavMesh.AllAreas))
         {
             agent.enabled = false;
             return false;

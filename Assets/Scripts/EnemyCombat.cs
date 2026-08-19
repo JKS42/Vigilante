@@ -202,7 +202,8 @@ public class EnemyCombat : MonoBehaviour
         if (dist > attackRange)
             return false;
 
-        Vector3 aimDir = ApplySpread(baseDir.normalized, EvaluateShotError(dist, GetPlayerMovement(target)));
+        aimPoint = OffsetAimPoint(aimPoint, origin, EvaluateShotError(dist, GetPlayerMovement(target)));
+        Vector3 aimDir = (aimPoint - origin).normalized;
 
         nextFireTime = Time.time + 1f / Mathf.Max(0.1f, fireRate);
         animator?.PlayFire();
@@ -381,6 +382,29 @@ public class EnemyCombat : MonoBehaviour
         return col != null && col.transform.root == transform.root;
     }
 
+    static Vector3 OffsetAimPoint(Vector3 aimPoint, Vector3 origin, float errorDegrees)
+    {
+        if (errorDegrees <= 0.01f)
+            return aimPoint;
+
+        Vector3 toTarget = aimPoint - origin;
+        float dist = toTarget.magnitude;
+        if (dist < 0.01f)
+            return aimPoint;
+
+        Vector3 forward = toTarget / dist;
+        Vector3 right = Vector3.Cross(Vector3.up, forward);
+        if (right.sqrMagnitude < 0.0001f)
+            right = Vector3.right;
+        else
+            right.Normalize();
+
+        float errorMeters = Mathf.Tan(errorDegrees * Mathf.Deg2Rad) * dist;
+        float lateral = Random.Range(-errorMeters, errorMeters);
+        float vertical = Random.Range(-errorMeters * 0.4f, errorMeters * 0.4f);
+        return aimPoint + right * lateral + Vector3.up * vertical;
+    }
+
     static Vector3 ApplySpread(Vector3 forward, float degrees)
     {
         if (forward.sqrMagnitude < 0.0001f)
@@ -390,11 +414,13 @@ public class EnemyCombat : MonoBehaviour
         if (degrees <= 0.01f)
             return dir;
 
+        // Pitch is tighter than yaw so pellets miss beside the player instead of into the floor.
+        float pitchDegrees = degrees * 0.35f;
         Quaternion aim = Quaternion.LookRotation(dir);
         Vector3 right = aim * Vector3.right;
         Vector3 up = aim * Vector3.up;
         Quaternion yaw = Quaternion.AngleAxis(Random.Range(-degrees, degrees), up);
-        Quaternion pitch = Quaternion.AngleAxis(Random.Range(-degrees, degrees), right);
+        Quaternion pitch = Quaternion.AngleAxis(Random.Range(-pitchDegrees, pitchDegrees), right);
         return (yaw * pitch * dir).normalized;
     }
 

@@ -87,7 +87,15 @@ PrefabInstance:
     - target: {fileID: 4975115454148350142, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
       propertyPath: pickupPrefab
       value: 
-      objectReference: {fileID: 2236876683753923128, guid: 9f0c6490cb01b614c854c233088cbddf, type: 3}
+      objectReference: {fileID: 3000010001, guid: 0ac3e6f9d4b16283c7a5e1b2f8d9c034, type: 3}
+    - target: {fileID: 2915080414910063984, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+      propertyPath: archetype
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915080414910063984, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+      propertyPath: weaponDropIndex
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5094933234793028574, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

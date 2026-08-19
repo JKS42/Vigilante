@@ -66,7 +66,7 @@ public class EnemyProfile : MonoBehaviour
                 profile.moveSpeed = 4.6f;
                 profile.preferredEngageDistance = 4.5f;
                 profile.weaponDropIndex = 2;
-                profile.weaponDropChance = 0.85f;
+                profile.weaponDropChance = 1f;
                 profile.tint = new Color(0.85f, 0.45f, 0.1f);
                 profile.displayName = "Shotgun Bruiser";
                 break;
@@ -79,7 +79,7 @@ public class EnemyProfile : MonoBehaviour
                 profile.moveSpeed = 3.1f;
                 profile.preferredEngageDistance = 16f;
                 profile.weaponDropIndex = 3;
-                profile.weaponDropChance = 0.75f;
+                profile.weaponDropChance = 1f;
                 profile.tint = new Color(0.2f, 0.35f, 0.75f);
                 profile.displayName = "Rifle Marksman";
                 break;
