@@ -1,27 +1,35 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Marker that spawns a med kit pickup at this transform on Start.
+/// Marker that spawns a med kit pickup at this transform, then respawns it
+/// after a random delay once collected.
 /// Empty objects named MedKitSpawn* are wired automatically by LevelCombatBootstrap.
 /// </summary>
 public class MedKitSpawnPoint : MonoBehaviour
 {
     [SerializeField] GameObject pickupPrefab;
 
-    bool spawned;
+    [Header("Respawn")]
+    [SerializeField] float minRespawnSeconds = 12f;
+    [SerializeField] float maxRespawnSeconds = 30f;
+
+    MedKitPickup current;
 
     void Start()
     {
-        SpawnKit();
+        StartCoroutine(SpawnLoop());
     }
 
-    public void SpawnKit()
+    IEnumerator SpawnLoop()
     {
-        if (spawned)
-            return;
-
-        spawned = true;
-        MedKitPickup.Spawn(transform.position, pickupPrefab);
+        while (true)
+        {
+            current = MedKitPickup.Spawn(transform.position, pickupPrefab);
+            yield return new WaitUntil(() => current == null);
+            float delay = Random.Range(minRespawnSeconds, maxRespawnSeconds);
+            yield return new WaitForSeconds(delay);
+        }
     }
 
     void OnDrawGizmos()

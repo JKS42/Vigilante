@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 /// <summary>
 /// World-space HP bar above an enemy. Hidden until damaged, then fades out.
-/// Unparented so it billboards toward the player camera instead of rotating with the enemy.
+/// Parent to the enemy so it follows movement; LateUpdate only billboards toward the camera.
 /// Drawn with ZTest Always so enemy meshes never cover it.
 /// </summary>
 public class EnemyHealthBar : MonoBehaviour
@@ -18,7 +19,8 @@ public class EnemyHealthBar : MonoBehaviour
     Image fill;
     CanvasGroup group;
     Camera cam;
-    Renderer[] bodyRenderers;
+    CapsuleCollider bodyCapsule;
+    NavMeshAgent agent;
     float hideAt;
     bool visible;
     static Material overlayMat;
@@ -26,6 +28,8 @@ public class EnemyHealthBar : MonoBehaviour
     void Awake()
     {
         health = GetComponent<Health>();
+        bodyCapsule = GetComponent<CapsuleCollider>();
+        agent = GetComponent<NavMeshAgent>();
         BuildUi();
         SetVisible(false);
     }
@@ -61,8 +65,6 @@ public class EnemyHealthBar : MonoBehaviour
         if (barRoot == null)
             return;
 
-        barRoot.position = transform.position + Vector3.up * CurrentHeight();
-
         if (cam == null)
             cam = Camera.main;
 
@@ -70,14 +72,7 @@ public class EnemyHealthBar : MonoBehaviour
         {
             Vector3 awayFromCam = barRoot.position - cam.transform.position;
             if (awayFromCam.sqrMagnitude > 0.0001f)
-            {
                 barRoot.rotation = Quaternion.LookRotation(awayFromCam);
-                barRoot.position += -awayFromCam.normalized * 0.35f;
-            }
-
-            float dist = Vector3.Distance(cam.transform.position, barRoot.position);
-            float scale = Mathf.Clamp(dist * 0.014f, 0.01f, 0.028f);
-            barRoot.localScale = Vector3.one * scale;
         }
 
         if (visible && Time.time >= hideAt)
@@ -130,8 +125,8 @@ public class EnemyHealthBar : MonoBehaviour
     void BuildUi()
     {
         GameObject root = new GameObject("EnemyHealthBar");
-        root.transform.position = transform.position + Vector3.up * height;
         barRoot = root.transform;
+        barRoot.SetParent(transform, false);
 
         Canvas canvas = root.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;
@@ -139,8 +134,13 @@ public class EnemyHealthBar : MonoBehaviour
         canvas.sortingOrder = 200;
 
         RectTransform canvasRt = root.GetComponent<RectTransform>();
-        canvasRt.sizeDelta = new Vector2(160f, 22f);
-        root.transform.localScale = Vector3.one * 0.012f;
+        canvasRt.anchorMin = new Vector2(0.5f, 0.5f);
+        canvasRt.anchorMax = new Vector2(0.5f, 0.5f);
+        canvasRt.pivot = new Vector2(0.5f, 0.5f);
+        canvasRt.sizeDelta = new Vector2(100f, 14f);
+        canvasRt.localScale = Vector3.one * 0.01f;
+        canvasRt.localRotation = Quaternion.identity;
+        canvasRt.localPosition = Vector3.up * CurrentHeight();
 
         root.AddComponent<CanvasGroup>();
         group = root.GetComponent<CanvasGroup>();
@@ -180,29 +180,13 @@ public class EnemyHealthBar : MonoBehaviour
 
     float CurrentHeight()
     {
-        if (bodyRenderers == null)
-            bodyRenderers = GetComponentsInChildren<Renderer>(true);
+        if (bodyCapsule != null)
+            return bodyCapsule.center.y + bodyCapsule.height * 0.5f + headPadding;
 
-        float top = transform.position.y;
-        bool any = false;
-        for (int i = 0; i < bodyRenderers.Length; i++)
-        {
-            Renderer r = bodyRenderers[i];
-            if (r == null || !r.enabled || r is ParticleSystemRenderer)
-                continue;
+        if (agent != null)
+            return agent.height / Mathf.Max(0.01f, transform.lossyScale.y) + headPadding;
 
-            float y = r.bounds.max.y;
-            if (!any || y > top)
-            {
-                top = y;
-                any = true;
-            }
-        }
-
-        if (!any)
-            return height;
-
-        return (top - transform.position.y) + headPadding;
+        return height;
     }
 
     static Material OverlayMaterial()
