@@ -37,6 +37,7 @@ public static class LevelCombatBootstrap
         SetupPlayer();
         EnemySquad.EnsureExists();
         EnsureNavMesh();
+        SceneFade.PlayLevelIntro();
         EnsureCampaignSystems();
     }
 

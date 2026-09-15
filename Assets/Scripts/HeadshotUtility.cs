@@ -9,7 +9,7 @@ public static class HeadshotUtility
     public const float Multiplier = 2f;
     public const float HeadHeightNormalized = 0.8f;
 
-    static int lastPopupId;
+    static EntityId lastPopupId;
     static float lastPopupTime;
 
     public static bool TryApply(Health health, Collider hitCollider, Vector3 hitPoint, ref float damage)
@@ -49,7 +49,7 @@ public static class HeadshotUtility
         if (health == null)
             return;
 
-        int id = health.GetInstanceID();
+        EntityId id = health.GetEntityId();
         if (id == lastPopupId && Time.unscaledTime - lastPopupTime < 0.12f)
             return;
 

@@ -34,7 +34,7 @@ public class Melee : MonoBehaviour
     GameObject playerRoot;
     readonly RaycastHit[] sweepHits = new RaycastHit[24];
     readonly Collider[] overlapHits = new Collider[24];
-    readonly HashSet<int> damagedIds = new HashSet<int>();
+    readonly HashSet<EntityId> damagedIds = new HashSet<EntityId>();
     Coroutine pendingHit;
 
     void Awake()
@@ -193,7 +193,7 @@ public class Melee : MonoBehaviour
 
         if (other.CompareTag("Breakable") || HasBreakable(other.transform))
         {
-            int breakId = other.transform.root.GetInstanceID();
+            EntityId breakId = other.transform.root.GetEntityId();
             if (!damagedIds.Add(breakId))
                 return;
 
@@ -214,7 +214,7 @@ public class Melee : MonoBehaviour
         if (health == null)
             return;
 
-        int id = health.GetInstanceID();
+        EntityId id = health.GetEntityId();
         if (!damagedIds.Add(id))
             return;
 

@@ -643,7 +643,7 @@ public class EnemyAI : MonoBehaviour
     void BeginFlank()
     {
         ReleaseCover();
-        preferLeftFlank = GetInstanceID() % 2 == 0;
+        preferLeftFlank = (EntityId.ToULong(GetEntityId()) & 1UL) == 0UL;
 
         Vector3 threat = player != null ? player.position : lastKnownPlayerPos;
         float dist = flankDistance * (0.75f + FlankTend * 0.5f);

@@ -359,7 +359,7 @@ public class DebrisHazard : MonoBehaviour
     public GameObject sourceBreakable;
     public float minSpeed = 3.5f;
 
-    readonly HashSet<int> hitIds = new HashSet<int>();
+    readonly HashSet<EntityId> hitIds = new HashSet<EntityId>();
     float age;
     Rigidbody rb;
 
@@ -395,7 +395,7 @@ public class DebrisHazard : MonoBehaviour
         if (health == null)
             return;
 
-        int id = health.GetInstanceID();
+        EntityId id = health.GetEntityId();
         if (!hitIds.Add(id))
             return;
 
