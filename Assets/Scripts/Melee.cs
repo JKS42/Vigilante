@@ -27,6 +27,9 @@ public class Melee : MonoBehaviour
     [Header("Optional FX")]
     public AudioClip swingSound;
 
+    /// <summary>True only during an active melee swing hit window.</summary>
+    public bool IsSwingActive { get; private set; }
+
     float currentCooldown;
     AudioSource audioSource;
     InputAction attackAction;
@@ -36,6 +39,7 @@ public class Melee : MonoBehaviour
     readonly Collider[] overlapHits = new Collider[24];
     readonly HashSet<EntityId> damagedIds = new HashSet<EntityId>();
     Coroutine pendingHit;
+    Coroutine swingWindow;
 
     void Awake()
     {
@@ -60,10 +64,20 @@ public class Melee : MonoBehaviour
 
         if (attackAction != null)
             attackAction.Enable();
+
+        IsSwingActive = false;
     }
 
     void OnDisable()
     {
+        if (swingWindow != null)
+        {
+            StopCoroutine(swingWindow);
+            swingWindow = null;
+        }
+
+        IsSwingActive = false;
+
         if (attackAction != null && ownsAttackAction)
         {
             attackAction.Disable();
@@ -121,10 +135,27 @@ public class Melee : MonoBehaviour
 
         currentCooldown = Mathf.Max(0.01f, attackCooldown);
         PlaySwingSound();
+        BeginSwingWindow();
 
         if (pendingHit != null)
             StopCoroutine(pendingHit);
         pendingHit = StartCoroutine(DealDamageAfterDelay());
+    }
+
+    void BeginSwingWindow()
+    {
+        if (swingWindow != null)
+            StopCoroutine(swingWindow);
+        swingWindow = StartCoroutine(SwingWindowRoutine());
+    }
+
+    IEnumerator SwingWindowRoutine()
+    {
+        IsSwingActive = true;
+        float duration = Mathf.Max(0.2f, hitDelay + 0.15f);
+        yield return new WaitForSeconds(duration);
+        IsSwingActive = false;
+        swingWindow = null;
     }
 
     IEnumerator DealDamageAfterDelay()

@@ -137,8 +137,21 @@ public class Break : MonoBehaviour
         if (other == null)
             return;
 
-        if (!other.CompareTag("Bullet") && !other.CompareTag("Bat"))
+        if (other.CompareTag("Bullet"))
+        {
+            // always break
+        }
+        else if (other.CompareTag("Bat"))
+        {
+            // Walking into a wall with the bat must not shatter it — only swings count.
+            Melee melee = other.GetComponentInParent<Melee>();
+            if (melee == null || !melee.IsSwingActive)
+                return;
+        }
+        else
+        {
             return;
+        }
 
         Vector3 impulse = collision.relativeVelocity;
         if (impulse.sqrMagnitude < 1f && collision.contactCount > 0)
