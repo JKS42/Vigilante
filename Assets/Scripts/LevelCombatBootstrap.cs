@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -9,11 +10,20 @@ using Unity.AI.Navigation;
 /// </summary>
 public static class LevelCombatBootstrap
 {
+    const float NavRebuildDelay = 0.2f;
+
+    static float navRebuildDueAt = -1f;
+    static Coroutine navRebuildRoutine;
+    static MonoBehaviour navRebuildHost;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void RegisterSceneHook()
     {
         SceneManager.sceneLoaded -= HandleSceneLoaded;
         SceneManager.sceneLoaded += HandleSceneLoaded;
+        navRebuildDueAt = -1f;
+        navRebuildRoutine = null;
+        navRebuildHost = null;
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -154,6 +164,67 @@ public static class LevelCombatBootstrap
         return probe;
     }
 
+    /// <summary>
+    /// Debounced rebuild so blasting a wall of tiles refreshes paths once,
+    /// and enemies can walk through the destroyed section.
+    /// </summary>
+    public static void ScheduleNavMeshRebuild(float delay = NavRebuildDelay)
+    {
+        if (SceneManager.GetActiveScene().buildIndex < 1)
+            return;
+
+        navRebuildDueAt = Time.unscaledTime + Mathf.Max(0.05f, delay);
+        if (navRebuildRoutine != null)
+            return;
+
+        MonoBehaviour host = GetNavRebuildHost();
+        if (host == null)
+        {
+            RebuildPlayableNavMesh();
+            return;
+        }
+
+        navRebuildRoutine = host.StartCoroutine(NavRebuildWhenDue());
+    }
+
+    static MonoBehaviour GetNavRebuildHost()
+    {
+        if (navRebuildHost != null)
+            return navRebuildHost;
+
+        LevelDirector director = Object.FindFirstObjectByType<LevelDirector>();
+        if (director != null)
+        {
+            navRebuildHost = director;
+            return navRebuildHost;
+        }
+
+        WaveManager waves = Object.FindFirstObjectByType<WaveManager>();
+        if (waves != null)
+        {
+            navRebuildHost = waves;
+            return navRebuildHost;
+        }
+
+        GameObject go = GameObject.Find("RuntimeNavMeshSurface");
+        if (go == null)
+            go = new GameObject("RuntimeNavMeshSurface");
+
+        navRebuildHost = go.GetComponent<NavMeshSurface>();
+        if (navRebuildHost == null)
+            navRebuildHost = go.AddComponent<NavMeshSurface>();
+        return navRebuildHost;
+    }
+
+    static IEnumerator NavRebuildWhenDue()
+    {
+        while (Time.unscaledTime < navRebuildDueAt)
+            yield return null;
+
+        navRebuildRoutine = null;
+        RebuildPlayableNavMesh();
+    }
+
     public static void RebuildPlayableNavMesh()
     {
         NavMeshSurface surface = GetOrCreateRuntimeSurface();
@@ -161,12 +232,21 @@ public static class LevelCombatBootstrap
 
         surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
         surface.collectObjects = CollectObjects.All;
-        surface.BuildNavMesh();
 
-        if (!HasPlayableNavMesh())
+        List<Collider> skipped = TemporarilyDisableBrokenColliders();
+        try
         {
-            surface.collectObjects = CollectObjects.Children;
             surface.BuildNavMesh();
+
+            if (!HasPlayableNavMesh())
+            {
+                surface.collectObjects = CollectObjects.Children;
+                surface.BuildNavMesh();
+            }
+        }
+        finally
+        {
+            RestoreColliders(skipped);
         }
 
         // Collider is only for baking. Leaving it in the scene blocks the player jump.
@@ -175,8 +255,64 @@ public static class LevelCombatBootstrap
         EnemyAI[] ais = Object.FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
         for (int i = 0; i < ais.Length; i++)
         {
-            if (ais[i] != null)
-                ais[i].PlaceOnNavMesh();
+            EnemyAI ai = ais[i];
+            if (ai == null)
+                continue;
+
+            ai.PlaceOnNavMesh();
+            NavMeshAgent agent = ai.GetComponent<NavMeshAgent>();
+            if (agent != null && agent.enabled && agent.isOnNavMesh && agent.hasPath)
+                agent.ResetPath();
+        }
+    }
+
+    static List<Collider> TemporarilyDisableBrokenColliders()
+    {
+        List<Collider> disabled = new List<Collider>(64);
+
+        Break[] breaks = Object.FindObjectsByType<Break>(FindObjectsSortMode.None);
+        for (int i = 0; i < breaks.Length; i++)
+        {
+            Break br = breaks[i];
+            if (br == null || !br.IsBroken)
+                continue;
+            DisableEnabledColliders(br.gameObject, disabled);
+        }
+
+        DebrisHazard[] debris = Object.FindObjectsByType<DebrisHazard>(FindObjectsSortMode.None);
+        for (int i = 0; i < debris.Length; i++)
+        {
+            DebrisHazard hazard = debris[i];
+            if (hazard == null)
+                continue;
+            DisableEnabledColliders(hazard.gameObject, disabled);
+        }
+
+        return disabled;
+    }
+
+    static void DisableEnabledColliders(GameObject go, List<Collider> sink)
+    {
+        Collider[] cols = go.GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < cols.Length; i++)
+        {
+            Collider col = cols[i];
+            if (col == null || !col.enabled)
+                continue;
+            col.enabled = false;
+            sink.Add(col);
+        }
+    }
+
+    static void RestoreColliders(List<Collider> disabled)
+    {
+        if (disabled == null)
+            return;
+
+        for (int i = 0; i < disabled.Count; i++)
+        {
+            if (disabled[i] != null)
+                disabled[i].enabled = true;
         }
     }
 

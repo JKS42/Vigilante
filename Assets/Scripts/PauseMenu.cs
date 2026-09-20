@@ -123,6 +123,12 @@ public class PauseMenu : MonoBehaviour
         AudioManager.UIClick();
         SettingsMenu.EnsureOn(settingsPanel, CloseSettings);
         settingsPanel.SetActive(true);
+        if (dimmer != null)
+        {
+            dimmer.SetActive(true);
+            dimmer.transform.SetAsFirstSibling();
+            ConfigureDimmer(dimmer);
+        }
         settingsPanel.transform.SetAsLastSibling();
         if (pauseMenuPanel != null && pauseMenuPanel != settingsPanel)
             pauseMenuPanel.SetActive(false);
@@ -186,7 +192,11 @@ public class PauseMenu : MonoBehaviour
         {
             dimmer.SetActive(paused);
             if (paused)
-                dimmer.transform.SetAsLastSibling();
+            {
+                // Dim behind the pause / settings panels.
+                dimmer.transform.SetAsFirstSibling();
+                ConfigureDimmer(dimmer);
+            }
         }
 
         if (pauseMenuPanel != null)
@@ -301,25 +311,41 @@ public class PauseMenu : MonoBehaviour
 
     void EnsureDimmer(Transform hud)
     {
-        if (dimmer != null || hud == null)
+        if (hud == null)
             return;
 
-        Transform existing = hud.Find("PauseDimmer");
-        if (existing != null)
+        if (dimmer == null)
         {
-            dimmer = existing.gameObject;
-            return;
+            Transform existing = hud.Find("PauseDimmer");
+            if (existing != null)
+                dimmer = existing.gameObject;
         }
 
-        dimmer = new GameObject("PauseDimmer");
-        dimmer.transform.SetParent(hud, false);
-        Image image = dimmer.AddComponent<Image>();
-        image.sprite = WhiteSprite();
-        image.color = new Color(0f, 0f, 0f, 0.55f);
-        image.raycastTarget = true;
-        Stretch(image.rectTransform);
+        if (dimmer == null)
+        {
+            dimmer = new GameObject("PauseDimmer");
+            dimmer.transform.SetParent(hud, false);
+            dimmer.AddComponent<Image>();
+        }
+
+        ConfigureDimmer(dimmer);
         dimmer.SetActive(false);
         dimmer.transform.SetAsFirstSibling();
+    }
+
+    static void ConfigureDimmer(GameObject dimmerGo)
+    {
+        if (dimmerGo == null)
+            return;
+
+        Image image = dimmerGo.GetComponent<Image>();
+        if (image == null)
+            image = dimmerGo.AddComponent<Image>();
+
+        image.sprite = WhiteSprite();
+        image.color = new Color(0f, 0f, 0f, 0.62f);
+        image.raycastTarget = true;
+        Stretch(image.rectTransform);
     }
 
     static GameObject BuildPausePanel(Transform hud)

@@ -28,6 +28,8 @@ public class Break : MonoBehaviour
     static Material s_crackedWallMat;
     static Material s_crackedPropMat;
 
+    public bool IsBroken => isBroken;
+
     void Start()
     {
         if (rb == null)
@@ -184,6 +186,10 @@ public class Break : MonoBehaviour
 
         LaunchPiece(launchDir, impulse, instigator, hitPoint, wall);
         SpawnDebris(launchDir, instigator, wall);
+
+        // Wall tiles bake into the runtime NavMesh — open the gap so AI can path through.
+        if (wall)
+            LevelCombatBootstrap.ScheduleNavMeshRebuild();
 
         if (!destroyScheduled)
         {

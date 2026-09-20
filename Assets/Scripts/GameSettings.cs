@@ -1,9 +1,12 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// Persisted master volume, brightness, and mouse look sensitivity. Applied in every scene.
+/// Brightness 0 = fully black, 1 = no dim.
 /// </summary>
 public static class GameSettings
 {
@@ -16,9 +19,17 @@ public static class GameSettings
     static Volume brightnessVolume;
     static ColorAdjustments colorAdjustments;
     static CanvasGroup overlay;
+    static Image overlayImage;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void ApplyOnLoad()
+    {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+        ApplyAll();
+    }
+
+    static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         ApplyAll();
     }
@@ -77,17 +88,24 @@ public static class GameSettings
 
     public static void ApplyBrightness()
     {
-        float brightness = Brightness;
+        float brightness = Mathf.Clamp01(Brightness);
         EnsureBrightnessFx();
+        EnsureCameraPostProcessing();
 
+        // Soft exposure nudge for mid values (needs URP post-processing on the camera).
         if (colorAdjustments != null)
         {
+            colorAdjustments.active = true;
             colorAdjustments.postExposure.overrideState = true;
-            colorAdjustments.postExposure.value = Mathf.Lerp(-1.5f, 0.4f, brightness);
+            colorAdjustments.postExposure.value = Mathf.Lerp(-2f, 0.25f, brightness);
         }
 
+        // Source of truth: full-screen black veil. 0 = fully black, 1 = clear.
         if (overlay != null)
-            overlay.alpha = Mathf.Clamp01(1f - brightness) * 0.7f;
+            overlay.alpha = 1f - brightness;
+
+        if (overlayImage != null)
+            overlayImage.color = Color.black;
     }
 
     static void EnsureBrightnessFx()
@@ -107,53 +125,101 @@ public static class GameSettings
 
             brightnessVolume.isGlobal = true;
             brightnessVolume.priority = 100f;
+            brightnessVolume.weight = 1f;
             if (brightnessVolume.profile == null)
                 brightnessVolume.profile = ScriptableObject.CreateInstance<VolumeProfile>();
 
             if (!brightnessVolume.profile.TryGet(out colorAdjustments))
                 colorAdjustments = brightnessVolume.profile.Add<ColorAdjustments>(true);
         }
-        else if (colorAdjustments == null)
+        else if (colorAdjustments == null && brightnessVolume.profile != null)
         {
-            brightnessVolume.profile.TryGet(out colorAdjustments);
+            if (!brightnessVolume.profile.TryGet(out colorAdjustments))
+                colorAdjustments = brightnessVolume.profile.Add<ColorAdjustments>(true);
         }
 
         if (overlay == null)
         {
-            GameObject existing = GameObject.Find("BrightnessOverlay");
-            Canvas canvas;
-            if (existing != null)
+            GameObject canvasGo = GameObject.Find("BrightnessOverlay");
+            if (canvasGo == null)
             {
-                overlay = existing.GetComponent<CanvasGroup>();
-                if (overlay == null)
-                    overlay = existing.AddComponent<CanvasGroup>();
-                overlay.blocksRaycasts = false;
-                overlay.interactable = false;
-                return;
+                canvasGo = new GameObject("BrightnessOverlay");
+                Object.DontDestroyOnLoad(canvasGo);
+            }
+            else
+            {
+                Object.DontDestroyOnLoad(canvasGo);
             }
 
-            GameObject canvasGo = new GameObject("BrightnessOverlay");
-            Object.DontDestroyOnLoad(canvasGo);
-            canvas = canvasGo.AddComponent<Canvas>();
+            Canvas canvas = canvasGo.GetComponent<Canvas>();
+            if (canvas == null)
+                canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            // Stay behind HUD / pause / settings canvases so menus stay readable.
-            canvas.sortingOrder = -50;
-            overlay = canvasGo.AddComponent<CanvasGroup>();
+            // Under HUD / pause / settings so menus stay readable at low brightness.
+            canvas.sortingOrder = -20;
+
+            overlay = canvasGo.GetComponent<CanvasGroup>();
+            if (overlay == null)
+                overlay = canvasGo.AddComponent<CanvasGroup>();
             overlay.blocksRaycasts = false;
             overlay.interactable = false;
 
-            GameObject imageGo = new GameObject("Dim");
-            imageGo.transform.SetParent(canvasGo.transform, false);
-            UnityEngine.UI.Image image = imageGo.AddComponent<UnityEngine.UI.Image>();
+            Transform dimTf = canvasGo.transform.Find("Dim");
+            GameObject imageGo = dimTf != null ? dimTf.gameObject : null;
+            if (imageGo == null)
+            {
+                imageGo = new GameObject("Dim");
+                imageGo.transform.SetParent(canvasGo.transform, false);
+            }
+
+            overlayImage = imageGo.GetComponent<Image>();
+            if (overlayImage == null)
+                overlayImage = imageGo.AddComponent<Image>();
+
             Texture2D tex = Texture2D.whiteTexture;
-            image.sprite = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 4f);
-            image.color = Color.black;
-            image.raycastTarget = false;
-            RectTransform rt = image.rectTransform;
+            overlayImage.sprite = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 4f);
+            overlayImage.color = Color.black;
+            overlayImage.raycastTarget = false;
+
+            RectTransform rt = overlayImage.rectTransform;
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
+            rt.localScale = Vector3.one;
         }
+        else
+        {
+            Canvas canvas = overlay.GetComponent<Canvas>();
+            if (canvas != null)
+                canvas.sortingOrder = -20;
+
+            if (overlayImage == null)
+            {
+                Transform dimTf = overlay.transform.Find("Dim");
+                if (dimTf != null)
+                    overlayImage = dimTf.GetComponent<Image>();
+            }
+        }
+    }
+
+    static void EnsureCameraPostProcessing()
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+        {
+            MouseMovement look = Object.FindFirstObjectByType<MouseMovement>();
+            if (look != null)
+                cam = look.GetComponentInChildren<Camera>();
+        }
+
+        if (cam == null)
+            return;
+
+        UniversalAdditionalCameraData data = cam.GetComponent<UniversalAdditionalCameraData>();
+        if (data == null)
+            data = cam.gameObject.AddComponent<UniversalAdditionalCameraData>();
+
+        data.renderPostProcessing = true;
     }
 }
