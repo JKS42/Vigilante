@@ -59,7 +59,7 @@ public class LevelDirector : MonoBehaviour
         // Pause default Start() flow — we rebuild waves then begin.
         waves.SetPaused(true);
 
-        int level = GameProgression.SelectedLevel;
+        int level = GameProgression.ActiveLevel;
 
         if (UsableEnemyPrefab(pistolEnemyPrefab) == null)
             pistolEnemyPrefab = UsableEnemyPrefab(waves.DefaultEnemyPrefab);
@@ -114,6 +114,7 @@ public class LevelDirector : MonoBehaviour
     void SetupLevel1()
     {
         TutorialPrompt.EnsureForLevel1();
+        SeedTutorialTriggers();
         DialogueManager.PlayerLine("Bat only. Take their pistols when they fall.");
         DialogueManager.Announcer("LEVEL 1 — TUTORIAL");
 
@@ -127,6 +128,29 @@ public class LevelDirector : MonoBehaviour
 
         waves.ConfigureLevel(defs, CollectSceneSpawnPoints());
         AudioManager.SetCombatMusicIntensity(0.9f);
+    }
+
+    void SeedTutorialTriggers()
+    {
+        // Auto-wrap breakable props so walking near them teaches the break tip.
+        Break[] breaks = FindObjectsByType<Break>(FindObjectsSortMode.None);
+        int created = 0;
+        for (int i = 0; i < breaks.Length && created < 6; i++)
+        {
+            Break br = breaks[i];
+            if (br == null || !br.CompareTag("Breakable"))
+                continue;
+
+            Collider col = br.GetComponent<Collider>();
+            if (col == null)
+                continue;
+
+            Bounds b = col.bounds;
+            Vector3 size = b.size + Vector3.one * 2.5f;
+            size.y = Mathf.Max(size.y, 3f);
+            TutorialTrigger.Create(b.center, size, "near_breakable");
+            created++;
+        }
     }
 
     void SetupLevel2()
@@ -368,7 +392,7 @@ public class LevelDirector : MonoBehaviour
     void HandleLevelComplete()
     {
         DialogueManager.Announcer("AREA CLEARED");
-        DialogueManager.PlayerLine(GameProgression.SelectedLevel >= 3
+        DialogueManager.PlayerLine(GameProgression.ActiveLevel >= 3
             ? "It's over."
             : "Moving to the next district.");
 

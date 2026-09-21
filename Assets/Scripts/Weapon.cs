@@ -22,6 +22,9 @@ public class Weapon : MonoBehaviour
     public float fireBloomRecovery = 10f;
     public float maxSpread = 5f;
 
+    [Header("Recoil")]
+    public float recoilScale = 1f;
+
     float fireBloom;
 
     [Header("Input")]
@@ -33,6 +36,7 @@ public class Weapon : MonoBehaviour
     int reserveAmmo;
     bool isReloading;
     Coroutine reloadRoutine;
+    WeaponViewMotion viewMotion;
 
     InputAction fireAction;
     InputAction reloadAction;
@@ -60,6 +64,7 @@ public class Weapon : MonoBehaviour
         reserveAmmo = startingReserve;
         currentAmmo = magazineSize;
         EnsureAccuracyDefaults();
+        viewMotion = WeaponViewMotion.Ensure(gameObject);
     }
 
     protected virtual void EnsureAccuracyDefaults()
@@ -236,6 +241,9 @@ public class Weapon : MonoBehaviour
 
         currentAmmo--;
         FireShot();
+        if (viewMotion == null)
+            viewMotion = WeaponViewMotion.Ensure(gameObject);
+        viewMotion?.KickRecoil(recoilScale);
         if (fireBloomPerShot > 0f)
         {
             fireBloom += fireBloomPerShot;
@@ -259,7 +267,12 @@ public class Weapon : MonoBehaviour
     IEnumerator ReloadRoutine()
     {
         isReloading = true;
+        if (viewMotion == null)
+            viewMotion = WeaponViewMotion.Ensure(gameObject);
+        viewMotion?.BeginReloadDip(reloadTime);
+
         yield return new WaitForSeconds(reloadTime);
+
         int needed = magazineSize - currentAmmo;
         int take = Mathf.Min(needed, reserveAmmo);
         currentAmmo += take;
@@ -278,6 +291,23 @@ public class Weapon : MonoBehaviour
         int added = Mathf.Min(amount, room);
         reserveAmmo += added;
         return added;
+    }
+
+    /// <summary>
+    /// Apply ammo taken from an enemy mag. First loot loads the chamber;
+    /// later pickups add to reserve.
+    /// </summary>
+    public void ApplyLootAmmo(int amount, bool asLoadedMagazine)
+    {
+        amount = Mathf.Max(0, amount);
+        if (asLoadedMagazine)
+        {
+            currentAmmo = Mathf.Min(amount, Mathf.Max(1, magazineSize));
+            reserveAmmo = 0;
+            return;
+        }
+
+        AddReserveAmmo(amount);
     }
 
     protected virtual void FireShot()

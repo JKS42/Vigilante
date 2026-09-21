@@ -10,6 +10,9 @@ public class WeaponPickup : MonoBehaviour
     [Tooltip("Loadout index to unlock (1 = Pistol, 2 = Shotgun, 3 = AR).")]
     public int weaponIndex = 1;
 
+    [Tooltip("Ammo granted on pickup. Negative = default unlock/refill behavior.")]
+    public int ammoGrant = -1;
+
     [Header("Motion")]
     public float spinSpeed = 90f;
     public float bobAmplitude = 0.15f;
@@ -59,9 +62,9 @@ public class WeaponPickup : MonoBehaviour
             return;
 
         collected = true;
-        bool newly = switcher.UnlockWeapon(weaponIndex, equip: true);
+        bool newly = switcher.UnlockWeapon(weaponIndex, equip: true, lootAmmo: ammoGrant);
         AudioManager.WeaponPickup();
-        CombatVfx.SpawnOnomatopoeia(transform.position + Vector3.up, newly ? "GET!" : "AMMO?");
+        CombatVfx.SpawnOnomatopoeia(transform.position + Vector3.up, newly ? "GET!" : "AMMO!");
         if (newly)
         {
             string name = weaponIndex == 1 ? "Pistol" : weaponIndex == 2 ? "Shotgun" : "Rifle";
@@ -82,11 +85,11 @@ public class WeaponPickup : MonoBehaviour
             riflePrefab = rifle;
     }
 
-    public static WeaponPickup Spawn(Vector3 position, int index, GameObject preferredPrefab = null)
+    public static WeaponPickup Spawn(Vector3 position, int index, GameObject preferredPrefab = null, int ammoGrant = -1)
     {
         GameObject prefab = ResolvePrefab(index, preferredPrefab);
         if (prefab == null)
-            return SpawnRuntime(position, index);
+            return SpawnRuntime(position, index, ammoGrant);
 
         GameObject go = Object.Instantiate(prefab, position, Quaternion.identity);
         WeaponPickup pickup = go.GetComponent<WeaponPickup>();
@@ -96,6 +99,7 @@ public class WeaponPickup : MonoBehaviour
             pickup = go.AddComponent<WeaponPickup>();
 
         pickup.weaponIndex = index;
+        pickup.ammoGrant = ammoGrant;
         pickup.basePos = position;
         pickup.collected = false;
         Object.Destroy(go, 90f);
@@ -136,7 +140,7 @@ public class WeaponPickup : MonoBehaviour
             || prefab.GetComponentInChildren<WeaponPickup>() != null;
     }
 
-    public static WeaponPickup SpawnRuntime(Vector3 position, int index)
+    public static WeaponPickup SpawnRuntime(Vector3 position, int index, int ammoGrant = -1)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
         go.name = "WeaponPickup_" + index;
@@ -164,6 +168,7 @@ public class WeaponPickup : MonoBehaviour
 
         WeaponPickup pickup = go.AddComponent<WeaponPickup>();
         pickup.weaponIndex = index;
+        pickup.ammoGrant = ammoGrant;
         pickup.basePos = position;
         Object.Destroy(go, 90f);
         return pickup;

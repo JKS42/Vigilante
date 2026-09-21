@@ -108,6 +108,7 @@ public class UIManager : MonoBehaviour
         WeaponAccuracy.EnsureExists();
         CrosshairUI.EnsureExists();
         MinimapUI.EnsureExists();
+        DamageIndicatorUI.EnsureExists();
         PauseMenu.EnsureExists();
 
         RefreshWaveTimer();
@@ -115,7 +116,7 @@ public class UIManager : MonoBehaviour
 
         if (enemyCountText != null)
         {
-            string levelLabel = $"LEVEL {GameProgression.SelectedLevel}  ·  ";
+            string levelLabel = $"LEVEL {GameProgression.ActiveLevel}  ·  ";
             if (!enemyCountPrefix.Contains("LEVEL"))
                 enemyCountPrefix = levelLabel + enemyCountPrefix;
         }
@@ -176,7 +177,14 @@ public class UIManager : MonoBehaviour
     void HandlePlayerDamaged(float amount, Vector3 hitPoint, GameObject instigator)
     {
         RefreshHealthSlider();
-        vignetteAlpha = Mathf.Max(vignetteAlpha, 0.55f);
+        vignetteAlpha = Mathf.Max(vignetteAlpha, 0.72f);
+        TutorialPrompt.Notify("player_hurt");
+    }
+
+    public void PulseDamageFlash()
+    {
+        EnsureDamageVignette();
+        vignetteAlpha = Mathf.Max(vignetteAlpha, 0.85f);
     }
 
     void HandlePlayerHealed(float amount)
@@ -235,7 +243,7 @@ public class UIManager : MonoBehaviour
         damageVignette = go.AddComponent<Image>();
         Texture2D tex = Texture2D.whiteTexture;
         damageVignette.sprite = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 4f);
-        damageVignette.color = new Color(0.7f, 0.05f, 0.05f, 0f);
+        damageVignette.color = new Color(0.85f, 0.02f, 0.02f, 0f);
         damageVignette.raycastTarget = false;
         RectTransform rt = damageVignette.rectTransform;
         rt.anchorMin = Vector2.zero;

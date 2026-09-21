@@ -19,16 +19,61 @@ public class MainMenu : MonoBehaviour
         if (GetComponent<LevelSelectUI>() == null)
             gameObject.AddComponent<LevelSelectUI>();
 
+        WirePanelButtons();
         SettingsMenu.EnsureOn(SettingsPanel);
         GameSettings.ApplyAll();
     }
 
+    void WirePanelButtons()
+    {
+        if (NewGamePanel == null)
+            return;
+
+        // Scene "Level Select" button has an empty onClick — bind it at runtime.
+        Transform levelSelect = FindChildByName(NewGamePanel.transform, "Level Select");
+        if (levelSelect != null)
+        {
+            Button btn = levelSelect.GetComponent<Button>();
+            if (btn != null)
+            {
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(OpenLevelSelect);
+            }
+        }
+
+        // Panel "NewGame" should also begin the campaign at level 1.
+        Transform newGame = FindChildByName(NewGamePanel.transform, "NewGame");
+        if (newGame != null)
+        {
+            Button btn = newGame.GetComponent<Button>();
+            if (btn != null)
+            {
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(NewGame);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Primary Start button: always begin the campaign on Level 1.
+    /// </summary>
     public void StartNewGame()
+    {
+        AudioManager.UIClick();
+        GameProgression.StartLevel(1);
+    }
+
+    public void OpenLevelSelect()
     {
         AudioManager.UIClick();
         if (NewGamePanel != null) NewGamePanel.SetActive(true);
         if (StartMenuPanel != null) StartMenuPanel.SetActive(false);
         if (SettingsPanel != null) SettingsPanel.SetActive(false);
+
+        LevelSelectUI select = GetComponent<LevelSelectUI>();
+        if (select == null)
+            select = gameObject.AddComponent<LevelSelectUI>();
+        select.EnsureLevelButtons();
     }
 
     public void OpenSettings()
@@ -53,7 +98,6 @@ public class MainMenu : MonoBehaviour
 
     /// <summary>
     /// New Game always starts campaign Level 1.
-    /// Does not read leftover SelectedLevel or unlock progress.
     /// </summary>
     public void NewGame()
     {
@@ -71,10 +115,7 @@ public class MainMenu : MonoBehaviour
     {
         AudioManager.UIClick();
         if (GameProgression.UnlockedLevel < 2)
-        {
             Debug.Log("Level 2 locked — finish Level 1 first.");
-            // Allow free play during development.
-        }
         GameProgression.StartLevel(2);
     }
 
@@ -96,5 +137,22 @@ public class MainMenu : MonoBehaviour
     {
         AudioManager.UIClick();
         SceneManager.LoadSceneAsync(0);
+    }
+
+    static Transform FindChildByName(Transform root, string name)
+    {
+        if (root == null)
+            return null;
+        if (root.name == name)
+            return root;
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform found = FindChildByName(root.GetChild(i), name);
+            if (found != null)
+                return found;
+        }
+
+        return null;
     }
 }

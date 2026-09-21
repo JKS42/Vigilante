@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -20,6 +21,10 @@ public class WeaponSwitcher : MonoBehaviour
     public InputActionReference nextActionReference;
     public float scrollThreshold = 0.1f;
 
+    [Header("Swap motion")]
+    public float holsterDuration = 0.18f;
+    public float equipDuration = 0.22f;
+
     public event Action<int, GameObject> WeaponChanged;
     public event Action<int> WeaponUnlocked;
 
@@ -30,8 +35,11 @@ public class WeaponSwitcher : MonoBehaviour
     int currentIndex = -1;
     float scrollCooldown;
     bool[] unlocked;
+    bool swapping;
+    Coroutine swapRoutine;
 
     public int CurrentIndex => currentIndex;
+    public bool IsSwapping => swapping;
     public GameObject CurrentWeapon =>
         currentIndex >= 0 && weapons != null && currentIndex < weapons.Length
             ? weapons[currentIndex]
@@ -43,6 +51,15 @@ public class WeaponSwitcher : MonoBehaviour
     void Awake()
     {
         InitUnlocked();
+        EnsureWeaponMotion();
+    }
+
+    void EnsureWeaponMotion()
+    {
+        if (weapons == null)
+            return;
+        for (int i = 0; i < weapons.Length; i++)
+            WeaponViewMotion.Ensure(weapons[i]);
     }
 
     void OnEnable()
@@ -64,6 +81,13 @@ public class WeaponSwitcher : MonoBehaviour
 
     void OnDisable()
     {
+        if (swapRoutine != null)
+        {
+            StopCoroutine(swapRoutine);
+            swapRoutine = null;
+            swapping = false;
+        }
+
         if (previousAction != null)
         {
             previousAction.performed -= OnPrevious;
@@ -96,6 +120,7 @@ public class WeaponSwitcher : MonoBehaviour
             return;
 
         InitUnlocked();
+        EnsureWeaponMotion();
 
         int index = Mathf.Clamp(startingWeaponIndex, 0, weapons.Length - 1);
         if (!IsUnlocked(index))
@@ -126,11 +151,10 @@ public class WeaponSwitcher : MonoBehaviour
         return unlocked != null && index >= 0 && index < unlocked.Length && unlocked[index];
     }
 
-    /// <summary>
-    /// Unlocks a loadout slot. When equip is true, switches to that weapon.
-    /// Returns true if the slot was newly unlocked.
-    /// </summary>
-    public bool UnlockWeapon(int index, bool equip = true)
+    /// <param name="lootAmmo">
+    /// Rounds from an enemy mag. Negative = legacy unlock/refill (full mag to reserve on re-loot).
+    /// </param>
+    public bool UnlockWeapon(int index, bool equip = true, int lootAmmo = -1)
     {
         if (weapons == null || index < 0 || index >= weapons.Length)
             return false;
@@ -142,13 +166,28 @@ public class WeaponSwitcher : MonoBehaviour
 
         if (newlyUnlocked)
             WeaponUnlocked?.Invoke(index);
-        else
+
+        if (lootAmmo >= 0)
+            ApplyLootAmmo(index, lootAmmo, newlyUnlocked);
+        else if (!newlyUnlocked)
             RefillWeaponReserve(index);
 
         if (equip)
             SelectWeapon(index, force: true);
 
         return newlyUnlocked;
+    }
+
+    void ApplyLootAmmo(int index, int amount, bool newlyUnlocked)
+    {
+        if (weapons == null || index < 0 || index >= weapons.Length || weapons[index] == null)
+            return;
+
+        Weapon weapon = weapons[index].GetComponent<Weapon>();
+        if (weapon == null)
+            return;
+
+        weapon.ApplyLootAmmo(amount, asLoadedMagazine: newlyUnlocked);
     }
 
     void RefillWeaponReserve(int index)
@@ -233,21 +272,21 @@ public class WeaponSwitcher : MonoBehaviour
 
     void OnPrevious(InputAction.CallbackContext context)
     {
-        if (Time.timeScale <= 0f)
+        if (Time.timeScale <= 0f || swapping)
             return;
         CycleWeapon(-1);
     }
 
     void OnNext(InputAction.CallbackContext context)
     {
-        if (Time.timeScale <= 0f)
+        if (Time.timeScale <= 0f || swapping)
             return;
         CycleWeapon(1);
     }
 
     void HandleScroll()
     {
-        if (scrollCooldown > 0f || Mouse.current == null)
+        if (swapping || scrollCooldown > 0f || Mouse.current == null)
             return;
 
         float scroll = Mouse.current.scroll.ReadValue().y;
@@ -260,6 +299,9 @@ public class WeaponSwitcher : MonoBehaviour
 
     void HandleNumberKeys()
     {
+        if (swapping)
+            return;
+
         Keyboard kb = Keyboard.current;
         if (kb == null)
             return;
@@ -276,7 +318,7 @@ public class WeaponSwitcher : MonoBehaviour
 
     public void CycleWeapon(int direction)
     {
-        if (weapons == null || weapons.Length == 0)
+        if (swapping || weapons == null || weapons.Length == 0)
             return;
 
         InitUnlocked();
@@ -310,21 +352,82 @@ public class WeaponSwitcher : MonoBehaviour
         if (!IsUnlocked(index))
             return;
 
-        if (!force && index == currentIndex)
+        if (!force && (index == currentIndex || swapping))
             return;
 
-        bool playSwapSound = !force && currentIndex >= 0 && index != currentIndex;
-
-        for (int i = 0; i < weapons.Length; i++)
+        if (force)
         {
-            if (weapons[i] != null)
-                weapons[i].SetActive(i == index);
+            if (swapRoutine != null)
+            {
+                StopCoroutine(swapRoutine);
+                swapRoutine = null;
+                swapping = false;
+            }
+
+            InstantSelect(index, playSwapSound: false);
+            return;
         }
 
+        swapRoutine = StartCoroutine(SwapRoutine(index));
+    }
+
+    void InstantSelect(int index, bool playSwapSound)
+    {
+        for (int i = 0; i < weapons.Length; i++)
+        {
+            if (weapons[i] == null)
+                continue;
+
+            bool on = i == index;
+            weapons[i].SetActive(on);
+            if (on)
+            {
+                WeaponViewMotion motion = WeaponViewMotion.Ensure(weapons[i]);
+                motion?.SnapEquipped();
+            }
+        }
+
+        bool changed = currentIndex != index;
         currentIndex = index;
         WeaponChanged?.Invoke(currentIndex, CurrentWeapon);
 
+        if (playSwapSound && changed)
+            AudioManager.WeaponSwap();
+    }
+
+    IEnumerator SwapRoutine(int index)
+    {
+        swapping = true;
+        GameObject from = CurrentWeapon;
+        GameObject to = weapons[index];
+        bool playSwapSound = currentIndex >= 0 && index != currentIndex;
+
+        if (from != null && from.activeInHierarchy)
+        {
+            WeaponViewMotion fromMotion = WeaponViewMotion.Ensure(from);
+            if (fromMotion != null)
+                yield return fromMotion.PlayHolster(holsterDuration);
+            from.SetActive(false);
+        }
+
+        currentIndex = index;
+
+        if (to != null)
+        {
+            to.SetActive(true);
+            WeaponViewMotion toMotion = WeaponViewMotion.Ensure(to);
+            if (toMotion != null)
+            {
+                toMotion.SnapHolstered();
+                yield return toMotion.PlayEquip(equipDuration);
+            }
+        }
+
+        WeaponChanged?.Invoke(currentIndex, CurrentWeapon);
         if (playSwapSound)
             AudioManager.WeaponSwap();
+
+        swapping = false;
+        swapRoutine = null;
     }
 }

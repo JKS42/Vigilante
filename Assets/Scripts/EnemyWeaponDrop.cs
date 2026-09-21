@@ -10,6 +10,7 @@ public class EnemyWeaponDrop : MonoBehaviour
     [SerializeField] GameObject pickupPrefab;
     Health health;
     EnemyProfile profile;
+    EnemyCombat combat;
     bool dropped;
     const float DropHover = 0.08f;
 
@@ -17,6 +18,7 @@ public class EnemyWeaponDrop : MonoBehaviour
     {
         health = GetComponent<Health>();
         profile = GetComponent<EnemyProfile>();
+        combat = GetComponent<EnemyCombat>();
     }
 
     void OnEnable()
@@ -41,10 +43,28 @@ public class EnemyWeaponDrop : MonoBehaviour
 
         dropped = true;
         Vector3 pos = ResolveDropPosition();
-        WeaponPickup.Spawn(pos, profile.weaponDropIndex, pickupPrefab);
+        int ammo = ResolveDropAmmo();
+        WeaponPickup.Spawn(pos, profile.weaponDropIndex, pickupPrefab, ammo);
+        TutorialPrompt.Notify("weapon_drop");
 
         CombatVfx.SpawnOnomatopoeia(pos + Vector3.up, "LOOT!");
         DialogueManager.PlayerLine("I'll take that.");
+    }
+
+    int ResolveDropAmmo()
+    {
+        if (combat == null)
+            combat = GetComponent<EnemyCombat>();
+
+        if (combat == null || combat.MeleeOnly)
+            return 0;
+
+        // Pass whatever is left in the mag (0 if they died mid-reload).
+        if (combat.MagazineSize > 0)
+            return combat.AmmoInMagazine;
+
+        // Fallback for any unlimited config: grant a full player-sized mag.
+        return 0;
     }
 
     Vector3 ResolveDropPosition()

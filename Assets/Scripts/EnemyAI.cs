@@ -331,6 +331,7 @@ public class EnemyAI : MonoBehaviour
         EnemySquad.Instance?.Unregister(this);
         DialogueManager.EnemyBark(transform.position, "death");
         CombatVfx.SpawnDeathKo(transform.position + Vector3.up * 1.5f);
+        TutorialPrompt.Notify("enemy_killed");
         enabled = false;
         Destroy(gameObject, 0.85f);
     }

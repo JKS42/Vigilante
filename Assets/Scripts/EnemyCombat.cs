@@ -55,6 +55,9 @@ public class EnemyCombat : MonoBehaviour
     public float Damage => damage;
     public EnemyWeaponKind WeaponKind => weaponKind;
     public bool IsReloading => isReloading;
+    public int MagazineSize => magazineSize;
+    /// <summary>Rounds left in the current mag (0 while empty / mid-reload). Unlimited guns report 0.</summary>
+    public int AmmoInMagazine => magazineSize > 0 ? Mathf.Max(0, shotsRemaining) : 0;
     public float PreferredMinRange { get; private set; } = 2f;
 
     void Awake()
@@ -97,7 +100,7 @@ public class EnemyCombat : MonoBehaviour
                 pelletCount = 1f;
                 spreadDegrees = 0.4f;
                 SetShotError(2.8f, 0.18f, 3.5f, 2f, 4f, 9f);
-                SetMagazine(10);
+                SetMagazine(12);
                 PreferredMinRange = 3f;
                 break;
 
@@ -110,7 +113,7 @@ public class EnemyCombat : MonoBehaviour
                 pelletCount = 7f;
                 spreadDegrees = 9f;
                 SetShotError(1.2f, 0.08f, 2f, 1.5f, 2.5f, 6f);
-                SetMagazine(0);
+                SetMagazine(6);
                 PreferredMinRange = 1.5f;
                 break;
 
@@ -123,7 +126,7 @@ public class EnemyCombat : MonoBehaviour
                 pelletCount = 1f;
                 spreadDegrees = 0.4f;
                 SetShotError(1f, 0.10f, 2.5f, 1.5f, 3f, 6f);
-                SetMagazine(0);
+                SetMagazine(30);
                 PreferredMinRange = 8f;
                 break;
 
@@ -136,7 +139,7 @@ public class EnemyCombat : MonoBehaviour
                 pelletCount = 2f;
                 spreadDegrees = 1.5f;
                 SetShotError(1.6f, 0.12f, 2.5f, 1.5f, 3f, 7f);
-                SetMagazine(0);
+                SetMagazine(30);
                 PreferredMinRange = 4f;
                 break;
         }

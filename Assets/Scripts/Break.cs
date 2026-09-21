@@ -189,7 +189,10 @@ public class Break : MonoBehaviour
 
         // Wall tiles bake into the runtime NavMesh — open the gap so AI can path through.
         if (wall)
+        {
             LevelCombatBootstrap.ScheduleNavMeshRebuild();
+            TutorialPrompt.Notify("wall_broken");
+        }
 
         if (!destroyScheduled)
         {
