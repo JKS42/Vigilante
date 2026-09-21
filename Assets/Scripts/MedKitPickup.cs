@@ -72,6 +72,7 @@ public class MedKitPickup : MonoBehaviour
                 pickup = go.GetComponentInChildren<MedKitPickup>();
             if (pickup == null)
                 pickup = go.AddComponent<MedKitPickup>();
+            CelOutline.ApplyHierarchy(go);
             return pickup;
         }
 
@@ -99,6 +100,7 @@ public class MedKitPickup : MonoBehaviour
             Material mat = CelMaterial.Create(new Color(0.85f, 0.2f, 0.22f), "MedKit");
             if (mat != null)
                 r.sharedMaterial = mat;
+            CelOutline.Apply(r);
         }
 
         MedKitPickup pickup = go.AddComponent<MedKitPickup>();

@@ -102,6 +102,7 @@ public class WeaponPickup : MonoBehaviour
         pickup.ammoGrant = ammoGrant;
         pickup.basePos = position;
         pickup.collected = false;
+        CelOutline.ApplyHierarchy(go);
         Object.Destroy(go, 90f);
         return pickup;
     }
@@ -164,6 +165,7 @@ public class WeaponPickup : MonoBehaviour
             Material mat = CelMaterial.Create(color, "WeaponPickup");
             if (mat != null)
                 r.sharedMaterial = mat;
+            CelOutline.Apply(r);
         }
 
         WeaponPickup pickup = go.AddComponent<WeaponPickup>();

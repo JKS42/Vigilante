@@ -139,5 +139,6 @@ public static class BossArenaBuilder
         Material mat = CelMaterial.Create(color);
         if (mat != null)
             r.sharedMaterial = mat;
+        CelOutline.Apply(r);
     }
 }

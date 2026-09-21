@@ -60,11 +60,16 @@ public class EnemyWeaponDrop : MonoBehaviour
             return 0;
 
         // Pass whatever is left in the mag (0 if they died mid-reload).
-        if (combat.MagazineSize > 0)
-            return combat.AmmoInMagazine;
+        if (combat.MagazineSize <= 0)
+            return 0;
 
-        // Fallback for any unlimited config: grant a full player-sized mag.
-        return 0;
+        int ammo = combat.AmmoInMagazine;
+
+        // AR (slot 3): convert enemy mag leftovers at 3:1, rounded up.
+        if (profile != null && profile.weaponDropIndex == 3)
+            ammo = Mathf.CeilToInt(ammo / 3f);
+
+        return ammo;
     }
 
     Vector3 ResolveDropPosition()

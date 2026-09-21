@@ -221,5 +221,9 @@ public static class GameSettings
             data = cam.gameObject.AddComponent<UniversalAdditionalCameraData>();
 
         data.renderPostProcessing = true;
+        // SMAA cleans hard cel outlines; MSAA is enabled on the URP asset.
+        data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+        data.antialiasingQuality = AntialiasingQuality.High;
+        cam.allowMSAA = true;
     }
 }

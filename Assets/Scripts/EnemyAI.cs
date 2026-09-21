@@ -148,6 +148,8 @@ public class EnemyAI : MonoBehaviour
         if (GetComponent<EnemyHurtTint>() == null)
             gameObject.AddComponent<EnemyHurtTint>();
 
+        CelOutline.ApplyHierarchy(gameObject);
+
         EnemySquad.EnsureExists().Register(this);
         FindPlayer();
         PlaceOnNavMesh();
