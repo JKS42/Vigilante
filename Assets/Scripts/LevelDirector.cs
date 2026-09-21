@@ -132,13 +132,19 @@ public class LevelDirector : MonoBehaviour
 
     void SeedTutorialTriggers()
     {
-        // Auto-wrap breakable props so walking near them teaches the break tip.
+        // Wrap cracked wall tiles so walking up to one shows the break tip.
         Break[] breaks = FindObjectsByType<Break>(FindObjectsSortMode.None);
         int created = 0;
-        for (int i = 0; i < breaks.Length && created < 6; i++)
+        for (int i = 0; i < breaks.Length && created < 8; i++)
         {
             Break br = breaks[i];
             if (br == null || !br.CompareTag("Breakable"))
+                continue;
+
+            // Prefer actual wall pieces for this tip.
+            bool wall = br.isWallTile
+                || br.name.IndexOf("Wall", System.StringComparison.OrdinalIgnoreCase) >= 0;
+            if (!wall)
                 continue;
 
             Collider col = br.GetComponent<Collider>();
@@ -146,7 +152,7 @@ public class LevelDirector : MonoBehaviour
                 continue;
 
             Bounds b = col.bounds;
-            Vector3 size = b.size + Vector3.one * 2.5f;
+            Vector3 size = b.size + Vector3.one * 2.75f;
             size.y = Mathf.Max(size.y, 3f);
             TutorialTrigger.Create(b.center, size, "near_breakable");
             created++;

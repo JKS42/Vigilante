@@ -96,6 +96,10 @@ public class PauseMenu : MonoBehaviour
         if (!Keyboard.current.escapeKey.wasPressedThisFrame)
             return;
 
+        // Controls tutorial owns Escape until dismissed.
+        if (TutorialPrompt.BlocksGameplay)
+            return;
+
         UIManager ui = UIManager.Instance;
         if (ui != null && ui.IsPlayerDead)
             return;
