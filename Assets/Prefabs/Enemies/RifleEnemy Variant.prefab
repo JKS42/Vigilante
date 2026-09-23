@@ -52,6 +52,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Rifle
       objectReference: {fileID: 0}
+    - target: {fileID: 2915080414910063984, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+      propertyPath: archetype
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2915080414910063984, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+      propertyPath: weaponDropIndex
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 3471822538585445616, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
       propertyPath: m_Name
       value: RifleEnemy Variant
@@ -88,28 +96,27 @@ PrefabInstance:
       propertyPath: pickupPrefab
       value: 
       objectReference: {fileID: 3000010001, guid: 0ac3e6f9d4b16283c7a5e1b2f8d9c034, type: 3}
-    - target: {fileID: 2915080414910063984, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
-      propertyPath: archetype
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2915080414910063984, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
-      propertyPath: weaponDropIndex
-      value: 3
+    - target: {fileID: 5094933234793028574, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5094933234793028574, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 6ff7271b675f4d84aab581d4a7512f31, type: 2}
-    - target: {fileID: 5530856436280254973, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+    - target: {fileID: 6371092322397099615, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
     - target: {fileID: 8673777529999011483, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedComponents:
+    - {fileID: 8859026250720694971, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+    - {fileID: 2237332751208399581, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
+    m_RemovedGameObjects:
+    - {fileID: 7771035955728741663, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ae95e24b9379b164a99b387cc3d9db88, type: 3}

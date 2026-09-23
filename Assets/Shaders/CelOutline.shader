@@ -13,6 +13,7 @@ Shader "Vigilante/CelOutline"
             "RenderType" = "Opaque"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Geometry+10"
+            "IgnoreProjector" = "True"
         }
 
         Pass
@@ -28,14 +29,17 @@ Shader "Vigilante/CelOutline"
             ColorMask RGB
 
             HLSLPROGRAM
+            #pragma target 2.0
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            float4 _OutlineColor;
-            float _OutlineWidth;
+            CBUFFER_START(UnityPerMaterial)
+                float4 _OutlineColor;
+                float _OutlineWidth;
+            CBUFFER_END
 
             struct Attributes
             {
@@ -56,8 +60,7 @@ Shader "Vigilante/CelOutline"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
-                // Clip-space silhouette expand — stays glued to the edge.
-                // (World-space normal extrude caused the floating halo / gap.)
+                // Clip-space silhouette expand — stays glued to the mesh edge.
                 float4 positionCS = TransformObjectToHClip(input.positionOS.xyz);
                 float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
                 float3 normalVS = TransformWorldToViewDir(normalWS, false);
@@ -76,7 +79,7 @@ Shader "Vigilante/CelOutline"
             half4 frag(Varyings input) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(input);
-                return _OutlineColor;
+                return half4(_OutlineColor.rgb, 1);
             }
             ENDHLSL
         }

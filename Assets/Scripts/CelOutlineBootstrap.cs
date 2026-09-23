@@ -36,7 +36,8 @@ public static class CelOutlineBootstrap
         if (SceneManager.GetActiveScene().buildIndex < 1)
             return;
 
-        CelOutline.ApplyScene();
+        CelMaterial.UpgradeSceneMaterials();
+        CelOutline.RepairScene();
     }
 
     sealed class Runner : MonoBehaviour
@@ -50,7 +51,8 @@ public static class CelOutlineBootstrap
         {
             // Wait a frame so spawners / profile tint finish first.
             yield return null;
-            CelOutline.ApplyScene();
+            CelMaterial.UpgradeSceneMaterials();
+            CelOutline.RepairScene();
             Destroy(gameObject);
         }
     }

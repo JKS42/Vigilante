@@ -17,9 +17,6 @@ public static class CelOutline
     static Material outlineTemplate;
     static Shader outlineShader;
 
-    /// <summary>Marks a renderer that already received an outline slot.</summary>
-    public sealed class Marker : MonoBehaviour { }
-
     public static void ApplyScene()
     {
         Renderer[] renderers = Object.FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
@@ -37,12 +34,74 @@ public static class CelOutline
             Apply(renderers[i]);
     }
 
+    /// <summary>
+    /// Strips broken/null/outline slots then re-applies a clean outline pass.
+    /// </summary>
+    public static void RepairHierarchy(GameObject root)
+    {
+        if (root == null)
+            return;
+
+        Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+            Repair(renderers[i]);
+    }
+
+    public static void RepairScene()
+    {
+        Renderer[] renderers = Object.FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        for (int i = 0; i < renderers.Length; i++)
+            Repair(renderers[i]);
+    }
+
+    static void Repair(Renderer renderer)
+    {
+        if (renderer == null)
+            return;
+
+        CelOutlineMarker marker = renderer.GetComponent<CelOutlineMarker>();
+        if (marker != null)
+            Object.Destroy(marker);
+
+        // Nested Marker leftover from older builds.
+        MonoBehaviour[] behaviours = renderer.GetComponents<MonoBehaviour>();
+        for (int i = 0; i < behaviours.Length; i++)
+        {
+            if (behaviours[i] == null)
+                continue;
+            if (behaviours[i].GetType().Name == "Marker"
+                && behaviours[i].GetType().DeclaringType != null
+                && behaviours[i].GetType().DeclaringType.Name == "CelOutline")
+                Object.Destroy(behaviours[i]);
+        }
+
+        Material[] shared = renderer.sharedMaterials;
+        if (shared != null && shared.Length > 0)
+        {
+            matScratch.Clear();
+            for (int i = 0; i < shared.Length; i++)
+            {
+                Material mat = shared[i];
+                if (mat == null)
+                    continue;
+                if (IsOutlineMaterial(mat) || IsBrokenShader(mat))
+                    continue;
+                matScratch.Add(mat);
+            }
+            if (matScratch.Count != shared.Length)
+                renderer.sharedMaterials = matScratch.Count > 0 ? matScratch.ToArray() : shared;
+            renderer.SetPropertyBlock(null);
+        }
+
+        Apply(renderer);
+    }
+
     public static void Apply(Renderer renderer)
     {
         if (renderer == null || ShouldSkip(renderer))
             return;
 
-        if (renderer.GetComponent<Marker>() != null)
+        if (renderer.GetComponent<CelOutlineMarker>() != null)
         {
             RefreshWidth(renderer);
             return;
@@ -72,9 +131,12 @@ public static class CelOutline
         matScratch.Clear();
         for (int i = 0; i < shared.Length; i++)
         {
-            if (shared[i] != null)
+            if (shared[i] != null && !IsBrokenShader(shared[i]))
                 matScratch.Add(shared[i]);
         }
+
+        if (matScratch.Count == 0)
+            return;
 
         int outlineIndex = matScratch.Count;
         matScratch.Add(outline);
@@ -100,8 +162,8 @@ public static class CelOutline
 
     static void EnsureMarker(Renderer renderer)
     {
-        if (renderer.GetComponent<Marker>() == null)
-            renderer.gameObject.AddComponent<Marker>();
+        if (renderer.GetComponent<CelOutlineMarker>() == null)
+            renderer.gameObject.AddComponent<CelOutlineMarker>();
     }
 
     static void ApplyWidthBlock(Renderer renderer, int materialIndex, float width)
@@ -120,7 +182,6 @@ public static class CelOutline
         Bounds b = renderer.bounds;
         float size = Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z));
 
-        // Screen-space widths (clip NDC). Keep midway thickness, no world halo gap.
         if (size < 0.5f)
             return 0.0035f;
         if (size > 6f)
@@ -130,18 +191,36 @@ public static class CelOutline
 
     static Material GetOutlineMaterial()
     {
-        if (outlineTemplate != null)
+        if (IsUsableOutlineMaterial(outlineTemplate))
             return outlineTemplate;
 
-        outlineTemplate = Resources.Load<Material>(ResourcesMaterial);
-        if (outlineTemplate != null)
-            return outlineTemplate;
+        outlineTemplate = null;
 
-        if (outlineShader == null)
+        Material fromResources = Resources.Load<Material>(ResourcesMaterial);
+        if (IsUsableOutlineMaterial(fromResources))
+        {
+            outlineTemplate = fromResources;
+            return outlineTemplate;
+        }
+
+        // Resources mat exists but shader is pink/missing — rebuild from Shader.Find.
+        if (outlineShader == null || outlineShader.name != ShaderName)
             outlineShader = Shader.Find(ShaderName);
 
         if (outlineShader == null)
+        {
+            Debug.LogWarning("CelOutline: Shader '" + ShaderName + "' not found. Reimport Assets/Shaders/CelOutline.shader.");
             return null;
+        }
+
+        if (fromResources != null)
+        {
+            fromResources.shader = outlineShader;
+            fromResources.SetColor("_OutlineColor", OutlineColor);
+            fromResources.SetFloat("_OutlineWidth", 0.0045f);
+            outlineTemplate = fromResources;
+            return outlineTemplate;
+        }
 
         outlineTemplate = new Material(outlineShader);
         outlineTemplate.name = "CelOutline_Runtime";
@@ -149,6 +228,20 @@ public static class CelOutline
         outlineTemplate.SetColor("_OutlineColor", OutlineColor);
         outlineTemplate.SetFloat("_OutlineWidth", 0.0045f);
         return outlineTemplate;
+    }
+
+    static bool IsUsableOutlineMaterial(Material mat)
+    {
+        return mat != null && mat.shader != null && mat.shader.name == ShaderName && !IsBrokenShader(mat);
+    }
+
+    static bool IsBrokenShader(Material mat)
+    {
+        if (mat == null || mat.shader == null)
+            return true;
+        string n = mat.shader.name;
+        return n == "Hidden/InternalErrorShader"
+            || n.IndexOf("InternalError", System.StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     public static bool IsOutlineMaterial(Material mat)
@@ -161,7 +254,7 @@ public static class CelOutline
         for (int i = 0; i < shared.Length; i++)
         {
             Material mat = shared[i];
-            if (mat == null || mat.shader == null)
+            if (mat == null || mat.shader == null || IsBrokenShader(mat))
                 continue;
             if (IsOutlineMaterial(mat))
                 continue;

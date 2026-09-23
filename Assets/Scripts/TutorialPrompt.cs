@@ -51,7 +51,6 @@ public class TutorialPrompt : MonoBehaviour
     {
         Instance = this;
         EnsureTipUi();
-        EnsureControlsUi();
         if (tips.Count == 0)
             LoadDefaultTips();
         IndexTips();
@@ -217,7 +216,7 @@ public class TutorialPrompt : MonoBehaviour
         if (controlsDone || controlsOpen)
             return;
 
-        EnsureControlsUi();
+        RebuildControlsUi();
         BeginControlsPause();
         SetControlsVisible(true);
         AudioManager.UIClick();
@@ -268,12 +267,13 @@ public class TutorialPrompt : MonoBehaviour
             || kb.numpadEnterKey.wasPressedThisFrame || kb.escapeKey.wasPressedThisFrame))
             return true;
 
+        // Continue on mouse / pad *release* so the Continue button can show press feedback first.
         Mouse mouse = Mouse.current;
-        if (mouse != null && mouse.leftButton.wasPressedThisFrame)
+        if (mouse != null && mouse.leftButton.wasReleasedThisFrame)
             return true;
 
         Gamepad pad = Gamepad.current;
-        if (pad != null && (pad.buttonSouth.wasPressedThisFrame || pad.startButton.wasPressedThisFrame))
+        if (pad != null && (pad.buttonSouth.wasReleasedThisFrame || pad.startButton.wasReleasedThisFrame))
             return true;
 
         return false;
@@ -384,7 +384,11 @@ public class TutorialPrompt : MonoBehaviour
     void EnsureTipUi()
     {
         if (promptText != null && panel != null)
+        {
+            VigilanteUiStyle.StylePanel(panel);
+            VigilanteUiStyle.ApplyFont(promptText);
             return;
+        }
 
         GameObject canvasGo = EnsureCanvas();
 
@@ -395,19 +399,19 @@ public class TutorialPrompt : MonoBehaviour
             panelGo = new GameObject("TutorialPanel");
             panelGo.transform.SetParent(canvasGo.transform, false);
             panel = panelGo.AddComponent<Image>();
-            panel.sprite = WhiteSprite();
-            panel.color = new Color(0.05f, 0.05f, 0.07f, 0.88f);
             RectTransform prt = panel.rectTransform;
             prt.anchorMin = new Vector2(0.5f, 0.12f);
             prt.anchorMax = new Vector2(0.5f, 0.12f);
             prt.pivot = new Vector2(0.5f, 0f);
             prt.anchoredPosition = Vector2.zero;
-            prt.sizeDelta = new Vector2(640f, 96f);
+            prt.sizeDelta = new Vector2(640f, 110f);
         }
         else
         {
             panel = panelGo.GetComponent<Image>();
         }
+
+        VigilanteUiStyle.StylePanel(panel);
 
         Transform textTf = panelGo.transform.Find("TutorialText");
         if (textTf == null)
@@ -417,31 +421,38 @@ public class TutorialPrompt : MonoBehaviour
             promptText = textGo.AddComponent<TextMeshProUGUI>();
             promptText.fontSize = 24f;
             promptText.alignment = TextAlignmentOptions.Center;
-            promptText.color = Color.white;
             RectTransform trt = promptText.rectTransform;
             trt.anchorMin = Vector2.zero;
             trt.anchorMax = Vector2.one;
-            trt.offsetMin = new Vector2(20f, 12f);
-            trt.offsetMax = new Vector2(-20f, -12f);
+            trt.offsetMin = new Vector2(28f, 18f);
+            trt.offsetMax = new Vector2(-28f, -18f);
         }
         else
         {
             promptText = textTf.GetComponent<TextMeshProUGUI>();
         }
+
+        VigilanteUiStyle.ApplyFont(promptText);
     }
 
-    void EnsureControlsUi()
+    void RebuildControlsUi()
     {
-        if (controlsRoot != null)
-            return;
-
         GameObject canvasGo = EnsureCanvas();
+
+        if (controlsRoot != null)
+        {
+            UnityEngine.Object.DestroyImmediate(controlsRoot);
+            controlsRoot = null;
+        }
+
         Transform existing = canvasGo.transform.Find("ControlsModal");
         if (existing != null)
-        {
-            controlsRoot = existing.gameObject;
-            return;
-        }
+            UnityEngine.Object.DestroyImmediate(existing.gameObject);
+
+        // Also clear any stray modal left under other canvases.
+        GameObject stray = GameObject.Find("ControlsModal");
+        if (stray != null)
+            UnityEngine.Object.DestroyImmediate(stray);
 
         controlsRoot = new GameObject("ControlsModal");
         controlsRoot.transform.SetParent(canvasGo.transform, false);
@@ -458,13 +469,12 @@ public class TutorialPrompt : MonoBehaviour
         GameObject box = new GameObject("Box");
         box.transform.SetParent(controlsRoot.transform, false);
         Image boxImg = box.AddComponent<Image>();
-        boxImg.sprite = WhiteSprite();
-        boxImg.color = new Color(0.08f, 0.08f, 0.1f, 0.96f);
         RectTransform boxRt = boxImg.rectTransform;
         boxRt.anchorMin = new Vector2(0.5f, 0.5f);
         boxRt.anchorMax = new Vector2(0.5f, 0.5f);
         boxRt.pivot = new Vector2(0.5f, 0.5f);
         boxRt.sizeDelta = new Vector2(560f, 420f);
+        VigilanteUiStyle.StylePanel(boxImg);
 
         TextMeshProUGUI title = CreateTmp(box.transform, "Title", "CONTROLS", 34f, FontStyles.Bold);
         RectTransform titleRt = title.rectTransform;
@@ -475,38 +485,29 @@ public class TutorialPrompt : MonoBehaviour
         titleRt.sizeDelta = new Vector2(-48f, 44f);
         title.alignment = TextAlignmentOptions.Center;
 
-        const string body =
-            "WASD — Move\n" +
-            "Mouse — Look\n" +
-            "Shift — Sprint\n" +
-            "C / Ctrl — Crouch\n" +
-            "Alt / Q — Dash\n" +
-            "Left Click — Swing bat / Fire\n" +
-            "1–4 / Scroll — Switch weapons\n" +
-            "Esc — Pause";
-
-        TextMeshProUGUI bodyTmp = CreateTmp(box.transform, "Body", body, 22f, FontStyles.Normal);
-        RectTransform bodyRt = bodyTmp.rectTransform;
-        bodyRt.anchorMin = new Vector2(0f, 0f);
-        bodyRt.anchorMax = new Vector2(1f, 1f);
-        bodyRt.offsetMin = new Vector2(40f, 88f);
-        bodyRt.offsetMax = new Vector2(-40f, -84f);
-        bodyTmp.alignment = TextAlignmentOptions.Left;
-        bodyTmp.lineSpacing = 8f;
+        string[][] rows =
+        {
+            new[] { "WASD", "Move" },
+            new[] { "Mouse", "Look" },
+            new[] { "Shift", "Sprint" },
+            new[] { "C / Ctrl", "Crouch" },
+            new[] { "Alt / Q", "Dash" },
+            new[] { "Left Click", "Swing bat / Fire" },
+            new[] { "1–4 / Scroll", "Switch weapons" },
+            new[] { "Esc", "Pause" },
+        };
+        BuildControlBindings(box.transform, rows);
 
         GameObject btnGo = new GameObject("Continue");
         btnGo.transform.SetParent(box.transform, false);
         Image btnImg = btnGo.AddComponent<Image>();
-        btnImg.sprite = WhiteSprite();
-        btnImg.color = new Color(0.85f, 0.2f, 0.18f, 1f);
         Button btn = btnGo.AddComponent<Button>();
         btn.targetGraphic = btnImg;
-        btn.onClick.AddListener(CloseControlsModal);
         RectTransform btnRt = btnImg.rectTransform;
         btnRt.anchorMin = new Vector2(0.5f, 0f);
         btnRt.anchorMax = new Vector2(0.5f, 0f);
-        btnRt.pivot = new Vector2(0.5f, 0f);
-        btnRt.anchoredPosition = new Vector2(0f, 28f);
+        btnRt.pivot = new Vector2(0.5f, 0.5f);
+        btnRt.anchoredPosition = new Vector2(0f, 50f);
         btnRt.sizeDelta = new Vector2(200f, 44f);
 
         TextMeshProUGUI btnLabel = CreateTmp(btnGo.transform, "Label", "CONTINUE", 20f, FontStyles.Bold);
@@ -517,6 +518,8 @@ public class TutorialPrompt : MonoBehaviour
         btnLabelRt.offsetMax = Vector2.zero;
         btnLabel.alignment = TextAlignmentOptions.Center;
 
+        VigilanteUiStyle.StyleInvertedButton(btn, CloseControlsModal);
+
         TextMeshProUGUI hint = CreateTmp(box.transform, "Hint", "Space / Click to continue", 16f, FontStyles.Italic);
         hint.color = new Color(1f, 1f, 1f, 0.55f);
         RectTransform hintRt = hint.rectTransform;
@@ -526,6 +529,63 @@ public class TutorialPrompt : MonoBehaviour
         hintRt.anchoredPosition = new Vector2(0f, 8f);
         hintRt.sizeDelta = new Vector2(-40f, 22f);
         hint.alignment = TextAlignmentOptions.Center;
+    }
+
+    static void BuildControlBindings(Transform box, string[][] rows)
+    {
+        GameObject list = new GameObject("Bindings", typeof(RectTransform));
+        list.transform.SetParent(box, false);
+        RectTransform listRt = list.GetComponent<RectTransform>();
+        listRt.anchorMin = new Vector2(0f, 0f);
+        listRt.anchorMax = new Vector2(1f, 1f);
+        listRt.offsetMin = new Vector2(40f, 88f);
+        listRt.offsetMax = new Vector2(-40f, -84f);
+
+        const float rowHeight = 32f;
+        float totalHeight = rows.Length * rowHeight;
+        float startY = totalHeight * 0.5f - rowHeight * 0.5f;
+
+        for (int i = 0; i < rows.Length; i++)
+        {
+            float y = startY - i * rowHeight;
+            CreateBindingRow(list.transform, rows[i][0], rows[i][1], y, rowHeight);
+        }
+    }
+
+    static void CreateBindingRow(Transform parent, string input, string action, float y, float height)
+    {
+        GameObject row = new GameObject("Row", typeof(RectTransform));
+        row.transform.SetParent(parent, false);
+        RectTransform rowRt = row.GetComponent<RectTransform>();
+        rowRt.anchorMin = new Vector2(0f, 0.5f);
+        rowRt.anchorMax = new Vector2(1f, 0.5f);
+        rowRt.pivot = new Vector2(0.5f, 0.5f);
+        rowRt.anchoredPosition = new Vector2(0f, y);
+        rowRt.sizeDelta = new Vector2(0f, height);
+
+        TextMeshProUGUI inputTmp = CreateTmp(row.transform, "Input", input, 20f, FontStyles.Normal);
+        RectTransform inputRt = inputTmp.rectTransform;
+        inputRt.anchorMin = new Vector2(0f, 0f);
+        inputRt.anchorMax = new Vector2(0.42f, 1f);
+        inputRt.offsetMin = Vector2.zero;
+        inputRt.offsetMax = Vector2.zero;
+        inputTmp.alignment = TextAlignmentOptions.MidlineLeft;
+
+        TextMeshProUGUI dashTmp = CreateTmp(row.transform, "Dash", "-", 20f, FontStyles.Normal);
+        RectTransform dashRt = dashTmp.rectTransform;
+        dashRt.anchorMin = new Vector2(0.42f, 0f);
+        dashRt.anchorMax = new Vector2(0.58f, 1f);
+        dashRt.offsetMin = Vector2.zero;
+        dashRt.offsetMax = Vector2.zero;
+        dashTmp.alignment = TextAlignmentOptions.Center;
+
+        TextMeshProUGUI actionTmp = CreateTmp(row.transform, "Action", action, 20f, FontStyles.Normal);
+        RectTransform actionRt = actionTmp.rectTransform;
+        actionRt.anchorMin = new Vector2(0.58f, 0f);
+        actionRt.anchorMax = new Vector2(1f, 1f);
+        actionRt.offsetMin = Vector2.zero;
+        actionRt.offsetMax = Vector2.zero;
+        actionTmp.alignment = TextAlignmentOptions.MidlineRight;
     }
 
     static GameObject EnsureCanvas()
@@ -553,14 +613,13 @@ public class TutorialPrompt : MonoBehaviour
         tmp.text = text;
         tmp.fontSize = size;
         tmp.fontStyle = style;
-        tmp.color = Color.white;
         tmp.raycastTarget = false;
+        VigilanteUiStyle.ApplyFont(tmp);
         return tmp;
     }
 
     static Sprite WhiteSprite()
     {
-        Texture2D tex = Texture2D.whiteTexture;
-        return Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 4f);
+        return VigilanteUiStyle.WhiteSprite();
     }
 }

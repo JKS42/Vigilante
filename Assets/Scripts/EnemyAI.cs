@@ -47,7 +47,7 @@ public class EnemyAI : MonoBehaviour
     Health health;
     EnemyCombat combat;
     EnemyProfile profile;
-    EnemyAnimator animator;
+    EnemyMecanim mecanim;
     Transform player;
 
     EnemyState state = EnemyState.Idle;
@@ -55,6 +55,8 @@ public class EnemyAI : MonoBehaviour
     Vector3 investigatePos;
     Vector3 homePos;
     Vector3 dynamicCoverPos;
+    Vector3 lastHitPoint;
+    Vector3 lastHitDir;
     CoverPoint currentCover;
     bool usingDynamicCover;
     bool pendingAttackAfterCover;
@@ -64,6 +66,8 @@ public class EnemyAI : MonoBehaviour
     float idleTimer;
     float alertBroadcastCooldown;
     float reassessTimer;
+    float stuckTimer;
+    float plantTimer;
     bool hasLastKnown;
     bool wasSeeingPlayer;
 
@@ -84,17 +88,38 @@ public class EnemyAI : MonoBehaviour
         health = GetComponent<Health>();
         combat = GetComponent<EnemyCombat>();
         profile = GetComponent<EnemyProfile>();
-        animator = null;
+        mecanim = GetComponent<EnemyMecanim>();
+        if (mecanim == null)
+            mecanim = GetComponentInChildren<EnemyMecanim>();
+
+        if (profile != null && profile.archetype != EnemyArchetype.Pistol)
+        {
+            Transform pistolVisual = transform.Find("PistolVisual");
+            if (pistolVisual != null)
+                Destroy(pistolVisual.gameObject);
+
+            EnemyMecanim[] mecanims = GetComponentsInChildren<EnemyMecanim>(true);
+            for (int i = 0; i < mecanims.Length; i++)
+            {
+                if (mecanims[i] != null)
+                    Destroy(mecanims[i]);
+            }
+            mecanim = null;
+        }
+
         EnemyAnimator leftover = GetComponent<EnemyAnimator>();
         if (leftover != null)
         {
             leftover.enabled = false;
             Destroy(leftover);
         }
+
         if (combat == null)
             combat = gameObject.AddComponent<EnemyCombat>();
 
         agent.stoppingDistance = stoppingDistance;
+        agent.angularSpeed = 360f;
+        agent.updateRotation = true;
         homePos = transform.position;
 
         if (eye == null)
@@ -148,7 +173,7 @@ public class EnemyAI : MonoBehaviour
         if (GetComponent<EnemyHurtTint>() == null)
             gameObject.AddComponent<EnemyHurtTint>();
 
-        CelOutline.ApplyHierarchy(gameObject);
+        CelOutline.RepairHierarchy(gameObject);
 
         EnemySquad.EnsureExists().Register(this);
         FindPlayer();
@@ -191,6 +216,8 @@ public class EnemyAI : MonoBehaviour
 
         wasSeeingPlayer = canSee;
 
+        TickStuckWatchdog(canSee);
+
         switch (state)
         {
             case EnemyState.Idle: TickIdle(canSee); break;
@@ -202,6 +229,78 @@ public class EnemyAI : MonoBehaviour
             case EnemyState.Attack: TickAttack(canSee); break;
             case EnemyState.Search: TickSearch(canSee); break;
         }
+    }
+
+    void TickStuckWatchdog(bool canSee)
+    {
+        if (state == EnemyState.Idle || state == EnemyState.Patrol)
+        {
+            stuckTimer = 0f;
+            return;
+        }
+
+        bool idlePlant = !AgentReady
+            || agent.isStopped
+            || agent.velocity.sqrMagnitude < 0.04f;
+
+        // Attack plant is only healthy while a shot anim is actually running.
+        if (state == EnemyState.Attack)
+        {
+            bool shooting = mecanim != null && mecanim.IsPlayingShoot;
+            if (canSee && shooting)
+            {
+                stuckTimer = 0f;
+                return;
+            }
+
+            if (idlePlant)
+                stuckTimer += Time.deltaTime;
+            else
+                stuckTimer = 0f;
+
+            if (stuckTimer < 1.75f)
+                return;
+
+            UnstickToChase(canSee);
+            return;
+        }
+
+        // Investigate/Search/Cover/Flank/Chase: no progress = stuck.
+        bool progressing = AgentReady && agent.hasPath && !agent.isStopped
+            && agent.remainingDistance > agent.stoppingDistance + 0.35f
+            && agent.velocity.sqrMagnitude > 0.04f;
+
+        if (progressing)
+        {
+            stuckTimer = 0f;
+            return;
+        }
+
+        stuckTimer += Time.deltaTime;
+        if (stuckTimer < 2f)
+            return;
+
+        UnstickToChase(canSee);
+    }
+
+    void UnstickToChase(bool canSee)
+    {
+        stuckTimer = 0f;
+        plantTimer = 0f;
+        ReleaseCover();
+        if (mecanim != null)
+            mecanim.CancelFireLock();
+        SetAgentStopped(false);
+        if (AgentReady)
+            agent.ResetPath();
+        PlaceOnNavMesh();
+
+        if (canSee && player != null)
+            SetState(EnemyState.Chase);
+        else if (hasLastKnown)
+            SetState(EnemyState.Search);
+        else
+            SetState(EnemyState.Patrol);
     }
 
     void FindPlayer()
@@ -279,17 +378,21 @@ public class EnemyAI : MonoBehaviour
         if (IsDead)
             return;
 
-        animator?.PlayHurt();
-
         if (instigator != null)
         {
             hasLastKnown = true;
             lastKnownPlayerPos = instigator.transform.position;
+            lastHitPoint = hitPoint;
+            lastHitDir = (transform.position - hitPoint).sqrMagnitude > 0.001f
+                ? (transform.position - hitPoint).normalized
+                : -transform.forward;
         }
         else if (player != null)
         {
             hasLastKnown = true;
             lastKnownPlayerPos = player.position;
+            lastHitPoint = hitPoint;
+            lastHitDir = (transform.position - hitPoint).normalized;
         }
 
         EnemySquad.Instance?.BroadcastAlert(this, lastKnownPlayerPos);
@@ -324,10 +427,21 @@ public class EnemyAI : MonoBehaviour
             agent.enabled = false;
         }
 
-        EnemyDeathPose pose = GetComponent<EnemyDeathPose>();
-        if (pose == null)
-            pose = gameObject.AddComponent<EnemyDeathPose>();
-        pose.Play();
+        float despawnDelay = 0.85f;
+        if (mecanim != null && mecanim.HasAnimator)
+        {
+            bool headshot = lastHitPoint.y > transform.position.y + 1.35f;
+            int variant = EnemyMecanim.ResolveDeathVariant(transform, lastHitPoint, lastHitDir, headshot);
+            mecanim.PlayDeath(variant);
+            despawnDelay = 2.6f;
+        }
+        else
+        {
+            EnemyDeathPose pose = GetComponent<EnemyDeathPose>();
+            if (pose == null)
+                pose = gameObject.AddComponent<EnemyDeathPose>();
+            pose.Play();
+        }
 
         CombatStimulus.NotifyEnemyDied(this);
         EnemySquad.Instance?.Unregister(this);
@@ -335,7 +449,7 @@ public class EnemyAI : MonoBehaviour
         CombatVfx.SpawnDeathKo(transform.position + Vector3.up * 1.5f);
         TutorialPrompt.Notify("enemy_killed");
         enabled = false;
-        Destroy(gameObject, 0.85f);
+        Destroy(gameObject, despawnDelay);
     }
 
     void TickIdle(bool canSee)
@@ -371,19 +485,19 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
+        // Always count down — don't require arriving before the look timer expires.
+        stateTimer -= Time.deltaTime;
         MoveTo(investigatePos);
 
-        if (ReachedDestination(0.4f))
+        if (ReachedDestination(0.5f))
+            FaceTarget(investigatePos);
+
+        if (stateTimer <= 0f)
         {
-            stateTimer -= Time.deltaTime;
-            transform.Rotate(0f, 90f * Time.deltaTime, 0f);
-            if (stateTimer <= 0f)
-            {
-                if (hasLastKnown)
-                    SetState(EnemyState.Search);
-                else
-                    SetState(EnemyState.Patrol);
-            }
+            if (hasLastKnown)
+                SetState(EnemyState.Search);
+            else
+                SetState(EnemyState.Patrol);
         }
     }
 
@@ -512,10 +626,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         if (canSee && player != null)
-        {
             FaceTarget(player.position);
-            combat.TryAttack(player);
-        }
 
         if (!canSee && lostSightTimer >= lostSightGrace * 2f)
             SetState(EnemyState.Search);
@@ -530,6 +641,84 @@ public class EnemyAI : MonoBehaviour
         }
 
         float dist = Vector3.Distance(transform.position, player.position);
+        bool usesMecanimShoot = mecanim != null && mecanim.HasAnimator && !combat.MeleeOnly;
+
+        if (usesMecanimShoot)
+        {
+            if (dist > combat.AttackRange * 1.15f)
+            {
+                plantTimer = 0f;
+                SetAgentStopped(false);
+                if (AgentReady)
+                    agent.updateRotation = true;
+                SetState(EnemyState.Chase);
+                return;
+            }
+
+            // Hold preferred band — don't freeze permanently if too close/far.
+            if (dist < PreferredDist * 0.55f)
+            {
+                plantTimer = 0f;
+                SetAgentStopped(false);
+                if (AgentReady)
+                    agent.updateRotation = true;
+                Vector3 away = (transform.position - player.position).normalized;
+                MoveTo(transform.position + away * 3.5f);
+                FaceTarget(player.position);
+                return;
+            }
+
+            if (dist > PreferredDist * 1.35f && dist <= combat.AttackRange)
+            {
+                plantTimer = 0f;
+                SetAgentStopped(false);
+                if (AgentReady)
+                    agent.updateRotation = true;
+                MoveTo(player.position);
+                FaceTarget(canSee ? player.position : lastKnownPlayerPos);
+                return;
+            }
+
+            SetAgentStopped(true);
+            if (AgentReady)
+                agent.updateRotation = false;
+            FaceTarget(canSee ? player.position : lastKnownPlayerPos);
+
+            if (canSee)
+            {
+                plantTimer += Time.deltaTime;
+
+                if (dist <= combat.MeleeRange)
+                {
+                    combat.TryAttack(player);
+                    plantTimer = 0f;
+                }
+                else if (combat.HasLineOfFire(player) && !mecanim.IsMoving)
+                {
+                    if (!mecanim.IsFiring)
+                        combat.TryFireAt(player);
+                    if (mecanim.IsPlayingShoot)
+                        plantTimer = 0f;
+                }
+                else if (!combat.HasLineOfFire(player) || plantTimer > 1.8f)
+                {
+                    plantTimer = 0f;
+                    SetAgentStopped(false);
+                    if (AgentReady)
+                        agent.updateRotation = true;
+                    SetState(EnemyState.Chase);
+                }
+            }
+            else if (lostSightTimer >= lostSightGrace)
+            {
+                plantTimer = 0f;
+                SetAgentStopped(false);
+                if (AgentReady)
+                    agent.updateRotation = true;
+                SetState(EnemyState.Search);
+            }
+            return;
+        }
 
         // Aggressive close-range: keep advancing while shooting.
         bool pushIn = Aggression > 0.7f && dist > PreferredDist * 0.6f;
@@ -659,41 +848,60 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            SetState(EnemyState.Attack);
+            SetState(EnemyState.Chase);
         }
     }
 
     void SetState(EnemyState next)
     {
         if (state == EnemyState.Attack && next != EnemyState.Attack)
+        {
             SetAgentStopped(false);
+            if (AgentReady)
+                agent.updateRotation = true;
+        }
 
         state = next;
         stateTimer = 0f;
+        stuckTimer = 0f;
+        plantTimer = 0f;
 
         switch (next)
         {
             case EnemyState.Idle:
                 idleTimer = idleTime + Random.Range(0f, 1f);
                 if (AgentReady)
+                {
+                    agent.updateRotation = true;
                     agent.ResetPath();
+                }
                 break;
             case EnemyState.Patrol:
+                if (AgentReady)
+                    agent.updateRotation = true;
                 SetRandomPatrolDestination();
                 break;
             case EnemyState.Investigate:
                 stateTimer = investigateLookTime;
                 SetAgentStopped(false);
+                if (AgentReady)
+                    agent.updateRotation = true;
                 MoveTo(investigatePos);
                 break;
             case EnemyState.Chase:
                 SetAgentStopped(false);
+                if (AgentReady)
+                    agent.updateRotation = true;
                 break;
             case EnemyState.TakeCover:
                 SetAgentStopped(false);
+                if (AgentReady)
+                    agent.updateRotation = true;
                 break;
             case EnemyState.Flank:
                 SetAgentStopped(false);
+                if (AgentReady)
+                    agent.updateRotation = true;
                 break;
             case EnemyState.Attack:
                 if (Aggression < 0.7f)
@@ -702,6 +910,8 @@ public class EnemyAI : MonoBehaviour
             case EnemyState.Search:
                 stateTimer = searchGiveUpTime;
                 SetAgentStopped(false);
+                if (AgentReady)
+                    agent.updateRotation = true;
                 if (hasLastKnown)
                     MoveTo(lastKnownPlayerPos);
                 break;
@@ -727,10 +937,11 @@ public class EnemyAI : MonoBehaviour
             return true;
 
         Vector3 probe = LevelCombatBootstrap.SnapToFloor(transform.position);
-        if (!NavMesh.SamplePosition(probe, out NavMeshHit hit, 2.5f, NavMesh.AllAreas)
-            && !NavMesh.SamplePosition(LevelCombatBootstrap.SnapToFloor(homePos), out hit, 3f, NavMesh.AllAreas))
+        if (!NavMesh.SamplePosition(probe, out NavMeshHit hit, 4f, NavMesh.AllAreas)
+            && !NavMesh.SamplePosition(LevelCombatBootstrap.SnapToFloor(homePos), out hit, 6f, NavMesh.AllAreas)
+            && !NavMesh.SamplePosition(probe, out hit, 12f, NavMesh.AllAreas))
         {
-            agent.enabled = false;
+            // Keep trying next frames — don't permanently disable the agent.
             return false;
         }
 

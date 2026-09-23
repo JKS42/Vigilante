@@ -3,9 +3,8 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
-/// World-space HP bar above an enemy. Visible only while that enemy sits under
-/// the crosshair. Built as unparented unlit quads so it never inherits enemy
-/// rotation and always faces the camera.
+/// World-space HP bar above an enemy. Visible while the crosshair ray hits
+/// that enemy's collider. Unparented unlit quads so it always faces the camera.
 /// </summary>
 public class EnemyHealthBar : MonoBehaviour
 {
@@ -13,14 +12,14 @@ public class EnemyHealthBar : MonoBehaviour
     [SerializeField] float headPadding = 0.28f;
     [SerializeField] float barWidth = 1.1f;
     [SerializeField] float barHeight = 0.12f;
+    [SerializeField] float borderPadding = 0.018f;
 
     const float HoverRange = 80f;
-    // How close to screen center (0–0.5) counts as "on the crosshair".
-    const float ScreenHoverRadius = 0.07f;
 
     static readonly List<EnemyHealthBar> Active = new List<EnemyHealthBar>(32);
     static EnemyHealthBar hovered;
     static int hoverFrame = -1;
+    static readonly RaycastHit[] HoverHits = new RaycastHit[16];
 
     Health health;
     Transform barRoot;
@@ -121,38 +120,32 @@ public class EnemyHealthBar : MonoBehaviour
         if (camera == null || Active.Count == 0)
             return;
 
-        float bestScore = ScreenHoverRadius * ScreenHoverRadius;
+        Ray ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+        int count = Physics.RaycastNonAlloc(ray, HoverHits, HoverRange, ~0, QueryTriggerInteraction.Ignore);
+        if (count <= 0)
+            return;
+
+        float bestDist = float.MaxValue;
         EnemyHealthBar best = null;
 
-        for (int i = 0; i < Active.Count; i++)
+        for (int i = 0; i < count; i++)
         {
-            EnemyHealthBar bar = Active[i];
+            RaycastHit hit = HoverHits[i];
+            if (hit.collider == null)
+                continue;
+
+            EnemyHealthBar bar = hit.collider.GetComponentInParent<EnemyHealthBar>();
             if (bar == null || bar.health == null || bar.health.IsDead)
                 continue;
 
-            Vector3 world = bar.HoverPoint();
-            Vector3 vp = camera.WorldToViewportPoint(world);
-            if (vp.z < 0.5f || vp.z > HoverRange)
+            if (hit.distance >= bestDist)
                 continue;
 
-            float dx = vp.x - 0.5f;
-            float dy = vp.y - 0.5f;
-            float score = dx * dx + dy * dy;
-            if (score > bestScore)
-                continue;
-
-            bestScore = score;
+            bestDist = hit.distance;
             best = bar;
         }
 
         hovered = best;
-    }
-
-    Vector3 HoverPoint()
-    {
-        if (bodyCapsule != null)
-            return transform.TransformPoint(bodyCapsule.center);
-        return transform.position + Vector3.up * (CurrentHeight() * 0.5f);
     }
 
     void PlaceAndBillboard()
@@ -162,7 +155,6 @@ public class EnemyHealthBar : MonoBehaviour
 
         barRoot.position = transform.TransformPoint(Vector3.up * CurrentHeight());
 
-        // Same billboard convention as CombatVfx / TextMeshPro world text.
         Vector3 away = barRoot.position - cam.transform.position;
         if (away.sqrMagnitude > 0.0001f)
             barRoot.rotation = Quaternion.LookRotation(away, Vector3.up);
@@ -174,11 +166,16 @@ public class EnemyHealthBar : MonoBehaviour
             return;
 
         float pct = Mathf.Clamp01(health.CurrentHealth / Mathf.Max(1f, health.MaxHealth));
-        fillTf.localScale = new Vector3(Mathf.Max(0.001f, barWidth * pct), barHeight * 0.7f, 1f);
-        fillTf.localPosition = new Vector3((pct - 1f) * 0.5f * barWidth, 0f, -0.001f);
+        float pad = Mathf.Max(0.004f, borderPadding);
+        float innerW = Mathf.Max(0.001f, barWidth - pad * 2f);
+        float innerH = Mathf.Max(0.001f, barHeight - pad * 2f);
+
+        fillTf.localScale = new Vector3(Mathf.Max(0.001f, innerW * pct), innerH, 1f);
+        // Left-align white fill inside the black border frame.
+        fillTf.localPosition = new Vector3((-innerW * 0.5f) + (innerW * pct * 0.5f), 0f, -0.001f);
 
         if (fillMat != null)
-            fillMat.color = Color.Lerp(new Color(0.85f, 0.15f, 0.12f), new Color(0.25f, 0.8f, 0.28f), pct);
+            fillMat.color = Color.white;
     }
 
     void SetVisible(bool on)
@@ -215,12 +212,12 @@ public class EnemyHealthBar : MonoBehaviour
         barRoot.SetParent(null, false);
 
         bgMat = new Material(UnlitShader());
-        bgMat.color = new Color(0.08f, 0.08f, 0.08f, 1f);
+        bgMat.color = Color.black;
         fillMat = new Material(UnlitShader());
-        fillMat.color = new Color(0.25f, 0.8f, 0.28f, 1f);
+        fillMat.color = Color.white;
 
         GameObject bgGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        bgGo.name = "Background";
+        bgGo.name = "Border";
         Object.Destroy(bgGo.GetComponent<Collider>());
         bgGo.transform.SetParent(barRoot, false);
         bgGo.transform.localPosition = Vector3.zero;
@@ -237,8 +234,6 @@ public class EnemyHealthBar : MonoBehaviour
         fillTf = fillGo.transform;
         fillTf.SetParent(barRoot, false);
         fillTf.localRotation = Quaternion.identity;
-        fillTf.localScale = new Vector3(barWidth, barHeight * 0.7f, 1f);
-        fillTf.localPosition = new Vector3(0f, 0f, -0.001f);
         fillRenderer = fillGo.GetComponent<Renderer>();
         fillRenderer.sharedMaterial = fillMat;
         fillRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;

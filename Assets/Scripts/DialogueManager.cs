@@ -55,6 +55,10 @@ public class DialogueManager : MonoBehaviour
                 var next = queue.Dequeue();
                 ShowInternal(next.text, next.duration);
             }
+            else
+            {
+                SetBoxVisible(false);
+            }
         }
     }
 
@@ -74,19 +78,32 @@ public class DialogueManager : MonoBehaviour
             canvasGo.AddComponent<GraphicRaycaster>();
         }
 
+        GameObject boxGo = new GameObject("DialogueBox");
+        boxGo.transform.SetParent(canvas.transform, false);
+        Image boxImg = boxGo.AddComponent<Image>();
+        RectTransform boxRt = boxImg.rectTransform;
+        boxRt.anchorMin = new Vector2(0.5f, 0.06f);
+        boxRt.anchorMax = new Vector2(0.5f, 0.06f);
+        boxRt.pivot = new Vector2(0.5f, 0f);
+        boxRt.anchoredPosition = Vector2.zero;
+        boxRt.sizeDelta = new Vector2(920f, 96f);
+        VigilanteUiStyle.StylePanel(boxImg);
+
         GameObject textGo = new GameObject("DialogueSubtitle");
-        textGo.transform.SetParent(canvas.transform, false);
+        textGo.transform.SetParent(boxGo.transform, false);
         subtitleText = textGo.AddComponent<TextMeshProUGUI>();
-        subtitleText.fontSize = 28f;
+        subtitleText.fontSize = 26f;
         subtitleText.alignment = TextAlignmentOptions.Center;
-        subtitleText.color = Color.white;
         subtitleText.text = string.Empty;
+        VigilanteUiStyle.ApplyFont(subtitleText);
 
         RectTransform rt = subtitleText.rectTransform;
-        rt.anchorMin = new Vector2(0.1f, 0.08f);
-        rt.anchorMax = new Vector2(0.9f, 0.18f);
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = new Vector2(28f, 16f);
+        rt.offsetMax = new Vector2(-28f, -16f);
+
+        boxGo.SetActive(false);
     }
 
     void ShowInternal(string text, float duration)
@@ -94,8 +111,16 @@ public class DialogueManager : MonoBehaviour
         EnsureUi();
         showing = true;
         hideAt = Time.unscaledTime + duration;
+        SetBoxVisible(true);
         if (subtitleText != null)
             subtitleText.text = text;
+    }
+
+    void SetBoxVisible(bool on)
+    {
+        if (subtitleText == null || subtitleText.transform.parent == null)
+            return;
+        subtitleText.transform.parent.gameObject.SetActive(on);
     }
 
     void Enqueue(string text, float duration)

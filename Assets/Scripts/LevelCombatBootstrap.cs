@@ -47,8 +47,42 @@ public static class LevelCombatBootstrap
         SetupPlayer();
         EnemySquad.EnsureExists();
         EnsureNavMesh();
+        EnsureMainDirectionalLight();
         SceneFade.PlayLevelIntro();
         EnsureCampaignSystems();
+    }
+
+    /// <summary>
+    /// Cel shading reads main-light realtime shadows. Without a Directional Light
+    /// (LevelDemo only had unshadowed point lights), roofs never darken anything.
+    /// </summary>
+    public static void EnsureMainDirectionalLight()
+    {
+        Light[] lights = Object.FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        Light sun = null;
+        for (int i = 0; i < lights.Length; i++)
+        {
+            if (lights[i] != null && lights[i].type == LightType.Directional)
+            {
+                sun = lights[i];
+                break;
+            }
+        }
+
+        if (sun == null)
+        {
+            GameObject go = new GameObject("Sun");
+            sun = go.AddComponent<Light>();
+            sun.type = LightType.Directional;
+            sun.color = new Color(1f, 0.96f, 0.88f, 1f);
+            sun.intensity = 1.15f;
+            go.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+        }
+
+        sun.shadows = LightShadows.Soft;
+        sun.shadowStrength = 1f;
+        sun.shadowBias = 0.05f;
+        sun.shadowNormalBias = 0.4f;
     }
 
     public static void EnsureCampaignSystems()

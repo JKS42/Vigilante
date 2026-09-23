@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: CellShading
-  m_Shader: {fileID: -6465566751694194690, guid: 9f5e3c7fb3b88134cbbbb8c949d32fe7, type: 3}
+  m_Shader: {fileID: 4800000, guid: c8e4a71b9f2d4e6a8b0c1d2e3f405162, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []

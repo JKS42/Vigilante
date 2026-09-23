@@ -134,11 +134,15 @@ public class EnemyProfile : MonoBehaviour
         {
             if (renderers[i] == null || renderers[i].sharedMaterial == null)
                 continue;
+            if (KeepAuthoredMaterials(renderers[i]))
+                continue;
 
             Material mat = renderers[i].material;
             CelMaterial.Convert(mat);
             CelMaterial.ApplyColor(mat, tint);
         }
+
+        ApplyArchetypeBodyVisual(gameObject, archetype);
 
         EnemyAnimator leftover = GetComponent<EnemyAnimator>();
         if (leftover != null)
@@ -157,6 +161,53 @@ public class EnemyProfile : MonoBehaviour
         ApplyWeaponVisuals(gameObject, archetype);
     }
 
+    static bool KeepAuthoredMaterials(Renderer renderer)
+    {
+        if (renderer is SkinnedMeshRenderer)
+            return true;
+
+        Transform t = renderer.transform;
+        while (t != null)
+        {
+            string n = t.name;
+            if (n == "PistolVisual" || n == "EnemyPistol")
+                return true;
+            t = t.parent;
+        }
+        return false;
+    }
+
+    static void ApplyArchetypeBodyVisual(GameObject go, EnemyArchetype type)
+    {
+        if (type == EnemyArchetype.Pistol)
+            return;
+
+        Transform visual = go.transform.Find("PistolVisual");
+        if (visual != null)
+            Destroy(visual.gameObject);
+
+        EnemyMecanim mecanim = go.GetComponent<EnemyMecanim>();
+        if (mecanim == null)
+            mecanim = go.GetComponentInChildren<EnemyMecanim>();
+        if (mecanim != null)
+            Destroy(mecanim);
+
+        EnemyHandWeapon handWeapon = go.GetComponent<EnemyHandWeapon>();
+        if (handWeapon != null)
+            Destroy(handWeapon);
+
+        MeshFilter filter = go.GetComponent<MeshFilter>();
+        MeshRenderer bodyRenderer = go.GetComponent<MeshRenderer>();
+        if (filter != null && filter.sharedMesh == null)
+        {
+            GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            filter.sharedMesh = temp.GetComponent<MeshFilter>().sharedMesh;
+            Destroy(temp);
+        }
+        if (bodyRenderer != null)
+            bodyRenderer.enabled = true;
+    }
+
     static void ApplyWeaponVisuals(GameObject go, EnemyArchetype type)
     {
         Transform[] transforms = go.GetComponentsInChildren<Transform>(true);
@@ -167,6 +218,9 @@ public class EnemyProfile : MonoBehaviour
                 continue;
 
             string n = t.name;
+            if (ContainsIgnoreCase(n, "Visual") || ContainsIgnoreCase(n, "Enemy"))
+                continue;
+
             bool isGun = ContainsIgnoreCase(n, "Rifle")
                 || ContainsIgnoreCase(n, "Shotgun")
                 || ContainsIgnoreCase(n, "Pistol")
@@ -180,6 +234,11 @@ public class EnemyProfile : MonoBehaviour
                     t.gameObject.SetActive(false);
                 else if (isBat)
                     t.gameObject.SetActive(true);
+            }
+            else if (isBat)
+            {
+                // Gun archetypes: hide leftover bat props from shared prefabs.
+                t.gameObject.SetActive(false);
             }
         }
     }

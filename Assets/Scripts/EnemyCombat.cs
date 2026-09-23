@@ -40,13 +40,14 @@ public class EnemyCombat : MonoBehaviour
     [SerializeField] float reloadTime = 1.5f;
 
     float nextFireTime;
-    EnemyAnimator animator;
+    EnemyMecanim mecanim;
     bool meleeOnly;
     WeaponSwitcher playerLoadout;
     PlayerMovement playerMove;
     int shotsRemaining;
     bool isReloading;
     Coroutine reloadRoutine;
+    Coroutine pendingShotRoutine;
     readonly RaycastHit[] hitBuffer = new RaycastHit[16];
 
     public float AttackRange => meleeOnly ? meleeRange : attackRange;
@@ -62,14 +63,102 @@ public class EnemyCombat : MonoBehaviour
 
     void Awake()
     {
-        animator = null;
-        if (muzzle == null)
+        mecanim = GetComponent<EnemyMecanim>();
+        if (mecanim == null)
+            mecanim = GetComponentInChildren<EnemyMecanim>();
+
+        EnemyProfile profile = GetComponent<EnemyProfile>();
+        if (profile != null && profile.archetype != EnemyArchetype.Pistol)
+            mecanim = null;
+
+        ResolveMuzzle(createFallback: false);
+    }
+
+    public void SetMuzzle(Transform t)
+    {
+        if (t != null)
+            muzzle = t;
+    }
+
+    /// <summary>Prefer the Muzzle under the attached hand weapon (EnemyPistol / gun mesh).</summary>
+    void ResolveMuzzle(bool createFallback)
+    {
+        Transform weaponMuzzle = FindWeaponMuzzle(transform);
+        if (weaponMuzzle != null)
         {
-            GameObject m = new GameObject("Muzzle");
-            m.transform.SetParent(transform);
-            m.transform.localPosition = new Vector3(0.25f, 1.4f, 0.85f);
-            muzzle = m.transform;
+            // Drop any leftover chest-height muzzle on the enemy root.
+            if (muzzle != null && muzzle != weaponMuzzle && muzzle.parent == transform)
+                Destroy(muzzle.gameObject);
+            muzzle = weaponMuzzle;
+            return;
         }
+
+        if (muzzle != null)
+            return;
+
+        if (!createFallback)
+            return;
+
+        GameObject m = new GameObject("Muzzle");
+        m.transform.SetParent(transform);
+        m.transform.localPosition = new Vector3(0.25f, 1.4f, 0.85f);
+        muzzle = m.transform;
+    }
+
+    static Transform FindWeaponMuzzle(Transform root)
+    {
+        // Prefer explicit attached hand gun.
+        Transform gun = FindNamedChild(root, "EnemyPistol");
+        if (gun != null)
+        {
+            Transform muzzle = FindNamedChild(gun, "Muzzle");
+            if (muzzle != null)
+                return muzzle;
+        }
+
+        Transform[] all = root.GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < all.Length; i++)
+        {
+            Transform t = all[i];
+            if (t == null || t.name != "Muzzle" || t.parent == null || t.parent == root)
+                continue;
+
+            if (IsUnderWeaponMesh(t, root))
+                return t;
+        }
+
+        return null;
+    }
+
+    static bool IsUnderWeaponMesh(Transform t, Transform enemyRoot)
+    {
+        Transform p = t.parent;
+        while (p != null && p != enemyRoot)
+        {
+            string n = p.name;
+            if (n.Equals("EnemyPistol", System.StringComparison.OrdinalIgnoreCase)
+                || n.IndexOf("Weapon", System.StringComparison.OrdinalIgnoreCase) >= 0
+                || (n.IndexOf("Pistol", System.StringComparison.OrdinalIgnoreCase) >= 0
+                    && n.IndexOf("Enemy", System.StringComparison.OrdinalIgnoreCase) < 0))
+                return true;
+            p = p.parent;
+        }
+        return false;
+    }
+
+    static Transform FindNamedChild(Transform parent, string name)
+    {
+        if (parent == null)
+            return null;
+        if (parent.name == name)
+            return parent;
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            Transform found = FindNamedChild(parent.GetChild(i), name);
+            if (found != null)
+                return found;
+        }
+        return null;
     }
 
     public void ConfigureForArchetype(EnemyArchetype archetype)
@@ -159,7 +248,7 @@ public class EnemyCombat : MonoBehaviour
 
     public bool TryMeleeAt(Transform target)
     {
-        if (target == null || Time.time < nextFireTime)
+        if (target == null || IsCombatBlocked() || Time.time < nextFireTime)
             return false;
 
         float dist = Vector3.Distance(transform.position, target.position);
@@ -167,7 +256,6 @@ public class EnemyCombat : MonoBehaviour
             return false;
 
         nextFireTime = Time.time + 0.7f;
-        animator?.PlayFire();
 
         Vector3 origin = transform.position + Vector3.up * 1f + transform.forward * 0.55f;
         AudioManager.MeleeHit(origin);
@@ -211,6 +299,9 @@ public class EnemyCombat : MonoBehaviour
         if (target == null || isReloading || Time.time < nextFireTime)
             return false;
 
+        if (IsRangedFireBlocked())
+            return false;
+
         if (magazineSize > 0 && shotsRemaining <= 0)
         {
             BeginReload();
@@ -224,11 +315,74 @@ public class EnemyCombat : MonoBehaviour
         if (dist > attackRange)
             return false;
 
-        aimPoint = OffsetAimPoint(aimPoint, origin, EvaluateShotError(dist, GetPlayerMovement(target)));
-        Vector3 aimDir = (aimPoint - origin).normalized;
+        // Mecanim pistol: fire rate = shoot anim; hitscan releases on frame 20.
+        if (mecanim != null && mecanim.HasAnimator)
+        {
+            if (!mecanim.PlayFire())
+                return false;
+
+            // Soft lock only — full cycle lock applied when the shot actually fires.
+            nextFireTime = Time.time + 0.2f;
+            if (pendingShotRoutine != null)
+                StopCoroutine(pendingShotRoutine);
+            pendingShotRoutine = StartCoroutine(FireAfterAnimFrame(target, mecanim.FireReleaseDelay));
+            return true;
+        }
 
         nextFireTime = Time.time + 1f / Mathf.Max(0.1f, fireRate);
-        animator?.PlayFire();
+        return DischargeShot(target);
+    }
+
+    IEnumerator FireAfterAnimFrame(Transform target, float delay)
+    {
+        // Wait until Shoot is actually playing (Idle→Shoot / CrossFade).
+        float enterTimeout = 0.75f;
+        while (mecanim != null && !mecanim.IsDead && !mecanim.IsPlayingShoot && enterTimeout > 0f)
+        {
+            enterTimeout -= Time.deltaTime;
+            yield return null;
+        }
+
+        if (mecanim == null || mecanim.IsDead || !mecanim.IsPlayingShoot)
+        {
+            // Anim never entered Shoot — unlock so AI can retry / reposition.
+            mecanim?.CancelFireLock();
+            nextFireTime = Time.time + 0.35f;
+            pendingShotRoutine = null;
+            yield break;
+        }
+
+        if (delay > 0f)
+            yield return new WaitForSeconds(delay);
+
+        pendingShotRoutine = null;
+        if (target == null || mecanim == null || mecanim.IsDead || !mecanim.IsPlayingShoot)
+        {
+            mecanim?.CancelFireLock();
+            nextFireTime = Time.time + 0.35f;
+            yield break;
+        }
+
+        DischargeShot(target);
+        // Match remaining shoot-clip length so fire rate = anim.
+        float remaining = Mathf.Max(0.15f, mecanim.ShootCycleDuration - delay);
+        nextFireTime = Time.time + remaining;
+    }
+
+    bool DischargeShot(Transform target)
+    {
+        if (target == null)
+            return false;
+
+        Vector3 origin = GetMuzzlePosition();
+        Vector3 aimPoint = GetAimPoint(target);
+        Vector3 baseDir = aimPoint - origin;
+        float dist = baseDir.magnitude;
+        if (dist <= 0.001f)
+            return false;
+
+        aimPoint = OffsetAimPoint(aimPoint, origin, EvaluateShotError(dist, GetPlayerMovement(target)));
+        Vector3 aimDir = (aimPoint - origin).normalized;
 
         CombatStimulus.EmitNoise(origin, weaponKind == EnemyWeaponKind.Shotgun ? 28f : 22f, StimulusType.Gunfire);
         AudioManager.EnemyGunshot(origin, weaponKind);
@@ -309,7 +463,10 @@ public class EnemyCombat : MonoBehaviour
 
     Vector3 GetMuzzlePosition()
     {
-        return muzzle != null ? muzzle.position : transform.position + Vector3.up * 1.4f + transform.forward * 0.6f;
+        ResolveMuzzle(createFallback: true);
+        return muzzle != null
+            ? muzzle.position
+            : transform.position + Vector3.up * 1.4f + transform.forward * 0.6f;
     }
 
     void SetMagazine(int size)
@@ -495,6 +652,33 @@ public class EnemyCombat : MonoBehaviour
         if (col == null)
             return false;
         return col.CompareTag("Player") || col.transform.root.CompareTag("Player");
+    }
+
+    bool IsCombatBlocked()
+    {
+        return mecanim != null && mecanim.BlocksCombat;
+    }
+
+    bool IsRangedFireBlocked()
+    {
+        if (mecanim == null)
+            return false;
+        return !mecanim.CanFireRanged;
+    }
+
+    static Transform FindDeepChild(Transform parent, string name)
+    {
+        if (parent == null)
+            return null;
+        if (parent.name == name)
+            return parent;
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            Transform found = FindDeepChild(parent.GetChild(i), name);
+            if (found != null)
+                return found;
+        }
+        return null;
     }
 
     static bool HasBreakable(Transform t)
