@@ -253,7 +253,7 @@ public class Weapon : MonoBehaviour
         currentCooldown = Mathf.Max(0.01f, FireCooldown);
 
         if (currentAmmo <= 0)
-            TryReload();
+            ReportAmmoEmpty();
     }
 
     void TryReload()
@@ -261,7 +261,25 @@ public class Weapon : MonoBehaviour
         if (isReloading || currentAmmo >= magazineSize || reserveAmmo <= 0)
             return;
 
+        TutorialPrompt.HideLive("empty_mag");
         reloadRoutine = StartCoroutine(ReloadRoutine());
+    }
+
+    void ReportAmmoEmpty()
+    {
+        if (currentAmmo > 0)
+            return;
+
+        if (reserveAmmo <= 0)
+        {
+            TutorialPrompt.HideLive("empty_mag");
+            if (this is Pistol)
+                TutorialPrompt.ShowLive("out_of_ammo", "Out of ammo. Pick up ammo from defeated enemies.");
+            return;
+        }
+
+        TutorialPrompt.HideLive("out_of_ammo");
+        TutorialPrompt.ShowLive("empty_mag", "Empty magazine. Press R to reload.");
     }
 
     IEnumerator ReloadRoutine()
@@ -290,6 +308,12 @@ public class Weapon : MonoBehaviour
         int room = Mathf.Max(0, cap - reserveAmmo);
         int added = Mathf.Min(amount, room);
         reserveAmmo += added;
+        if (added > 0)
+        {
+            TutorialPrompt.HideLive("out_of_ammo");
+            if (currentAmmo <= 0)
+                TutorialPrompt.ShowLive("empty_mag", "Empty magazine. Press R to reload.");
+        }
         return added;
     }
 
@@ -304,6 +328,8 @@ public class Weapon : MonoBehaviour
         {
             currentAmmo = Mathf.Min(amount, Mathf.Max(1, magazineSize));
             reserveAmmo = 0;
+            TutorialPrompt.HideLive("out_of_ammo");
+            TutorialPrompt.HideLive("empty_mag");
             return;
         }
 

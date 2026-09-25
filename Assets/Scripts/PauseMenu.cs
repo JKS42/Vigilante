@@ -20,6 +20,10 @@ public class PauseMenu : MonoBehaviour
     public Button settingsButton;
     public Button restartLevelButton;
     public Button mainMenuButton;
+    public Button tutorialLogButton;
+
+    GameObject tutorialLogPanel;
+    TextMeshProUGUI tutorialLogText;
 
     [Header("Scenes")]
     public string mainMenuSceneName = "MainMenu";
@@ -97,7 +101,7 @@ public class PauseMenu : MonoBehaviour
             return;
 
         // Controls tutorial owns Escape until dismissed.
-        if (TutorialPrompt.BlocksGameplay)
+        if (TutorialPrompt.BlocksGameplay || PistolIntroCinematic.IsRunning)
             return;
 
         UIManager ui = UIManager.Instance;
@@ -107,6 +111,12 @@ public class PauseMenu : MonoBehaviour
         if (isPaused && settingsPanel != null && settingsPanel.activeSelf)
         {
             CloseSettings();
+            return;
+        }
+
+        if (isPaused && tutorialLogPanel != null && tutorialLogPanel.activeSelf)
+        {
+            CloseTutorialLog();
             return;
         }
 
@@ -188,6 +198,8 @@ public class PauseMenu : MonoBehaviour
             Time.timeScale = previousTimeScale > 0f ? previousTimeScale : 1f;
             if (settingsPanel != null)
                 settingsPanel.SetActive(false);
+            if (tutorialLogPanel != null)
+                tutorialLogPanel.SetActive(false);
         }
 
         isPaused = paused;
@@ -274,6 +286,8 @@ public class PauseMenu : MonoBehaviour
         EnsurePausedTitle();
         EnsureDimmer(hud);
         SettingsMenu.EnsureOn(settingsPanel, CloseSettings);
+        EnsureTutorialLog(hud);
+        StylePauseChrome();
 
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
@@ -292,15 +306,60 @@ public class PauseMenu : MonoBehaviour
             restartLevelButton = FindButton(pauseMenuPanel.transform, "Restart Level");
         if (mainMenuButton == null)
             mainMenuButton = FindButton(pauseMenuPanel.transform, "Main Menu");
+        if (tutorialLogButton == null)
+            tutorialLogButton = FindButton(pauseMenuPanel.transform, "Tutorial Log");
     }
 
     void WireAll()
     {
         ResolveButtons();
-        WireButton(resumeButton, Resume);
-        WireButton(settingsButton, OpenSettings);
-        WireButton(restartLevelButton, RestartLevel);
-        WireButton(mainMenuButton, LoadMainMenu);
+        StyleMenuButton(resumeButton, Resume);
+        StyleMenuButton(settingsButton, OpenSettings);
+        StyleMenuButton(restartLevelButton, RestartLevel);
+        StyleMenuButton(mainMenuButton, LoadMainMenu);
+        StyleMenuButton(tutorialLogButton, OpenTutorialLog);
+        if (tutorialLogPanel != null)
+            StyleMenuButton(FindButton(tutorialLogPanel.transform, "Back"), CloseTutorialLog);
+    }
+
+    void StylePauseChrome()
+    {
+        VigilanteUiStyle.StylePanel(pauseMenuPanel);
+        VigilanteUiStyle.StylePanel(tutorialLogPanel);
+        StyleTitle(pauseMenuPanel, "PausedTitle");
+        StyleTitle(tutorialLogPanel, "Title");
+        if (tutorialLogText != null)
+            VigilanteUiStyle.ApplyFont(tutorialLogText);
+    }
+
+    static void StyleTitle(GameObject panel, string childName)
+    {
+        if (panel == null)
+            return;
+        Transform title = FindChildByName(panel.transform, childName);
+        if (title == null)
+            return;
+        TextMeshProUGUI label = title.GetComponent<TextMeshProUGUI>();
+        if (label == null)
+            return;
+        VigilanteUiStyle.ApplyFont(label);
+        label.fontStyle = FontStyles.Bold;
+        label.color = Color.white;
+    }
+
+    const float MenuButtonWidth = 180f;
+    const float MenuButtonHeight = 36f;
+
+    static void StyleMenuButton(Button button, UnityEngine.Events.UnityAction action)
+    {
+        if (button == null || action == null)
+            return;
+
+        RectTransform rect = button.GetComponent<RectTransform>();
+        if (rect != null)
+            rect.sizeDelta = new Vector2(MenuButtonWidth, MenuButtonHeight);
+
+        VigilanteUiStyle.StyleInvertedButton(button, () => action.Invoke());
     }
 
     void EnsurePausedTitle()
@@ -311,6 +370,153 @@ public class PauseMenu : MonoBehaviour
             return;
 
         CreateLabel(pauseMenuPanel.transform, "PausedTitle", "PAUSED", new Vector2(0f, 210f), new Vector2(360f, 48f), 36f);
+    }
+
+    void EnsureTutorialLog(Transform hud)
+    {
+        if (pauseMenuPanel == null)
+            return;
+
+        if (tutorialLogButton == null && FindButton(pauseMenuPanel.transform, "Tutorial Log") == null)
+        {
+            Button sample = FindButton(pauseMenuPanel.transform, "Settings");
+            if (sample == null)
+                sample = FindButton(pauseMenuPanel.transform, "Resume");
+
+            float step = ButtonStep(sample);
+            ShiftButton("Restart Level", -step);
+            ShiftButton("Main Menu", -step);
+            Vector2 position = new Vector2(0f, 2f);
+            RectTransform settings = sample != null ? sample.GetComponent<RectTransform>() : null;
+            if (settings != null)
+                position = settings.anchoredPosition + new Vector2(0f, -step);
+            tutorialLogButton = CreateMenuButton(pauseMenuPanel.transform, "Tutorial Log", position);
+            MatchButton(tutorialLogButton, sample);
+            RectTransform panelRect = pauseMenuPanel.GetComponent<RectTransform>();
+            if (panelRect != null)
+                panelRect.sizeDelta += new Vector2(0f, step);
+        }
+
+        if (tutorialLogPanel == null && hud != null)
+        {
+            tutorialLogPanel = CreatePanel(hud, "TutorialLog", new Vector2(640f, 560f), new Color(0.08f, 0.08f, 0.1f, 0.94f));
+            CreateLabel(tutorialLogPanel.transform, "Title", "TUTORIAL LOG", new Vector2(0f, 230f), new Vector2(560f, 48f), 32f);
+
+            GameObject body = new GameObject("Entries");
+            body.layer = 5;
+            body.transform.SetParent(tutorialLogPanel.transform, false);
+            RectTransform bodyRect = body.AddComponent<RectTransform>();
+            bodyRect.anchorMin = new Vector2(0f, 0f);
+            bodyRect.anchorMax = new Vector2(1f, 1f);
+            bodyRect.offsetMin = new Vector2(36f, 96f);
+            bodyRect.offsetMax = new Vector2(-36f, -72f);
+            tutorialLogText = body.AddComponent<TextMeshProUGUI>();
+            tutorialLogText.fontSize = 20f;
+            tutorialLogText.alignment = TextAlignmentOptions.TopLeft;
+            tutorialLogText.color = Color.white;
+            tutorialLogText.raycastTarget = false;
+
+            Button back = CreateMenuButton(tutorialLogPanel.transform, "Back", new Vector2(0f, -230f));
+            StyleMenuButton(back, CloseTutorialLog);
+            tutorialLogPanel.SetActive(false);
+        }
+    }
+
+    static float ButtonStep(Button sample)
+    {
+        if (sample == null || sample.transform.parent == null)
+            return 70f;
+
+        RectTransform sampleRect = sample.GetComponent<RectTransform>();
+        if (sampleRect == null)
+            return 70f;
+
+        float nearest = 0f;
+        for (int i = 0; i < sample.transform.parent.childCount; i++)
+        {
+            Transform child = sample.transform.parent.GetChild(i);
+            if (child == sample.transform)
+                continue;
+            if (child.GetComponent<Button>() == null)
+                continue;
+            RectTransform rect = child.GetComponent<RectTransform>();
+            if (rect == null)
+                continue;
+            float gap = Mathf.Abs(rect.anchoredPosition.y - sampleRect.anchoredPosition.y);
+            if (gap < 1f)
+                continue;
+            if (nearest < 1f || gap < nearest)
+                nearest = gap;
+        }
+
+        return nearest > 1f ? nearest : 70f;
+    }
+
+    static void MatchButton(Button created, Button sample)
+    {
+        if (created == null || sample == null)
+            return;
+
+        RectTransform createdRect = created.GetComponent<RectTransform>();
+        RectTransform sampleRect = sample.GetComponent<RectTransform>();
+        if (createdRect != null && sampleRect != null)
+        {
+            createdRect.sizeDelta = sampleRect.sizeDelta;
+            createdRect.localScale = sampleRect.localScale;
+        }
+
+        TextMeshProUGUI sampleLabel = sample.GetComponentInChildren<TextMeshProUGUI>();
+        TextMeshProUGUI createdLabel = created.GetComponentInChildren<TextMeshProUGUI>();
+        if (sampleLabel == null || createdLabel == null)
+            return;
+
+        createdLabel.fontSize = sampleLabel.fontSize;
+        createdLabel.enableAutoSizing = false;
+    }
+
+    void ShiftButton(string name, float deltaY)
+    {
+        Button button = FindButton(pauseMenuPanel.transform, name);
+        if (button == null)
+            return;
+        RectTransform rect = button.GetComponent<RectTransform>();
+        if (rect != null)
+            rect.anchoredPosition += new Vector2(0f, deltaY);
+    }
+
+    public void OpenTutorialLog()
+    {
+        if (tutorialLogPanel == null)
+            return;
+
+        AudioManager.UIClick();
+        string[] entries = TutorialPrompt.GetLog();
+        if (tutorialLogText != null)
+        {
+            if (entries == null || entries.Length == 0)
+                tutorialLogText.text = "No tutorials yet.";
+            else
+                tutorialLogText.text = string.Join("\n\n", entries);
+        }
+
+        if (pauseMenuPanel != null)
+            pauseMenuPanel.SetActive(false);
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
+        tutorialLogPanel.SetActive(true);
+        tutorialLogPanel.transform.SetAsLastSibling();
+    }
+
+    public void CloseTutorialLog()
+    {
+        AudioManager.UIBack();
+        if (tutorialLogPanel != null)
+            tutorialLogPanel.SetActive(false);
+        if (isPaused && pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(true);
+            pauseMenuPanel.transform.SetAsLastSibling();
+        }
     }
 
     void EnsureDimmer(Transform hud)
@@ -356,10 +562,11 @@ public class PauseMenu : MonoBehaviour
     {
         GameObject panel = CreatePanel(hud, "PauseMenu", new Vector2(400f, 500f), new Color(0.08f, 0.08f, 0.1f, 0.92f));
         CreateLabel(panel.transform, "PausedTitle", "PAUSED", new Vector2(0f, 210f), new Vector2(360f, 48f), 36f);
-        CreateMenuButton(panel.transform, "Resume", new Vector2(0f, 142f));
-        CreateMenuButton(panel.transform, "Settings", new Vector2(0f, 72f));
-        CreateMenuButton(panel.transform, "Restart Level", new Vector2(0f, -5f));
-        CreateMenuButton(panel.transform, "Main Menu", new Vector2(0f, -85f));
+        CreateMenuButton(panel.transform, "Resume", new Vector2(0f, 168f));
+        CreateMenuButton(panel.transform, "Settings", new Vector2(0f, 98f));
+        CreateMenuButton(panel.transform, "Tutorial Log", new Vector2(0f, 28f));
+        CreateMenuButton(panel.transform, "Restart Level", new Vector2(0f, -42f));
+        CreateMenuButton(panel.transform, "Main Menu", new Vector2(0f, -112f));
         panel.SetActive(false);
         return panel;
     }
@@ -394,7 +601,7 @@ public class PauseMenu : MonoBehaviour
         go.transform.SetParent(parent, false);
         RectTransform rt = go.AddComponent<RectTransform>();
         rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(220f, 36f);
+        rt.sizeDelta = new Vector2(MenuButtonWidth, MenuButtonHeight);
         rt.anchoredPosition = position;
 
         Image image = go.AddComponent<Image>();
@@ -404,7 +611,7 @@ public class PauseMenu : MonoBehaviour
         Button button = go.AddComponent<Button>();
         button.targetGraphic = image;
 
-        CreateLabel(go.transform, "Label", label.ToUpperInvariant(), Vector2.zero, Vector2.zero, 22f, stretch: true);
+        CreateLabel(go.transform, "Label", label, Vector2.zero, Vector2.zero, 22f, stretch: true);
         return button;
     }
 
@@ -505,14 +712,5 @@ public class PauseMenu : MonoBehaviour
     {
         Texture2D tex = Texture2D.whiteTexture;
         return Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 4f);
-    }
-
-    static void WireButton(Button button, UnityEngine.Events.UnityAction action)
-    {
-        if (button == null)
-            return;
-
-        button.onClick.RemoveListener(action);
-        button.onClick.AddListener(action);
     }
 }

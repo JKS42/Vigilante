@@ -1,7 +1,9 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
 /// Spawns a world pickup when an enemy dies so Level 1 can teach "kill → loot pistol".
+/// The pickup appears only after the death animation has finished.
 /// </summary>
 [RequireComponent(typeof(Health))]
 [RequireComponent(typeof(EnemyProfile))]
@@ -42,9 +44,41 @@ public class EnemyWeaponDrop : MonoBehaviour
             return;
 
         dropped = true;
-        Vector3 pos = ResolveDropPosition();
         int ammo = ResolveDropAmmo();
-        WeaponPickup.Spawn(pos, profile.weaponDropIndex, pickupPrefab, ammo);
+        int index = profile.weaponDropIndex;
+        if (index == 1)
+            PistolIntroCinematic.HoldFirstPistolWave();
+        StartCoroutine(DropWhenDeathEnds(ammo, index));
+    }
+
+    IEnumerator DropWhenDeathEnds(int ammo, int index)
+    {
+        EnemyMecanim mecanim = GetComponent<EnemyMecanim>();
+        float elapsed = 0f;
+        yield return null;
+
+        while (elapsed < 12f)
+        {
+            if (mecanim == null || !mecanim.HasAnimator)
+            {
+                if (elapsed >= 0.35f)
+                    break;
+            }
+            else if (mecanim.DeathAnimationFinished)
+            {
+                break;
+            }
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (this == null)
+            yield break;
+
+        Vector3 pos = ResolveDropPosition();
+        WeaponPickup pickup = WeaponPickup.Spawn(pos, index, pickupPrefab, ammo);
+        PistolIntroCinematic.NotifyDropped(pickup, index);
         TutorialPrompt.Notify("weapon_drop");
 
         CombatVfx.SpawnOnomatopoeia(pos + Vector3.up, "LOOT!");
@@ -74,16 +108,47 @@ public class EnemyWeaponDrop : MonoBehaviour
 
     Vector3 ResolveDropPosition()
     {
-        Vector3 origin = transform.position + Vector3.up * 2f;
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.001f)
+            forward = Vector3.forward;
+        forward.Normalize();
+
+        const float ahead = 1.05f;
+        Vector3 chest = transform.position + Vector3.up * 1.1f;
+        float travel = ahead;
+        RaycastHit[] wallHits = Physics.RaycastAll(chest, forward, ahead, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < wallHits.Length; i++)
+        {
+            Collider col = wallHits[i].collider;
+            if (col == null || col.isTrigger || IsCharacterOrPickup(col))
+                continue;
+            travel = Mathf.Min(travel, Mathf.Max(0.35f, wallHits[i].distance - 0.3f));
+        }
+
+        Vector3 drop = chest + forward * travel;
+        return SnapToGround(drop) + Vector3.up * DropHover;
+    }
+
+    static bool IsCharacterOrPickup(Collider col)
+    {
+        return col.GetComponentInParent<EnemyAI>() != null
+            || col.GetComponentInParent<PlayerMovement>() != null
+            || col.GetComponentInParent<WeaponPickup>() != null;
+    }
+
+    Vector3 SnapToGround(Vector3 drop)
+    {
+        Vector3 origin = drop + Vector3.up * 1.5f;
         RaycastHit[] hits = Physics.RaycastAll(origin, Vector3.down, 6f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
 
         bool found = false;
-        Vector3 ground = transform.position;
+        Vector3 ground = drop;
         float bestY = float.PositiveInfinity;
         for (int i = 0; i < hits.Length; i++)
         {
             Collider col = hits[i].collider;
-            if (col == null || col.transform.root == transform.root)
+            if (col == null || col.isTrigger || col.transform.root == transform.root)
                 continue;
 
             if (hits[i].point.y < bestY)
@@ -94,9 +159,6 @@ public class EnemyWeaponDrop : MonoBehaviour
             }
         }
 
-        if (found)
-            return ground + Vector3.up * DropHover;
-
-        return transform.position + Vector3.up * DropHover;
+        return found ? ground : drop;
     }
 }

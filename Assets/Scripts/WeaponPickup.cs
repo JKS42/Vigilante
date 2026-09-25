@@ -37,6 +37,8 @@ public class WeaponPickup : MonoBehaviour
     {
         basePos = transform.position;
         bobPhase = Random.Range(0f, Mathf.PI * 2f);
+        CelOutline.ApplyHierarchy(gameObject, CelOutline.PickupOutlineColor);
+        PickupBeacon.Attach(transform);
     }
 
     void Update()
@@ -72,7 +74,14 @@ public class WeaponPickup : MonoBehaviour
             TutorialPrompt.Notify("weapon_pickup");
         }
 
+        PistolIntroCinematic.NotifyCollected(this);
         Destroy(gameObject);
+    }
+
+    void OnDestroy()
+    {
+        if (!collected)
+            PistolIntroCinematic.NotifyLost(this);
     }
 
     public static void RegisterPrefabs(GameObject pistol, GameObject shotgun, GameObject rifle)
@@ -102,7 +111,7 @@ public class WeaponPickup : MonoBehaviour
         pickup.ammoGrant = ammoGrant;
         pickup.basePos = position;
         pickup.collected = false;
-        CelOutline.ApplyHierarchy(go);
+        CelOutline.ApplyHierarchy(go, CelOutline.PickupOutlineColor);
         Object.Destroy(go, 90f);
         return pickup;
     }
@@ -165,7 +174,7 @@ public class WeaponPickup : MonoBehaviour
             Material mat = CelMaterial.Create(color, "WeaponPickup");
             if (mat != null)
                 r.sharedMaterial = mat;
-            CelOutline.Apply(r);
+            CelOutline.Apply(r, CelOutline.PickupOutlineColor);
         }
 
         WeaponPickup pickup = go.AddComponent<WeaponPickup>();

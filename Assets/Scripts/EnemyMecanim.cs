@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -43,13 +44,13 @@ public class EnemyMecanim : MonoBehaviour
                 return false;
 
             AnimatorStateInfo current = animator.GetCurrentAnimatorStateInfo(0);
-            if (current.IsName("Shoot"))
+            if (current.IsName("Shoot") || current.IsName("Strike"))
                 return true;
 
             if (animator.IsInTransition(0))
             {
                 AnimatorStateInfo next = animator.GetNextAnimatorStateInfo(0);
-                if (next.IsName("Shoot"))
+                if (next.IsName("Shoot") || next.IsName("Strike"))
                     return true;
             }
 
@@ -96,6 +97,11 @@ public class EnemyMecanim : MonoBehaviour
         animator = GetComponent<Animator>();
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
+        if (animator != null)
+        {
+            animator.applyRootMotion = false;
+            animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+        }
         agent = GetComponent<NavMeshAgent>();
         if (agent == null)
             agent = GetComponentInParent<NavMeshAgent>();
@@ -138,7 +144,7 @@ public class EnemyMecanim : MonoBehaviour
         if (dead || animator == null || !animator.enabled)
             return;
 
-        // While a shoot is locked in, keep locomotion flags clear so Shoot isn't interrupted.
+        // While a swing or shot is locked in, keep locomotion flags clear so it isn't interrupted.
         if (IsFiring || IsPlayingShoot)
         {
             currentSpeed = 0f;
@@ -148,6 +154,7 @@ public class EnemyMecanim : MonoBehaviour
             animator.SetBool("Moving", false);
             animator.SetBool("Backing", false);
             animator.SetBool("Strafing", false);
+            SetUpperIdle(false);
             return;
         }
 
@@ -171,6 +178,36 @@ public class EnemyMecanim : MonoBehaviour
         animator.SetBool("Moving", currentSpeed > moveThreshold);
         animator.SetBool("Backing", currentSpeed > moveThreshold && forward < -0.35f);
         animator.SetBool("Strafing", currentSpeed > moveThreshold && Mathf.Abs(strafe) > Mathf.Abs(forward) + 0.1f);
+        // Legs keep the run. Torso stays on the idle pose while moving either direction.
+        SetUpperIdle(currentSpeed > moveThreshold);
+    }
+
+    void SetUpperIdle(bool on)
+    {
+        if (animator == null)
+            return;
+        int layer = animator.GetLayerIndex("UpperIdle");
+        if (layer < 0)
+            return;
+        animator.SetLayerWeight(layer, on ? 1f : 0f);
+    }
+
+    public float MeleeImpactDelay => ShootCycleDuration * 0.38f;
+
+    public bool PlayMelee()
+    {
+        if (dead || animator == null || IsFiring)
+            return false;
+
+        currentSpeed = 0f;
+        animator.SetBool("Moving", false);
+        animator.SetBool("Backing", false);
+        animator.SetBool("Strafing", false);
+        SetUpperIdle(false);
+        animator.ResetTrigger(FireId);
+        animator.CrossFadeInFixedTime("Strike", 0.06f, 0, 0f);
+        fireBusyUntil = Time.time + ShootCycleDuration;
+        return true;
     }
 
     public bool PlayFire()
@@ -209,10 +246,44 @@ public class EnemyMecanim : MonoBehaviour
 
         dead = true;
         fireBusyUntil = 0f;
+        SetUpperIdle(false);
         animator.SetFloat(DieVariantId, Mathf.Clamp(variant, 0, 5));
         animator.ResetTrigger(DieId);
         animator.SetTrigger(DieId);
         animator.SetBool("Moving", false);
+    }
+
+    public bool DeathAnimationFinished
+    {
+        get
+        {
+            if (!dead || animator == null)
+                return false;
+            if (animator.IsInTransition(0))
+                return false;
+
+            AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
+            return info.IsName("Die") && info.normalizedTime >= 0.98f;
+        }
+    }
+
+    public void ReleaseCorpseWhenDeathEnds()
+    {
+        StartCoroutine(ReleaseCorpse());
+    }
+
+    IEnumerator ReleaseCorpse()
+    {
+        float elapsed = 0f;
+        yield return null;
+        while (elapsed < 12f && !DeathAnimationFinished)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (this != null)
+            Destroy(gameObject, 0.75f);
     }
 
     public static int ResolveDeathVariant(Transform enemy, Vector3 hitPoint, Vector3 hitDir, bool headshot)

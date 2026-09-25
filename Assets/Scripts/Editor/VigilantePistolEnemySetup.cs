@@ -20,7 +20,7 @@ public static class VigilantePistolEnemySetup
     const string IdlePath = Folder + "/Pistol Idle (2).fbx";
     const string RunPath = Folder + "/Pistol Run (1).fbx";
     const string StrafePath = Folder + "/Pistol Strafe.fbx";
-    const string WalkBackPath = Folder + "/Pistol Walk Backward.fbx";
+    const string WalkBackPath = Folder + "/Pistol Run Backward (1).fbx";
     const string ShootPath = Folder + "/Shooting.fbx";
     const string HitPath = Folder + "/Hit Reaction (1).fbx";
     const string DeathPath = Folder + "/Death (1).fbx";

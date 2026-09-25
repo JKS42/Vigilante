@@ -48,6 +48,7 @@ public static class LevelCombatBootstrap
         EnemySquad.EnsureExists();
         EnsureNavMesh();
         EnsureMainDirectionalLight();
+        FlickerDamagedLights();
         SceneFade.PlayLevelIntro();
         EnsureCampaignSystems();
     }
@@ -83,6 +84,43 @@ public static class LevelCombatBootstrap
         sun.shadowStrength = 1f;
         sun.shadowBias = 0.05f;
         sun.shadowNormalBias = 0.4f;
+    }
+
+    /// <summary>
+    /// At most two random point lights flicker like damaged bulbs, and they sit dimmer than the rest.
+    /// </summary>
+    static void FlickerDamagedLights()
+    {
+        const int maxFlickering = 2;
+        Light[] lights = Object.FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        var candidates = new System.Collections.Generic.List<Light>();
+        int already = 0;
+        for (int i = 0; i < lights.Length; i++)
+        {
+            Light light = lights[i];
+            if (light == null || light.type != LightType.Point)
+                continue;
+            if (light.GetComponent<PickupBeacon>() != null)
+                continue;
+            if (light.GetComponent<DamagedLightFlicker>() != null)
+            {
+                already++;
+                continue;
+            }
+
+            candidates.Add(light);
+        }
+
+        int slots = Mathf.Max(0, maxFlickering - already);
+        for (int i = 0; i < slots && i < candidates.Count; i++)
+        {
+            int pick = Random.Range(i, candidates.Count);
+            Light chosen = candidates[pick];
+            candidates[pick] = candidates[i];
+
+            DamagedLightFlicker flicker = chosen.gameObject.AddComponent<DamagedLightFlicker>();
+            flicker.Configure(i);
+        }
     }
 
     public static void EnsureCampaignSystems()

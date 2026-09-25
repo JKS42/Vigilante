@@ -170,7 +170,7 @@ public class EnemyProfile : MonoBehaviour
         while (t != null)
         {
             string n = t.name;
-            if (n == "PistolVisual" || n == "EnemyPistol")
+            if (n == "PistolVisual" || n == "EnemyPistol" || n == "BatVisual" || n == "EnemyBat")
                 return true;
             t = t.parent;
         }
@@ -179,7 +179,7 @@ public class EnemyProfile : MonoBehaviour
 
     static void ApplyArchetypeBodyVisual(GameObject go, EnemyArchetype type)
     {
-        if (type == EnemyArchetype.Pistol)
+        if (type == EnemyArchetype.Pistol || type == EnemyArchetype.Melee)
             return;
 
         Transform visual = go.transform.Find("PistolVisual");
@@ -225,15 +225,13 @@ public class EnemyProfile : MonoBehaviour
                 || ContainsIgnoreCase(n, "Shotgun")
                 || ContainsIgnoreCase(n, "Pistol")
                 || ContainsIgnoreCase(n, "Gun")
-                || ContainsIgnoreCase(n, "AR");
+                || IsWeaponMarkedAR(n);
             bool isBat = ContainsIgnoreCase(n, "Bat") && !ContainsIgnoreCase(n, "BatEnemy");
 
             if (type == EnemyArchetype.Melee)
             {
-                if (isGun)
+                if (isGun || IsProBuilderStandIn(t))
                     t.gameObject.SetActive(false);
-                else if (isBat)
-                    t.gameObject.SetActive(true);
             }
             else if (isBat)
             {
@@ -241,6 +239,45 @@ public class EnemyProfile : MonoBehaviour
                 t.gameObject.SetActive(false);
             }
         }
+    }
+
+    static bool IsProBuilderStandIn(Transform t)
+    {
+        Component[] components = t.GetComponents<Component>();
+        for (int i = 0; i < components.Length; i++)
+        {
+            if (components[i] == null)
+                continue;
+            string typeName = components[i].GetType().Name;
+            if (typeName == "ProBuilderMesh" || typeName == "ProBuilderShape")
+                return true;
+        }
+        return false;
+    }
+
+    static bool IsWeaponMarkedAR(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return false;
+
+        int i = 0;
+        while (i < value.Length)
+        {
+            int found = value.IndexOf("AR", i, System.StringComparison.OrdinalIgnoreCase);
+            if (found < 0)
+                return false;
+
+            int after = found + 2;
+            if (after < value.Length && (value[after] == 'm' || value[after] == 'M'))
+            {
+                i = after;
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     static bool ContainsIgnoreCase(string value, string token)

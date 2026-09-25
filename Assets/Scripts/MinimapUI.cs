@@ -91,16 +91,54 @@ public class MinimapUI : MonoBehaviour
             Destroy(triangleTex);
     }
 
+    bool tutorialHighlight;
+    Canvas highlightCanvas;
+    Vector3 highlightBaseScale = Vector3.one;
+
+    public void BeginTutorialHighlight()
+    {
+        tutorialHighlight = true;
+        if (root != null)
+            highlightBaseScale = root.localScale;
+        if (highlightCanvas == null)
+            highlightCanvas = GetComponent<Canvas>();
+        if (highlightCanvas == null)
+            highlightCanvas = gameObject.AddComponent<Canvas>();
+        highlightCanvas.overrideSorting = true;
+        highlightCanvas.sortingOrder = 65;
+        if (group != null)
+            group.alpha = 1f;
+    }
+
+    public void EndTutorialHighlight()
+    {
+        tutorialHighlight = false;
+        if (root != null)
+            root.localScale = highlightBaseScale;
+        if (highlightCanvas != null)
+            highlightCanvas.overrideSorting = false;
+    }
+
     void LateUpdate()
     {
         if (root == null)
             return;
 
-        bool hide = ShouldHide();
-        if (group != null)
-            group.alpha = hide ? 0f : 1f;
-        if (hide)
-            return;
+        if (tutorialHighlight)
+        {
+            if (group != null)
+                group.alpha = 1f;
+            float pulse = 1.08f + Mathf.Sin(Time.unscaledTime * 5.5f) * 0.04f;
+            root.localScale = highlightBaseScale * pulse;
+        }
+        else
+        {
+            bool hide = ShouldHide();
+            if (group != null)
+                group.alpha = hide ? 0f : 1f;
+            if (hide)
+                return;
+        }
 
         if (player == null)
         {

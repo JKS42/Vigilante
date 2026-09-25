@@ -29,6 +29,7 @@ public class Break : MonoBehaviour
     static Material s_crackedPropMat;
 
     public bool IsBroken => isBroken;
+    public bool IsIntactWall => !isBroken && IsWallPiece();
 
     void Start()
     {
@@ -182,7 +183,10 @@ public class Break : MonoBehaviour
         CombatStimulus.EmitBreach(transform.position);
         AudioManager.BreakObject(transform.position);
         CombatVfx.SpawnOnomatopoeia(transform.position + Vector3.up * 0.5f, "CRACK!");
-        CombatVfx.SpawnImpact(hitPoint, Vector3.up);
+        if (wall)
+            CombatVfx.PlayWallSmoke(hitPoint, launchDir);
+        else
+            CombatVfx.SpawnImpact(hitPoint, Vector3.up);
 
         LaunchPiece(launchDir, impulse, instigator, hitPoint, wall);
         SpawnDebris(launchDir, instigator, wall);
@@ -191,7 +195,7 @@ public class Break : MonoBehaviour
         if (wall)
         {
             LevelCombatBootstrap.ScheduleNavMeshRebuild();
-            TutorialPrompt.Notify("wall_broken");
+            TutorialPrompt.NotifyWallBroken(this);
         }
 
         if (!destroyScheduled)

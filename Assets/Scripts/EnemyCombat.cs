@@ -68,7 +68,9 @@ public class EnemyCombat : MonoBehaviour
             mecanim = GetComponentInChildren<EnemyMecanim>();
 
         EnemyProfile profile = GetComponent<EnemyProfile>();
-        if (profile != null && profile.archetype != EnemyArchetype.Pistol)
+        if (profile != null
+            && profile.archetype != EnemyArchetype.Pistol
+            && profile.archetype != EnemyArchetype.Melee)
             mecanim = null;
 
         ResolveMuzzle(createFallback: false);
@@ -257,12 +259,57 @@ public class EnemyCombat : MonoBehaviour
 
         nextFireTime = Time.time + 0.7f;
 
+        if (meleeOnly && mecanim != null && mecanim.HasAnimator)
+        {
+            if (!mecanim.PlayMelee())
+                return false;
+
+            nextFireTime = Time.time + Mathf.Max(0.75f, mecanim.ShootCycleDuration);
+            return true;
+        }
+
+        ApplyMeleeHit();
+        return true;
+    }
+
+    public bool IsMeleeSwinging =>
+        meleeOnly && mecanim != null && mecanim.IsPlayingShoot;
+
+    public bool NotifyBatContact(Collider col)
+    {
+        if (col == null || !IsMeleeSwinging || IsOwnCollider(col))
+            return false;
+
+        if (col.CompareTag("Breakable") || HasBreakable(col.transform))
+        {
+            Break br = col.GetComponentInParent<Break>();
+            if (br != null)
+                br.BreakApart(transform.forward * 14f, gameObject, col.ClosestPoint(transform.position));
+            return false;
+        }
+
+        if (!IsPlayerHit(col))
+            return false;
+
+        Health health = col.GetComponentInParent<Health>();
+        if (health == null || health.transform.root == transform.root)
+            return false;
+
+        Vector3 hitPoint = col.ClosestPoint(transform.position);
+        health.TakeDamage(meleeDamage, hitPoint, gameObject);
+        AudioManager.MeleeHit(hitPoint);
+        CombatVfx.SpawnOnomatopoeia(hitPoint, "WHACK!");
+        CombatVfx.SpawnImpact(hitPoint, -transform.forward);
+        return true;
+    }
+
+    void ApplyMeleeHit()
+    {
         Vector3 origin = transform.position + Vector3.up * 1f + transform.forward * 0.55f;
         AudioManager.MeleeHit(origin);
         CombatVfx.SpawnOnomatopoeia(origin, "WHACK!");
 
         Collider[] hits = Physics.OverlapSphere(origin, meleeRadius, hitMask, QueryTriggerInteraction.Collide);
-        bool anyHit = false;
         Health damaged = null;
         for (int i = 0; i < hits.Length; i++)
         {
@@ -288,10 +335,7 @@ public class EnemyCombat : MonoBehaviour
             health.TakeDamage(meleeDamage, col.ClosestPoint(origin), gameObject);
             CombatVfx.SpawnImpact(col.ClosestPoint(origin), -transform.forward);
             damaged = health;
-            anyHit = true;
         }
-
-        return anyHit;
     }
 
     public bool TryFireAt(Transform target)
@@ -386,7 +430,8 @@ public class EnemyCombat : MonoBehaviour
 
         CombatStimulus.EmitNoise(origin, weaponKind == EnemyWeaponKind.Shotgun ? 28f : 22f, StimulusType.Gunfire);
         AudioManager.EnemyGunshot(origin, weaponKind);
-        CombatVfx.SpawnMuzzleFlash(origin, aimDir);
+        ResolveMuzzle(createFallback: true);
+        CombatVfx.SpawnMuzzleFlash(origin, aimDir, 1f, muzzle != null ? muzzle : transform);
         DialogueManager.EnemyBark(transform.position, "fire");
 
         bool anyHit = false;
@@ -404,13 +449,13 @@ public class EnemyCombat : MonoBehaviour
                 Break br = hit.collider.GetComponentInParent<Break>();
                 if (br != null)
                     br.BreakApart(dir * 14f, gameObject, hit.point);
-                CombatVfx.SpawnImpact(hit.point, hit.normal);
+                CombatVfx.PlayBulletHit(hit.point, hit.normal);
                 continue;
             }
 
             if (!IsPlayerHit(hit.collider))
             {
-                CombatVfx.SpawnImpact(hit.point, hit.normal);
+                CombatVfx.PlayBulletHit(hit.point, hit.normal);
                 continue;
             }
 
@@ -418,7 +463,7 @@ public class EnemyCombat : MonoBehaviour
             if (health != null)
             {
                 health.TakeDamage(GetShotDamage(), hit.point, gameObject);
-                CombatVfx.SpawnImpact(hit.point, hit.normal);
+                CombatVfx.PlayBulletHit(hit.point, hit.normal);
                 CombatVfx.SpawnOnomatopoeia(hit.point, "BANG!");
                 anyHit = true;
             }

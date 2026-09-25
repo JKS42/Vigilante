@@ -77,7 +77,8 @@ public class Shotgun : Weapon
         else
             AudioManager.EnemyGunshot(spawnPos, EnemyWeaponKind.Shotgun);
 
-        CombatVfx.SpawnMuzzleFlash(spawnPos, aimDir);
+        Transform muzzle = bulletSpawnPoint != null ? bulletSpawnPoint : transform;
+        CombatVfx.SpawnMuzzleFlash(spawnPos, aimDir, 0.28f, muzzle);
         CombatVfx.SpawnOnomatopoeia(spawnPos + aimDir * 0.5f, "BOOM!");
         NoiseEmitter.Emit(spawnPos, shotNoiseRadius, StimulusType.Gunfire);
     }

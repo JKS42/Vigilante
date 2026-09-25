@@ -92,7 +92,9 @@ public class EnemyAI : MonoBehaviour
         if (mecanim == null)
             mecanim = GetComponentInChildren<EnemyMecanim>();
 
-        if (profile != null && profile.archetype != EnemyArchetype.Pistol)
+        if (profile != null
+            && profile.archetype != EnemyArchetype.Pistol
+            && profile.archetype != EnemyArchetype.Melee)
         {
             Transform pistolVisual = transform.Find("PistolVisual");
             if (pistolVisual != null)
@@ -395,26 +397,20 @@ public class EnemyAI : MonoBehaviour
             lastHitDir = (transform.position - hitPoint).normalized;
         }
 
+        if (player == null)
+            FindPlayer();
+
+        ReleaseCover();
+        pendingAttackAfterCover = false;
+
         EnemySquad.Instance?.BroadcastAlert(this, lastKnownPlayerPos);
         DialogueManager.EnemyBark(transform.position, "hurt");
 
-        float coverRoll = hurtCoverChance * CoverPref;
-        bool exposed = state != EnemyState.TakeCover && state != EnemyState.Attack;
-        bool wantCover = (exposed || Random.value <= coverRoll) && Aggression < 0.85f;
+        if (state != EnemyState.Attack)
+            SetState(EnemyState.Chase);
 
-        if (wantCover && state != EnemyState.TakeCover)
-        {
-            pendingAttackAfterCover = true;
-            BeginTakeCover();
-        }
-        else if (Aggression > 0.7f)
-        {
-            SetState(EnemyState.Chase);
-        }
-        else if (state == EnemyState.Idle || state == EnemyState.Patrol || state == EnemyState.Investigate || state == EnemyState.Search)
-        {
-            SetState(EnemyState.Chase);
-        }
+        Vector3 face = instigator != null ? instigator.transform.position : lastKnownPlayerPos;
+        FaceTarget(face);
     }
 
     void HandleDied()
@@ -428,12 +424,14 @@ public class EnemyAI : MonoBehaviour
         }
 
         float despawnDelay = 0.85f;
+        bool waitsForDeathClip = false;
         if (mecanim != null && mecanim.HasAnimator)
         {
             bool headshot = lastHitPoint.y > transform.position.y + 1.35f;
             int variant = EnemyMecanim.ResolveDeathVariant(transform, lastHitPoint, lastHitDir, headshot);
             mecanim.PlayDeath(variant);
-            despawnDelay = 2.6f;
+            mecanim.ReleaseCorpseWhenDeathEnds();
+            waitsForDeathClip = true;
         }
         else
         {
@@ -449,7 +447,8 @@ public class EnemyAI : MonoBehaviour
         CombatVfx.SpawnDeathKo(transform.position + Vector3.up * 1.5f);
         TutorialPrompt.Notify("enemy_killed");
         enabled = false;
-        Destroy(gameObject, despawnDelay);
+        if (!waitsForDeathClip)
+            Destroy(gameObject, despawnDelay);
     }
 
     void TickIdle(bool canSee)
@@ -743,6 +742,13 @@ public class EnemyAI : MonoBehaviour
         {
             if (combat.MeleeOnly)
             {
+                if (mecanim != null && mecanim.BlocksCombat)
+                {
+                    SetAgentStopped(true);
+                    FaceTarget(player.position);
+                    return;
+                }
+
                 if (dist <= combat.MeleeRange)
                     combat.TryAttack(player);
             }
@@ -945,10 +951,12 @@ public class EnemyAI : MonoBehaviour
             return false;
         }
 
-        transform.position = hit.position;
         agent.enabled = true;
         agent.Warp(hit.position);
         homePos = hit.position;
+        Vector3 standing = hit.position + Vector3.up * agent.baseOffset;
+        if (Mathf.Abs(transform.position.y - standing.y) > 0.35f)
+            transform.position = standing;
         return agent.isOnNavMesh;
     }
 

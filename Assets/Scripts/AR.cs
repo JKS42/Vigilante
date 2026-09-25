@@ -63,19 +63,13 @@ public class AR : Weapon
 
         Bullet.Spawn(bulletPrefab, spawnPos, aimDir, bulletSpeed, Damage, transform.root.gameObject, bulletScale);
 
-        if (muzzleFlash != null)
-        {
-            muzzleFlash.transform.position = spawnPos;
-            muzzleFlash.Play();
-        }
+        Transform muzzle = bulletSpawnPoint != null ? bulletSpawnPoint : transform;
+        CombatVfx.SpawnMuzzleFlash(spawnPos, lookDir, 0.28f, muzzle);
 
         if (shotSound != null && audioSource != null)
             audioSource.PlayOneShot(shotSound);
         else
             AudioManager.EnemyGunshot(spawnPos, EnemyWeaponKind.Rifle);
-
-        if (muzzleFlash == null)
-            CombatVfx.SpawnMuzzleFlash(spawnPos, lookDir);
 
         NoiseEmitter.Emit(spawnPos, shotNoiseRadius, StimulusType.Gunfire);
     }

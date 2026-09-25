@@ -128,6 +128,7 @@ public class UIManager : MonoBehaviour
         RefreshWaveTimer();
         RefreshEnemyCount();
         TickVignette();
+        TickHealthHighlight();
     }
 
     void BindPlayerHealth()
@@ -201,6 +202,80 @@ public class UIManager : MonoBehaviour
         RefreshHealthSlider();
         vignetteAlpha = 0.75f;
         ShowDeathOverlay();
+    }
+
+    bool healthHighlight;
+    Canvas healthHighlightCanvas;
+    Image healthHighlightGlow;
+    Vector3 healthBaseScale = Vector3.one;
+
+    public void BeginHealthTutorialHighlight()
+    {
+        if (healthSlider == null)
+        {
+            GameObject sliderGo = GameObject.Find("Health");
+            if (sliderGo != null)
+                healthSlider = sliderGo.GetComponent<Slider>();
+        }
+
+        if (healthSlider == null)
+            return;
+
+        RectTransform bar = healthSlider.transform as RectTransform;
+        if (bar == null)
+            return;
+
+        healthBaseScale = bar.localScale;
+        healthHighlight = true;
+
+        if (healthHighlightCanvas == null)
+            healthHighlightCanvas = healthSlider.GetComponent<Canvas>();
+        if (healthHighlightCanvas == null)
+            healthHighlightCanvas = healthSlider.gameObject.AddComponent<Canvas>();
+        healthHighlightCanvas.overrideSorting = true;
+        healthHighlightCanvas.sortingOrder = 65;
+
+        if (healthHighlightGlow == null)
+        {
+            GameObject glowGo = new GameObject("HealthHighlight");
+            glowGo.transform.SetParent(healthSlider.transform, false);
+            glowGo.transform.SetAsFirstSibling();
+            healthHighlightGlow = glowGo.AddComponent<Image>();
+            healthHighlightGlow.sprite = VigilanteUiStyle.WhiteSprite();
+            healthHighlightGlow.raycastTarget = false;
+            RectTransform glowRt = healthHighlightGlow.rectTransform;
+            glowRt.anchorMin = Vector2.zero;
+            glowRt.anchorMax = Vector2.one;
+            glowRt.offsetMin = new Vector2(-10f, -8f);
+            glowRt.offsetMax = new Vector2(10f, 8f);
+        }
+
+        healthHighlightGlow.gameObject.SetActive(true);
+    }
+
+    public void EndHealthTutorialHighlight()
+    {
+        healthHighlight = false;
+        if (healthSlider != null)
+            healthSlider.transform.localScale = healthBaseScale;
+        if (healthHighlightGlow != null)
+            healthHighlightGlow.gameObject.SetActive(false);
+        if (healthHighlightCanvas != null)
+            healthHighlightCanvas.overrideSorting = false;
+    }
+
+    void TickHealthHighlight()
+    {
+        if (!healthHighlight || healthSlider == null)
+            return;
+
+        float pulse = 1.06f + Mathf.Sin(Time.unscaledTime * 5.5f) * 0.04f;
+        healthSlider.transform.localScale = healthBaseScale * pulse;
+        if (healthHighlightGlow != null)
+        {
+            float alpha = 0.75f + Mathf.Sin(Time.unscaledTime * 5.5f) * 0.25f;
+            healthHighlightGlow.color = new Color(1f, 0.2f, 0.16f, alpha);
+        }
     }
 
     void RefreshHealthSlider()

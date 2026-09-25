@@ -54,7 +54,8 @@ public class Pistol : Weapon
         else
             AudioManager.EnemyGunshot(spawnPos, EnemyWeaponKind.Pistol);
 
-        CombatVfx.SpawnMuzzleFlash(spawnPos, lookDir);
+        Transform muzzle = bulletSpawnPoint != null ? bulletSpawnPoint : transform;
+        CombatVfx.SpawnMuzzleFlash(spawnPos, lookDir, 0.28f, muzzle);
         CombatVfx.SpawnOnomatopoeia(spawnPos + lookDir * 0.6f, "BLAM!");
         NoiseEmitter.Emit(spawnPos, shotNoiseRadius, StimulusType.Gunfire);
     }

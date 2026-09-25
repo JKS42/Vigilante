@@ -29,6 +29,8 @@ public class MedKitPickup : MonoBehaviour
     {
         basePos = transform.position;
         bobPhase = Random.Range(0f, Mathf.PI * 2f);
+        CelOutline.ApplyHierarchy(gameObject, CelOutline.PickupOutlineColor);
+        PickupBeacon.Attach(transform);
     }
 
     void Update()
@@ -72,7 +74,7 @@ public class MedKitPickup : MonoBehaviour
                 pickup = go.GetComponentInChildren<MedKitPickup>();
             if (pickup == null)
                 pickup = go.AddComponent<MedKitPickup>();
-            CelOutline.ApplyHierarchy(go);
+            CelOutline.ApplyHierarchy(go, CelOutline.PickupOutlineColor);
             return pickup;
         }
 
@@ -100,7 +102,7 @@ public class MedKitPickup : MonoBehaviour
             Material mat = CelMaterial.Create(new Color(0.85f, 0.2f, 0.22f), "MedKit");
             if (mat != null)
                 r.sharedMaterial = mat;
-            CelOutline.Apply(r);
+            CelOutline.Apply(r, CelOutline.PickupOutlineColor);
         }
 
         MedKitPickup pickup = go.AddComponent<MedKitPickup>();

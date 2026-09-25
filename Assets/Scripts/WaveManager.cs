@@ -32,6 +32,7 @@ public class WaveManager : MonoBehaviour
     public static WaveManager Instance { get; private set; }
 
     [SerializeField] GameObject enemyPrefab;
+    [SerializeField] GameObject meleePrefab;
     [SerializeField] GameObject shotgunPrefab;
     [SerializeField] GameObject riflePrefab;
     [SerializeField] GameObject bossPrefab;
@@ -61,10 +62,28 @@ public class WaveManager : MonoBehaviour
     int waveIndex;
     int spawnedThisWave;
     int nextPointIndex;
+    readonly HashSet<int> usedSpawnPoints = new HashSet<int>();
     float timer;
     bool started;
     int enemiesKilled;
     bool paused;
+    bool holdNextWave;
+    bool preferDistantSpawns;
+    bool scriptedSpawn;
+    bool hasReservedPose;
+    Pose reservedPose;
+    int reservedLocation = -1;
+    List<SpawnLocation> spawnLocations;
+    int[] locationSpawnCounts;
+    int[] locationPickPenalty;
+
+    const float LocationClusterRadius = 12f;
+
+    class SpawnLocation
+    {
+        public Vector3 center;
+        public readonly List<int> points = new List<int>();
+    }
 
     public int CurrentWaveIndex => waveIndex;
     public int TotalWaves => waves != null ? waves.Count : 0;
@@ -275,7 +294,7 @@ public class WaveManager : MonoBehaviour
 
     void Update()
     {
-        if (!started || paused || phase == Phase.Complete)
+        if (!started || paused || scriptedSpawn || phase == Phase.Complete)
             return;
 
         PruneDead();
@@ -303,6 +322,7 @@ public class WaveManager : MonoBehaviour
         waveIndex = index;
         spawnedThisWave = 0;
         nextPointIndex = 0;
+        usedSpawnPoints.Clear();
         timer = 0f;
         phase = Phase.Delay;
         OnWaveStarted?.Invoke(waveIndex);
@@ -387,48 +407,320 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
+        if (holdNextWave)
+            return;
+
         bool timedOut = CurrentWave().maxWaitBeforeNext > 0f && timer >= CurrentWave().maxWaitBeforeNext;
         if (cleared || timedOut)
             BeginWave(waveIndex + 1);
     }
 
-    bool TrySpawnNext()
+    public void HoldFollowingWave()
     {
-        if (spawnPoints == null || spawnPoints.Count == 0)
+        holdNextWave = true;
+    }
+
+    public void ReleaseFollowingWave()
+    {
+        holdNextWave = false;
+    }
+
+    public void UseDistantSpawns()
+    {
+        preferDistantSpawns = true;
+    }
+
+    public void BeginScriptedFollowingWave()
+    {
+        holdNextWave = false;
+        if (waves == null || waveIndex >= waves.Count - 1)
+            return;
+
+        scriptedSpawn = true;
+        hasReservedPose = false;
+        BeginWave(waveIndex + 1);
+        phase = Phase.Spawning;
+        spawnedThisWave = 0;
+        timer = 0f;
+    }
+
+    public bool HasScriptedSpawnsRemaining
+    {
+        get
+        {
+            if (!scriptedSpawn || waves == null || waveIndex < 0 || waveIndex >= waves.Count || waves[waveIndex] == null)
+                return false;
+            return spawnedThisWave < waves[waveIndex].enemyCount;
+        }
+    }
+
+    public bool PreviewScriptedSpawn(out Vector3 position)
+    {
+        position = default;
+        if (!HasScriptedSpawnsRemaining)
             return false;
 
-        int attempts = 0;
-        int maxAttempts = Mathf.Max(8, spawnPoints.Count * 4);
-        while (attempts < maxAttempts)
+        if (!hasReservedPose)
         {
-            WaveSpawnPoint point = spawnPoints[nextPointIndex % spawnPoints.Count];
-            nextPointIndex++;
-            attempts++;
+            if (!TryPickSpawnPose(out reservedPose))
+                return false;
+            hasReservedPose = true;
+        }
 
-            if (point == null)
-                continue;
+        position = reservedPose.position;
+        return true;
+    }
 
-            if (!TryGetClearSpawnPose(point, out Pose pose))
-                continue;
+    public bool CommitScriptedSpawn(out Vector3 position)
+    {
+        position = default;
+        if (!PreviewScriptedSpawn(out position))
+            return false;
 
-            GameObject go = SpawnEnemy(pose.position, pose.rotation, CurrentWave());
-            if (go == null)
-                continue;
+        Pose pose = reservedPose;
+        hasReservedPose = false;
+        if (!SpawnAtPose(pose))
+            return false;
 
-            EnemyAI ai = go.GetComponent<EnemyAI>();
-            if (ai == null)
-            {
-                Debug.LogWarning("WaveManager: spawned object has no EnemyAI.", go);
-                Destroy(go);
-                continue;
-            }
+        position = pose.position;
+        return true;
+    }
 
-            spawnedAlive.Add(ai);
-            spawnedThisWave++;
-            return true;
+    public void EndScriptedSpawn()
+    {
+        scriptedSpawn = false;
+        hasReservedPose = false;
+        if (phase != Phase.Spawning)
+            return;
+
+        if (waves != null && waveIndex >= 0 && waveIndex < waves.Count && waves[waveIndex] != null
+            && spawnedThisWave < waves[waveIndex].enemyCount)
+        {
+            timer = 0f;
+            return;
+        }
+
+        EnterActive();
+    }
+
+    bool TrySpawnNext()
+    {
+        for (int guard = 0; guard < 6; guard++)
+        {
+            if (!TryPickSpawnPose(out Pose pose))
+                return false;
+            if (SpawnAtPose(pose))
+                return true;
         }
 
         return false;
+    }
+
+    bool TryPickSpawnPose(out Pose pose)
+    {
+        pose = default;
+        if (spawnPoints == null || spawnPoints.Count == 0)
+            return false;
+
+        int closest = -1;
+        if (preferDistantSpawns && spawnPoints.Count > 1 && TryGetPlayerPosition(out Vector3 origin))
+            closest = ClosestSpawnIndex(origin);
+
+        int count = spawnPoints.Count;
+        for (int pass = 0; pass < 2; pass++)
+        {
+            for (int n = 0; n < count; n++)
+            {
+                int index = (nextPointIndex + n) % count;
+                if (pass == 0 && closest >= 0 && index == closest)
+                    continue;
+                if (pass == 0 && usedSpawnPoints.Contains(index))
+                    continue;
+
+                WaveSpawnPoint point = spawnPoints[index];
+                if (point == null)
+                    continue;
+                if (!TryGetClearSpawnPose(point, out pose))
+                    continue;
+
+                usedSpawnPoints.Add(index);
+                nextPointIndex = index + 1;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    int ClosestSpawnIndex(Vector3 origin)
+    {
+        int closest = -1;
+        float closestDistance = float.PositiveInfinity;
+        for (int i = 0; i < spawnPoints.Count; i++)
+        {
+            if (spawnPoints[i] == null)
+                continue;
+            float distance = HorizontalDistance(spawnPoints[i].position, origin);
+            if (distance >= closestDistance)
+                continue;
+            closestDistance = distance;
+            closest = i;
+        }
+
+        return closest;
+    }
+
+    void EnsureSpawnLocations()
+    {
+        if (spawnLocations != null && locationSpawnCounts != null && locationSpawnCounts.Length == spawnLocations.Count)
+            return;
+
+        spawnLocations = ClusterSpawnLocations();
+        locationSpawnCounts = new int[spawnLocations.Count];
+        locationPickPenalty = new int[spawnLocations.Count];
+    }
+
+    List<SpawnLocation> ClusterSpawnLocations()
+    {
+        int count = spawnPoints.Count;
+        int[] parent = new int[count];
+        for (int i = 0; i < count; i++)
+            parent[i] = i;
+
+        for (int i = 0; i < count; i++)
+        {
+            if (spawnPoints[i] == null)
+                continue;
+            for (int j = i + 1; j < count; j++)
+            {
+                if (spawnPoints[j] == null)
+                    continue;
+                if (HorizontalDistance(spawnPoints[i].position, spawnPoints[j].position) > LocationClusterRadius)
+                    continue;
+                UnionSpawn(parent, i, j);
+            }
+        }
+
+        Dictionary<int, SpawnLocation> groups = new Dictionary<int, SpawnLocation>();
+        for (int i = 0; i < count; i++)
+        {
+            if (spawnPoints[i] == null)
+                continue;
+
+            int root = FindSpawn(parent, i);
+            if (!groups.TryGetValue(root, out SpawnLocation location))
+            {
+                location = new SpawnLocation();
+                groups.Add(root, location);
+            }
+
+            location.points.Add(i);
+            location.center += spawnPoints[i].position;
+        }
+
+        List<SpawnLocation> result = new List<SpawnLocation>();
+        foreach (KeyValuePair<int, SpawnLocation> pair in groups)
+        {
+            SpawnLocation location = pair.Value;
+            if (location.points.Count > 0)
+                location.center /= location.points.Count;
+            result.Add(location);
+        }
+
+        return result;
+    }
+
+    static int FindSpawn(int[] parent, int index)
+    {
+        while (parent[index] != index)
+        {
+            parent[index] = parent[parent[index]];
+            index = parent[index];
+        }
+
+        return index;
+    }
+
+    static void UnionSpawn(int[] parent, int a, int b)
+    {
+        int ra = FindSpawn(parent, a);
+        int rb = FindSpawn(parent, b);
+        if (ra != rb)
+            parent[rb] = ra;
+    }
+
+    int ClosestLocation(Vector3 origin)
+    {
+        int closest = 0;
+        float closestDistance = float.PositiveInfinity;
+        for (int i = 0; i < spawnLocations.Count; i++)
+        {
+            float distance = HorizontalDistance(spawnLocations[i].center, origin);
+            if (distance >= closestDistance)
+                continue;
+            closestDistance = distance;
+            closest = i;
+        }
+
+        return closest;
+    }
+
+    static bool TryGetPlayerPosition(out Vector3 position)
+    {
+        position = default;
+        PlayerMovement movement = UnityEngine.Object.FindFirstObjectByType<PlayerMovement>();
+        if (movement != null)
+        {
+            position = movement.transform.position;
+            return true;
+        }
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+            return false;
+
+        position = player.transform.position;
+        return true;
+    }
+
+    bool SpawnAtPose(Pose pose)
+    {
+        GameObject go = SpawnEnemy(pose.position, pose.rotation, CurrentWave());
+        if (go == null)
+        {
+            NoteSpawnLocation(false);
+            return false;
+        }
+
+        EnemyAI ai = go.GetComponent<EnemyAI>();
+        if (ai == null)
+        {
+            Debug.LogWarning("WaveManager: spawned object has no EnemyAI.", go);
+            Destroy(go);
+            NoteSpawnLocation(false);
+            return false;
+        }
+
+        spawnedAlive.Add(ai);
+        spawnedThisWave++;
+        NoteSpawnLocation(true);
+        return true;
+    }
+
+    void NoteSpawnLocation(bool placed)
+    {
+        if (reservedLocation < 0 || locationSpawnCounts == null || reservedLocation >= locationSpawnCounts.Length)
+        {
+            reservedLocation = -1;
+            return;
+        }
+
+        if (placed)
+            locationSpawnCounts[reservedLocation]++;
+        else if (locationPickPenalty != null && reservedLocation < locationPickPenalty.Length)
+            locationPickPenalty[reservedLocation]++;
+
+        reservedLocation = -1;
     }
 
     const float SpawnSeparation = 1.8f;
@@ -445,7 +737,7 @@ public class WaveManager : MonoBehaviour
 
         // Stay on the authored marker. Wide rings walk enemies through walls
         // onto the outdoor navmesh pad.
-        float[] radii = { 0f, 1.1f, 2f };
+        float[] radii = { 0f, 1.1f, 2f, 2.8f };
         int sectors = 6;
         for (int r = 0; r < radii.Length; r++)
         {
@@ -462,13 +754,6 @@ public class WaveManager : MonoBehaviour
                 pose = new Pose(cleared, rot);
                 return true;
             }
-        }
-
-        if (TryResolveClearPosition(point.position, point.position, out Vector3 fallback)
-            && HorizontalDistance(fallback, point.position) <= 2.2f)
-        {
-            pose = new Pose(fallback, rot);
-            return true;
         }
 
         return false;
@@ -492,7 +777,31 @@ public class WaveManager : MonoBehaviour
             return false;
 
         cleared = hit.position;
-        return !IsOccupiedByEnemy(cleared, ignore);
+        if (IsOccupiedByEnemy(cleared, ignore))
+            return false;
+        return BodyFits(cleared);
+    }
+
+    static bool BodyFits(Vector3 feet)
+    {
+        Vector3 bottom = feet + Vector3.up * 0.4f;
+        Vector3 top = feet + Vector3.up * 1.7f;
+        Collider[] hits = Physics.OverlapCapsule(bottom, top, 0.34f, ~0, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider col = hits[i];
+            if (col == null || col.isTrigger)
+                continue;
+            if (col.GetComponentInParent<PlayerMovement>() != null)
+                continue;
+            if (col.GetComponentInParent<EnemyAI>() != null)
+                continue;
+            if (col.GetComponentInParent<WeaponPickup>() != null)
+                continue;
+            return false;
+        }
+
+        return true;
     }
 
     static bool LooksPlayable(Vector3 position)
@@ -591,16 +900,41 @@ public class WaveManager : MonoBehaviour
             if (ai != null)
             {
                 ai.PlaceOnNavMesh();
-                if (IsOccupiedByEnemy(ai.transform.position, ai)
-                    && TryFindNearbyClear(ai.transform.position, ai, out Vector3 nudged))
+                Vector3 feet = SpawnFeet(ai.transform.position, nav);
+                if (!BodyFits(feet) || IsOccupiedByEnemy(feet, ai))
                 {
-                    ai.transform.position = nudged;
-                    ai.PlaceOnNavMesh();
+                    if (TryFindNearbyClear(position, ai, out Vector3 nudged))
+                    {
+                        feet = nudged;
+                        if (nav != null)
+                        {
+                            nav.enabled = true;
+                            nav.Warp(nudged);
+                            ai.transform.position = nudged + Vector3.up * nav.baseOffset;
+                        }
+                        else
+                            ai.transform.position = nudged;
+                    }
                 }
+
+                if (!BodyFits(feet))
+                {
+                    Destroy(go);
+                    return null;
+                }
+
+                CombatVfx.PlaySpawnBurst(ai.transform.position);
             }
         }
 
         return go;
+    }
+
+    static Vector3 SpawnFeet(Vector3 placed, NavMeshAgent nav)
+    {
+        if (nav == null)
+            return placed;
+        return placed - Vector3.up * nav.baseOffset;
     }
 
     bool TryFindNearbyClear(Vector3 around, EnemyAI ignore, out Vector3 cleared)
@@ -649,6 +983,12 @@ public class WaveManager : MonoBehaviour
             {
                 GameObject boss = UsableEnemyPrefab(bossPrefab);
                 return boss != null ? boss : UsableEnemyPrefab(enemyPrefab);
+            }
+            case EnemyArchetype.Melee:
+            {
+                if (meleePrefab == null)
+                    meleePrefab = Resources.Load<GameObject>("Enemies/BatEnemy");
+                return UsableEnemyPrefab(meleePrefab);
             }
             default:
                 return UsableEnemyPrefab(enemyPrefab);

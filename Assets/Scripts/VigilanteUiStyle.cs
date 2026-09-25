@@ -77,11 +77,13 @@ public static class VigilanteUiStyle
         if (font != null)
             tmp.font = font;
         tmp.color = Color.white;
-        tmp.outlineColor = Color.black;
-        tmp.outlineWidth = 0.15f;
 
-        // Kill the red glow baked into the Militech material preset.
-        Material mat = tmp.fontSharedMaterial;
+        // outlineWidth on the component needs a shared material already.
+        // Scene labels without one were throwing and aborting the tutorial setup.
+        if (tmp.font == null)
+            return;
+
+        Material mat = tmp.fontMaterial;
         if (mat != null)
         {
             if (mat.HasProperty("_GlowColor"))

@@ -102,7 +102,7 @@ public class Bullet : MonoBehaviour
                     ~0,
                     QueryTriggerInteraction.Ignore))
             {
-                HandleHit(hit.collider, hit.point);
+                HandleHit(hit.collider, hit.point, hit.normal);
                 if (consumed)
                     return;
             }
@@ -113,20 +113,27 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        HandleHit(other, other != null ? other.ClosestPoint(transform.position) : transform.position);
+        HandleHit(other, other != null ? other.ClosestPoint(transform.position) : transform.position, -transform.forward);
     }
 
     void OnCollisionEnter(Collision collision)
     {
         Vector3 point = transform.position;
+        Vector3 normal = -transform.forward;
         if (collision.contactCount > 0)
-            point = collision.GetContact(0).point;
+        {
+            ContactPoint contact = collision.GetContact(0);
+            point = contact.point;
+            normal = contact.normal;
+        }
         else if (collision.collider != null)
+        {
             point = collision.collider.ClosestPoint(transform.position);
-        HandleHit(collision.collider, point);
+        }
+        HandleHit(collision.collider, point, normal);
     }
 
-    void HandleHit(Collider other, Vector3 hitPoint)
+    void HandleHit(Collider other, Vector3 hitPoint, Vector3 normal)
     {
         if (consumed || other == null)
             return;
@@ -152,7 +159,10 @@ public class Bullet : MonoBehaviour
         if (!hitBreakable && !hitEnemy && !hitPlayer)
         {
             if (!other.isTrigger)
+            {
+                CombatVfx.PlayBulletHit(hitPoint, normal);
                 Consume();
+            }
             return;
         }
 
@@ -182,6 +192,7 @@ public class Bullet : MonoBehaviour
             }
         }
 
+        CombatVfx.PlayBulletHit(hitPoint, normal);
         Consume();
     }
 

@@ -29,6 +29,12 @@ public class DamageIndicatorUI : MonoBehaviour
     Sprite wedgeSprite;
     Health boundHealth;
     PauseMenu pauseMenu;
+    bool highlight;
+    bool pendingHighlight;
+    int highlightedIndex = -1;
+    bool hasLastOrigin;
+    Vector3 lastOrigin;
+    Canvas highlightCanvas;
 
     public static DamageIndicatorUI EnsureExists()
     {
@@ -91,18 +97,26 @@ public class DamageIndicatorUI : MonoBehaviour
         for (int i = pulses.Count - 1; i >= 0; i--)
         {
             Pulse p = pulses[i];
-            p.life -= dt;
+            bool held = highlight && i == highlightedIndex;
+            if (!held)
+                p.life -= dt;
+
             if (p.life <= 0f || p.rect == null)
             {
                 if (p.rect != null)
                     Destroy(p.rect.gameObject);
                 pulses.RemoveAt(i);
+                if (highlightedIndex == i)
+                    highlightedIndex = -1;
+                else if (highlightedIndex > i)
+                    highlightedIndex--;
                 continue;
             }
 
             float t = Mathf.Clamp01(p.life / FadeDuration);
-            // Hold strong, then drop off near the end.
-            float alpha = t > 0.45f ? PeakAlpha : Mathf.Lerp(0f, PeakAlpha, t / 0.45f);
+            float alpha = held || t > 0.45f ? PeakAlpha : Mathf.Lerp(0f, PeakAlpha, t / 0.45f);
+            if (highlight && !held)
+                alpha = 0f;
             if (p.image != null)
             {
                 Color c = p.image.color;
@@ -110,14 +124,62 @@ public class DamageIndicatorUI : MonoBehaviour
                 p.image.color = c;
             }
 
-            // Punch scale on fresh hits.
-            float punch = t > 0.85f ? Mathf.Lerp(1.35f, 1f, (1f - t) / 0.15f) : 1f;
+            float punch = held
+                ? 1.55f + Mathf.Sin(Time.unscaledTime * 5.5f) * 0.12f
+                : t > 0.85f ? Mathf.Lerp(1.35f, 1f, (1f - t) / 0.15f) : 1f;
             if (p.rect != null)
                 p.rect.localScale = Vector3.one * punch;
 
             LayoutPulse(p);
             pulses[i] = p;
         }
+    }
+
+    public void BeginTutorialHighlight()
+    {
+        highlight = true;
+        EnsureHighlightCanvas();
+        if (group != null)
+            group.alpha = 1f;
+
+        if (pulses.Count == 0 && hasLastOrigin)
+        {
+            if (player == null)
+                BindPlayer();
+            if (player != null)
+                PushPulse(WorldToScreenAngle(lastOrigin));
+        }
+
+        if (pulses.Count == 0)
+        {
+            pendingHighlight = true;
+            return;
+        }
+
+        pendingHighlight = false;
+        int best = 0;
+        for (int i = 1; i < pulses.Count; i++)
+        {
+            if (pulses[i].life > pulses[best].life)
+                best = i;
+        }
+
+        highlightedIndex = best;
+        Pulse held = pulses[best];
+        held.life = FadeDuration;
+        if (held.image != null)
+            held.image.color = new Color(1f, 0.08f, 0.05f, PeakAlpha);
+        pulses[best] = held;
+        LayoutPulse(held);
+    }
+
+    public void EndTutorialHighlight()
+    {
+        highlight = false;
+        pendingHighlight = false;
+        highlightedIndex = -1;
+        if (highlightCanvas != null)
+            highlightCanvas.overrideSorting = false;
     }
 
     public void ShowHit(Vector3 hitPoint, GameObject instigator)
@@ -128,8 +190,12 @@ public class DamageIndicatorUI : MonoBehaviour
             return;
 
         Vector3 origin = ResolveAttackOrigin(hitPoint, instigator);
+        lastOrigin = origin;
+        hasLastOrigin = true;
         float angle = WorldToScreenAngle(origin);
         PushPulse(angle);
+        if (pendingHighlight)
+            BeginTutorialHighlight();
     }
 
     void PushPulse(float angleDegrees)
@@ -302,6 +368,8 @@ public class DamageIndicatorUI : MonoBehaviour
 
     bool ShouldHide()
     {
+        if (highlight)
+            return false;
         if (Cursor.lockState != CursorLockMode.Locked)
             return true;
         if (pauseMenu != null && pauseMenu.IsPaused)
@@ -330,6 +398,16 @@ public class DamageIndicatorUI : MonoBehaviour
         group.interactable = false;
 
         wedgeSprite = CreateWedgeSprite();
+    }
+
+    void EnsureHighlightCanvas()
+    {
+        if (highlightCanvas == null)
+            highlightCanvas = gameObject.GetComponent<Canvas>();
+        if (highlightCanvas == null)
+            highlightCanvas = gameObject.AddComponent<Canvas>();
+        highlightCanvas.overrideSorting = true;
+        highlightCanvas.sortingOrder = 70;
     }
 
     static Sprite CreateWedgeSprite()

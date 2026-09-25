@@ -10,10 +10,21 @@ public class EnemyHandWeapon : MonoBehaviour
     [SerializeField] Vector3 localPosition = new Vector3(-0.02f, 0.05f, 0.02f);
     [SerializeField] Vector3 localEuler = new Vector3(-90f, 90f, 0f);
     [SerializeField] float localScale = 0.45f;
+    [SerializeField] GameObject batPrefab;
+    [SerializeField] Vector3 batLocalPosition = new Vector3(0f, 0.09f, 0.02f);
+    [SerializeField] Vector3 batLocalEuler = new Vector3(8f, 90f, 90f);
+    [SerializeField] float batLocalScale = 1f;
 
     void Start()
     {
         EnemyProfile profile = GetComponent<EnemyProfile>();
+        if (ShouldCarryBat(profile))
+        {
+            HideStandIn();
+            KeepPrefabBat();
+            return;
+        }
+
         if (profile != null && profile.archetype != EnemyArchetype.Pistol)
             return;
 
@@ -25,6 +36,114 @@ public class EnemyHandWeapon : MonoBehaviour
             return;
 
         BindMuzzle(gun);
+    }
+
+    void LateUpdate()
+    {
+        EnemyProfile profile = GetComponent<EnemyProfile>();
+        if (!ShouldCarryBat(profile))
+            return;
+
+        KeepPrefabBat();
+    }
+
+    bool ShouldCarryBat(EnemyProfile profile)
+    {
+        if (profile != null && profile.archetype == EnemyArchetype.Melee)
+            return true;
+        return name.IndexOf("BatEnemy", System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    void HideStandIn()
+    {
+        Transform standIn = transform.Find("Bat");
+        if (standIn != null && IsProBuilder(standIn))
+            standIn.gameObject.SetActive(false);
+    }
+
+    static bool IsProBuilder(Transform t)
+    {
+        Component[] components = t.GetComponents<Component>();
+        for (int i = 0; i < components.Length; i++)
+        {
+            if (components[i] == null)
+                continue;
+            string typeName = components[i].GetType().Name;
+            if (typeName == "ProBuilderMesh" || typeName == "ProBuilderShape")
+                return true;
+        }
+        return false;
+    }
+
+    void KeepPrefabBat()
+    {
+        HideStandIn();
+
+        Transform bat = FindDeepChild(transform, "EnemyBat");
+        if (bat == null)
+            bat = FindDeepChild(transform, "Bat");
+        if (bat == null || IsProBuilder(bat))
+            return;
+
+        bat.gameObject.SetActive(true);
+        Renderer[] renderers = bat.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] == null)
+                continue;
+            renderers[i].enabled = true;
+            renderers[i].gameObject.SetActive(true);
+        }
+
+        if (bat.GetComponentInChildren<EnemyBatHit>(true) == null)
+        {
+            BoxCollider box = bat.gameObject.GetComponent<BoxCollider>();
+            if (box == null)
+                box = bat.gameObject.AddComponent<BoxCollider>();
+            box.isTrigger = true;
+            if (TryGetBatLocalBounds(bat, out Bounds local))
+            {
+                box.center = local.center;
+                box.size = local.size;
+            }
+            bat.gameObject.AddComponent<EnemyBatHit>();
+        }
+    }
+
+    static bool TryGetBatLocalBounds(Transform bat, out Bounds bounds)
+    {
+        bounds = default;
+        Renderer[] renderers = bat.GetComponentsInChildren<Renderer>(true);
+        bool any = false;
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer renderer = renderers[i];
+            if (renderer == null)
+                continue;
+
+            Bounds world = renderer.bounds;
+            Vector3 extents = world.extents;
+            for (int x = -1; x <= 1; x += 2)
+            {
+                for (int y = -1; y <= 1; y += 2)
+                {
+                    for (int z = -1; z <= 1; z += 2)
+                    {
+                        Vector3 corner = world.center + Vector3.Scale(extents, new Vector3(x, y, z));
+                        Vector3 local = bat.InverseTransformPoint(corner);
+                        if (!any)
+                        {
+                            bounds = new Bounds(local, Vector3.zero);
+                            any = true;
+                        }
+                        else
+                            bounds.Encapsulate(local);
+                    }
+                }
+            }
+        }
+
+        return any && bounds.size.sqrMagnitude > 0.0001f;
     }
 
     Transform AttachPistol()

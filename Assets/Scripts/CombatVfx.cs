@@ -1,13 +1,17 @@
+using CartoonFX;
 using UnityEngine;
 using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
-/// Comic-book style onomatopoeia + simple impact / muzzle / explosion flashes.
-/// Creates runtime primitives/TextMeshPro so no VFX assets are required.
+/// Comic-book style onomatopoeia + impact / muzzle / wall-break effects.
 /// </summary>
 public static class CombatVfx
 {
     static Transform root;
+    static CombatVfxLibrary library;
 
     static Transform Root
     {
@@ -21,6 +25,16 @@ public static class CombatVfx
                 root = go.transform;
             }
             return root;
+        }
+    }
+
+    static CombatVfxLibrary Library
+    {
+        get
+        {
+            if (library == null)
+                library = Resources.Load<CombatVfxLibrary>("CombatVfxLibrary");
+            return library;
         }
     }
 
@@ -41,6 +55,8 @@ public static class CombatVfx
 
     public static void SpawnOnomatopoeia(Vector3 position, string text, float fontSize, Color color, float lifetime, float riseSpeed)
     {
+        if (TrySpawnThemedText(position, text))
+            return;
         GameObject go = new GameObject("SFXText_" + text);
         go.transform.SetParent(Root, false);
         go.transform.position = position + Random.insideUnitSphere * 0.15f;
@@ -60,35 +76,199 @@ public static class CombatVfx
         go.AddComponent<BillboardVfx>().Init(lifetime, riseSpeed);
     }
 
-    public static void SpawnImpact(Vector3 position, Vector3 normal)
+    static bool TrySpawnThemedText(Vector3 position, string text)
     {
-        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        go.name = "ImpactFlash";
-        go.transform.SetParent(Root, false);
-        go.transform.position = position + normal.normalized * 0.05f;
-        go.transform.localScale = Vector3.one * 0.18f;
+        if (Library == null || string.IsNullOrEmpty(text))
+            return false;
 
-        Object.Destroy(go.GetComponent<Collider>());
-        Renderer r = go.GetComponent<Renderer>();
-        if (r != null)
+        string key = text.Trim().ToUpperInvariant();
+        GameObject prefab = Library.boomText;
+        bool tintRed = false;
+        switch (key)
         {
-            Shader shader = Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color") ?? Shader.Find("Standard");
-            Material mat = new Material(shader);
-            mat.color = new Color(1f, 0.7f, 0.2f, 1f);
-            r.sharedMaterial = mat;
+            case "KO":
+            case "KO!":
+                prefab = Library.boingText;
+                tintRed = true;
+                break;
+            case "HEAL":
+            case "HEAL!":
+                prefab = Library.cursedText;
+                break;
         }
 
-        go.AddComponent<FlashVfx>().Init(0.18f, 0.45f);
+        if (prefab == null)
+            return false;
+
+        GameObject go = SpawnPrefabInstance(prefab, position, BillboardForward());
+        if (go == null)
+            return false;
+
+        ApplyWord(go, text, tintRed);
+        go.transform.localScale = Vector3.one * 0.24f;
+        return true;
     }
 
-    public static void SpawnMuzzleFlash(Vector3 position, Vector3 forward)
+    static void ApplyWord(GameObject go, string text, bool tintRed)
+    {
+#if UNITY_EDITOR
+        if (PrefabUtility.IsPartOfPrefabInstance(go))
+            PrefabUtility.UnpackPrefabInstance(go, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+#endif
+        CFXR_ParticleText particleText = go.GetComponent<CFXR_ParticleText>();
+        if (particleText == null)
+            return;
+
+        if (tintRed)
+        {
+            particleText.UpdateText(
+                text,
+                null,
+                new Color(1f, 0.12f, 0.08f, 1f),
+                new Color(0.55f, 0.02f, 0.02f, 1f),
+                new Color(0.22f, 0.02f, 0.02f, 1f));
+        }
+        else
+        {
+            particleText.UpdateText(text);
+        }
+
+        ParticleSystem[] systems = go.GetComponentsInChildren<ParticleSystem>(true);
+        for (int i = 0; i < systems.Length; i++)
+        {
+            ParticleSystem ps = systems[i];
+            if (ps == null || !ps.gameObject.activeInHierarchy)
+                continue;
+            ps.Clear(true);
+            ps.Play(true);
+        }
+    }
+
+    static GameObject SpawnPrefabInstance(GameObject prefab, Vector3 position, Vector3 forward)
+    {
+        if (prefab == null)
+            return null;
+
+        GameObject go = Object.Instantiate(prefab, position, Facing(forward), Root);
+        CFXR_Effect[] effects = go.GetComponentsInChildren<CFXR_Effect>(true);
+        for (int i = 0; i < effects.Length; i++)
+        {
+            if (effects[i] != null && effects[i].cameraShake != null)
+                effects[i].cameraShake.enabled = false;
+        }
+
+        return go;
+    }
+
+    static Vector3 BillboardForward()
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+            return Vector3.forward;
+        return cam.transform.forward;
+    }
+
+    public static void SpawnImpact(Vector3 position, Vector3 normal)
+    {
+        SpawnFallbackFlash(position, normal, "ImpactFlash", new Color(1f, 0.7f, 0.2f, 1f), 0.18f, 0.45f, 0.18f);
+    }
+
+    public static void PlayBulletHit(Vector3 position, Vector3 normal)
+    {
+        if (!SpawnPrefab(Library != null ? Library.bulletHit : null, position, normal))
+            SpawnImpact(position, normal);
+    }
+
+    public static void PlaySpawnBurst(Vector3 position)
+    {
+        SpawnPrefab(Library != null ? Library.spawnBurst : null, position + Vector3.up * 0.9f, Vector3.up);
+    }
+
+    public static void PlayWallSmoke(Vector3 position, Vector3 normal)
+    {
+        if (!SpawnPrefab(Library != null ? Library.wallSmoke : null, position, normal))
+            SpawnFallbackFlash(position, Vector3.up, "WallSmoke", new Color(0.75f, 0.75f, 0.75f, 1f), 0.4f, 1.2f, 0.5f);
+    }
+
+    public static void SpawnMuzzleFlash(Vector3 position, Vector3 forward, float scale = 1f, Transform follow = null)
+    {
+        GameObject prefab = Library != null ? Library.muzzleFire : null;
+        GameObject go = prefab != null ? SpawnPrefabInstance(prefab, position, forward) : null;
+        if (go == null)
+        {
+            float size = Mathf.Max(0.02f, 0.12f * scale);
+            SpawnFallbackFlash(position + forward * 0.1f, forward, "MuzzleFlash", new Color(1f, 0.9f, 0.4f), 0.08f, size * 5f, size);
+            return;
+        }
+
+        if (follow != null)
+            go.transform.SetParent(follow, true);
+
+        ApplyWorldScale(go.transform, Mathf.Max(0.05f, scale));
+
+        if (follow != null)
+            StickParticlesToParent(go);
+    }
+
+    static void ApplyWorldScale(Transform target, float worldScale)
+    {
+        Transform parent = target.parent;
+        if (parent == null)
+        {
+            target.localScale = Vector3.one * worldScale;
+            return;
+        }
+
+        Vector3 lossy = parent.lossyScale;
+        target.localScale = new Vector3(
+            worldScale / Mathf.Max(0.0001f, Mathf.Abs(lossy.x)),
+            worldScale / Mathf.Max(0.0001f, Mathf.Abs(lossy.y)),
+            worldScale / Mathf.Max(0.0001f, Mathf.Abs(lossy.z)));
+    }
+
+    static void StickParticlesToParent(GameObject go)
+    {
+        ParticleSystem[] systems = go.GetComponentsInChildren<ParticleSystem>(true);
+        for (int i = 0; i < systems.Length; i++)
+        {
+            ParticleSystem ps = systems[i];
+            if (ps == null || !ps.gameObject.activeInHierarchy)
+                continue;
+
+            ParticleSystem.MainModule main = ps.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.Local;
+            ps.Clear(true);
+            ps.Play(true);
+        }
+    }
+
+    static bool SpawnPrefab(GameObject prefab, Vector3 position, Vector3 forward)
+    {
+        if (prefab == null)
+            return false;
+
+        GameObject go = SpawnPrefabInstance(prefab, position, forward);
+        return go != null;
+    }
+
+    static Quaternion Facing(Vector3 forward)
+    {
+        if (forward.sqrMagnitude < 0.0001f)
+            forward = Vector3.forward;
+        forward.Normalize();
+        Vector3 up = Mathf.Abs(Vector3.Dot(forward, Vector3.up)) > 0.95f ? Vector3.forward : Vector3.up;
+        return Quaternion.LookRotation(forward, up);
+    }
+
+    static void SpawnFallbackFlash(Vector3 position, Vector3 normal, string name, Color color, float life, float endScale, float startScale)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        go.name = "MuzzleFlash";
+        go.name = name;
         go.transform.SetParent(Root, false);
-        go.transform.position = position + forward * 0.1f;
-        go.transform.localScale = new Vector3(0.12f, 0.12f, 0.28f);
-        go.transform.rotation = Quaternion.LookRotation(forward);
+        go.transform.position = position + (normal.sqrMagnitude > 0.0001f ? normal.normalized * 0.05f : Vector3.zero);
+        go.transform.localScale = Vector3.one * startScale;
+        if (normal.sqrMagnitude > 0.0001f)
+            go.transform.rotation = Facing(normal);
 
         Object.Destroy(go.GetComponent<Collider>());
         Renderer r = go.GetComponent<Renderer>();
@@ -96,11 +276,11 @@ public static class CombatVfx
         {
             Shader shader = Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color") ?? Shader.Find("Standard");
             Material mat = new Material(shader);
-            mat.color = new Color(1f, 0.9f, 0.4f);
+            mat.color = color;
             r.sharedMaterial = mat;
         }
 
-        go.AddComponent<FlashVfx>().Init(0.08f, 0.7f);
+        go.AddComponent<FlashVfx>().Init(life, endScale);
     }
 
     public static void SpawnExplosion(Vector3 position, float radius)

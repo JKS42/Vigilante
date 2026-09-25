@@ -10,7 +10,8 @@ public static class CelOutline
     public const string ShaderName = "Vigilante/CelOutline";
     public const string ResourcesMaterial = "CelOutline";
 
-    static readonly Color OutlineColor = new Color(0.02f, 0.02f, 0.05f, 1f);
+    public static readonly Color OutlineColor = new Color(0.02f, 0.02f, 0.05f, 1f);
+    public static readonly Color PickupOutlineColor = Color.white;
     static readonly List<Material> matScratch = new List<Material>(8);
     static readonly MaterialPropertyBlock block = new MaterialPropertyBlock();
 
@@ -26,12 +27,17 @@ public static class CelOutline
 
     public static void ApplyHierarchy(GameObject root)
     {
+        ApplyHierarchy(root, OutlineColor);
+    }
+
+    public static void ApplyHierarchy(GameObject root, Color color)
+    {
         if (root == null)
             return;
 
         Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
         for (int i = 0; i < renderers.Length; i++)
-            Apply(renderers[i]);
+            Apply(renderers[i], color);
     }
 
     /// <summary>
@@ -59,9 +65,13 @@ public static class CelOutline
         if (renderer == null)
             return;
 
+        Color keptColor = OutlineColor;
         CelOutlineMarker marker = renderer.GetComponent<CelOutlineMarker>();
         if (marker != null)
-            Object.Destroy(marker);
+        {
+            keptColor = marker.outlineColor;
+            Object.DestroyImmediate(marker);
+        }
 
         // Nested Marker leftover from older builds.
         MonoBehaviour[] behaviours = renderer.GetComponents<MonoBehaviour>();
@@ -93,16 +103,23 @@ public static class CelOutline
             renderer.SetPropertyBlock(null);
         }
 
-        Apply(renderer);
+        Apply(renderer, keptColor);
     }
 
     public static void Apply(Renderer renderer)
     {
+        Apply(renderer, OutlineColor);
+    }
+
+    public static void Apply(Renderer renderer, Color color)
+    {
         if (renderer == null || ShouldSkip(renderer))
             return;
 
-        if (renderer.GetComponent<CelOutlineMarker>() != null)
+        CelOutlineMarker existing = renderer.GetComponent<CelOutlineMarker>();
+        if (existing != null)
         {
+            existing.outlineColor = color;
             RefreshWidth(renderer);
             return;
         }
@@ -119,8 +136,8 @@ public static class CelOutline
         {
             if (IsOutlineMaterial(shared[i]))
             {
-                EnsureMarker(renderer);
-                ApplyWidthBlock(renderer, shared.Length - 1, ResolveWidth(renderer));
+                EnsureMarker(renderer, color);
+                ApplyWidthBlock(renderer, shared.Length - 1, ResolveWidth(renderer), color);
                 return;
             }
         }
@@ -141,8 +158,8 @@ public static class CelOutline
         int outlineIndex = matScratch.Count;
         matScratch.Add(outline);
         renderer.sharedMaterials = matScratch.ToArray();
-        ApplyWidthBlock(renderer, outlineIndex, ResolveWidth(renderer));
-        EnsureMarker(renderer);
+        ApplyWidthBlock(renderer, outlineIndex, ResolveWidth(renderer), color);
+        EnsureMarker(renderer, color);
     }
 
     static void RefreshWidth(Renderer renderer)
@@ -155,25 +172,29 @@ public static class CelOutline
         {
             if (!IsOutlineMaterial(shared[i]))
                 continue;
-            ApplyWidthBlock(renderer, i, ResolveWidth(renderer));
+            CelOutlineMarker marker = renderer.GetComponent<CelOutlineMarker>();
+            Color color = marker != null ? marker.outlineColor : OutlineColor;
+            ApplyWidthBlock(renderer, i, ResolveWidth(renderer), color);
             return;
         }
     }
 
-    static void EnsureMarker(Renderer renderer)
+    static void EnsureMarker(Renderer renderer, Color color)
     {
-        if (renderer.GetComponent<CelOutlineMarker>() == null)
-            renderer.gameObject.AddComponent<CelOutlineMarker>();
+        CelOutlineMarker marker = renderer.GetComponent<CelOutlineMarker>();
+        if (marker == null)
+            marker = renderer.gameObject.AddComponent<CelOutlineMarker>();
+        marker.outlineColor = color;
     }
 
-    static void ApplyWidthBlock(Renderer renderer, int materialIndex, float width)
+    static void ApplyWidthBlock(Renderer renderer, int materialIndex, float width, Color color)
     {
         if (materialIndex < 0)
             return;
 
         renderer.GetPropertyBlock(block, materialIndex);
         block.SetFloat("_OutlineWidth", width);
-        block.SetColor("_OutlineColor", OutlineColor);
+        block.SetColor("_OutlineColor", color);
         renderer.SetPropertyBlock(block, materialIndex);
     }
 
@@ -182,11 +203,20 @@ public static class CelOutline
         Bounds b = renderer.bounds;
         float size = Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z));
 
+        if (IsPickup(renderer))
+            return size < 1.2f ? 0.01f : 0.007f;
+
         if (size < 0.5f)
             return 0.0035f;
         if (size > 6f)
             return 0.0055f;
         return 0.0045f;
+    }
+
+    static bool IsPickup(Renderer renderer)
+    {
+        return renderer.GetComponentInParent<WeaponPickup>() != null
+            || renderer.GetComponentInParent<MedKitPickup>() != null;
     }
 
     static Material GetOutlineMaterial()
@@ -294,16 +324,20 @@ public static class CelOutline
         if (renderer.GetComponentInParent<Canvas>() != null)
             return true;
 
-        if (renderer.GetComponentInParent<Camera>() != null)
-            return true;
-        if (renderer.GetComponentInParent<MouseMovement>() != null)
-            return true;
-        if (renderer.GetComponentInParent<WeaponSwitcher>() != null)
-            return true;
-        if (renderer.GetComponentInParent<Weapon>() != null)
-            return true;
-        if (renderer.GetComponentInParent<Melee>() != null)
-            return true;
+        // World pickups reuse weapon meshes. Outline those; still skip held weapons.
+        if (!IsPickup(renderer))
+        {
+            if (renderer.GetComponentInParent<Camera>() != null)
+                return true;
+            if (renderer.GetComponentInParent<MouseMovement>() != null)
+                return true;
+            if (renderer.GetComponentInParent<WeaponSwitcher>() != null)
+                return true;
+            if (renderer.GetComponentInParent<Weapon>() != null)
+                return true;
+            if (renderer.GetComponentInParent<Melee>() != null)
+                return true;
+        }
 
         Transform t = renderer.transform;
         string n = t.name;
