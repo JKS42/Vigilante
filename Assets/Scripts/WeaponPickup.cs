@@ -1,7 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// World pickup that unlocks a WeaponSwitcher loadout slot and equips it.
+/// World pickup that unlocks a WeaponSwitcher loadout slot.
+/// Equips only on first unlock; later ammo pickups do not swap the held weapon.
 /// Slot indices match keys 1–4: 0 bat, 1 pistol, 2 shotgun, 3 AR.
 /// </summary>
 [RequireComponent(typeof(Collider))]

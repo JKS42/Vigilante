@@ -63,6 +63,7 @@ public class WaveManager : MonoBehaviour
     int spawnedThisWave;
     int nextPointIndex;
     readonly HashSet<int> usedSpawnPoints = new HashSet<int>();
+    readonly HashSet<int> blockedNearPlayer = new HashSet<int>();
     float timer;
     bool started;
     int enemiesKilled;
@@ -522,9 +523,9 @@ public class WaveManager : MonoBehaviour
         if (spawnPoints == null || spawnPoints.Count == 0)
             return false;
 
-        int closest = -1;
+        HashSet<int> blocked = null;
         if (preferDistantSpawns && spawnPoints.Count > 1 && TryGetPlayerPosition(out Vector3 origin))
-            closest = ClosestSpawnIndex(origin);
+            blocked = BlockedNearPlayerSpawns(origin);
 
         int count = spawnPoints.Count;
         for (int pass = 0; pass < 2; pass++)
@@ -532,7 +533,7 @@ public class WaveManager : MonoBehaviour
             for (int n = 0; n < count; n++)
             {
                 int index = (nextPointIndex + n) % count;
-                if (pass == 0 && closest >= 0 && index == closest)
+                if (blocked != null && blocked.Contains(index))
                     continue;
                 if (pass == 0 && usedSpawnPoints.Contains(index))
                     continue;
@@ -568,6 +569,42 @@ public class WaveManager : MonoBehaviour
         }
 
         return closest;
+    }
+
+    HashSet<int> BlockedNearPlayerSpawns(Vector3 origin)
+    {
+        blockedNearPlayer.Clear();
+        int closest = ClosestSpawnIndex(origin);
+        if (closest >= 0)
+            blockedNearPlayer.Add(closest);
+
+        EnsureSpawnLocations();
+        if (spawnLocations != null && spawnLocations.Count > 1)
+        {
+            int loc = ClosestLocation(origin);
+            if (loc >= 0 && loc < spawnLocations.Count)
+            {
+                SpawnLocation location = spawnLocations[loc];
+                for (int i = 0; i < location.points.Count; i++)
+                    blockedNearPlayer.Add(location.points[i]);
+            }
+        }
+
+        int usable = 0;
+        for (int i = 0; i < spawnPoints.Count; i++)
+        {
+            if (spawnPoints[i] != null && !blockedNearPlayer.Contains(i))
+                usable++;
+        }
+
+        if (usable == 0)
+        {
+            blockedNearPlayer.Clear();
+            if (closest >= 0)
+                blockedNearPlayer.Add(closest);
+        }
+
+        return blockedNearPlayer;
     }
 
     void EnsureSpawnLocations()

@@ -273,8 +273,8 @@ public class Melee : MonoBehaviour
 
     void PlaySwingSound()
     {
-        if (swingSound != null && audioSource != null)
-            audioSource.PlayOneShot(swingSound);
+        if (swingSound != null)
+            AudioManager.Play(swingSound, 0.38f);
         else
             AudioManager.MeleeSwing();
     }

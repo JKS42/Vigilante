@@ -233,8 +233,14 @@ public class Weapon : MonoBehaviour
         if (Time.timeScale <= 0f)
             return;
 
-        if (isReloading || currentAmmo <= 0)
+        if (isReloading)
             return;
+
+        if (currentAmmo <= 0)
+        {
+            TryDryFire();
+            return;
+        }
 
         if (currentCooldown > 0f)
             return;
@@ -265,6 +271,16 @@ public class Weapon : MonoBehaviour
         reloadRoutine = StartCoroutine(ReloadRoutine());
     }
 
+    void TryDryFire()
+    {
+        if (currentCooldown > 0f)
+            return;
+
+        AudioManager.EmptyMag();
+        currentCooldown = Mathf.Max(0.18f, FireCooldown);
+        ReportAmmoEmpty();
+    }
+
     void ReportAmmoEmpty()
     {
         if (currentAmmo > 0)
@@ -288,6 +304,8 @@ public class Weapon : MonoBehaviour
         if (viewMotion == null)
             viewMotion = WeaponViewMotion.Ensure(gameObject);
         viewMotion?.BeginReloadDip(reloadTime);
+        if (this is Pistol)
+            AudioManager.PistolReload();
 
         yield return new WaitForSeconds(reloadTime);
 

@@ -66,10 +66,7 @@ public class AR : Weapon
         Transform muzzle = bulletSpawnPoint != null ? bulletSpawnPoint : transform;
         CombatVfx.SpawnMuzzleFlash(spawnPos, lookDir, 0.28f, muzzle);
 
-        if (shotSound != null && audioSource != null)
-            audioSource.PlayOneShot(shotSound);
-        else
-            AudioManager.EnemyGunshot(spawnPos, EnemyWeaponKind.Rifle);
+        AudioManager.PlayGunshot(shotSound, spawnPos, EnemyWeaponKind.Rifle);
 
         NoiseEmitter.Emit(spawnPos, shotNoiseRadius, StimulusType.Gunfire);
     }

@@ -172,7 +172,7 @@ public class WeaponSwitcher : MonoBehaviour
         else if (!newlyUnlocked)
             RefillWeaponReserve(index);
 
-        if (equip)
+        if (equip && newlyUnlocked)
             SelectWeapon(index, force: true);
 
         return newlyUnlocked;
@@ -364,7 +364,7 @@ public class WeaponSwitcher : MonoBehaviour
                 swapping = false;
             }
 
-            InstantSelect(index, playSwapSound: false);
+            InstantSelect(index, playSwapSound: currentIndex >= 0);
             return;
         }
 
@@ -392,7 +392,7 @@ public class WeaponSwitcher : MonoBehaviour
         WeaponChanged?.Invoke(currentIndex, CurrentWeapon);
 
         if (playSwapSound && changed)
-            AudioManager.WeaponSwap();
+            AudioManager.PlayEquip(CurrentWeapon);
     }
 
     IEnumerator SwapRoutine(int index)
@@ -425,7 +425,7 @@ public class WeaponSwitcher : MonoBehaviour
 
         WeaponChanged?.Invoke(currentIndex, CurrentWeapon);
         if (playSwapSound)
-            AudioManager.WeaponSwap();
+            AudioManager.PlayEquip(to);
 
         swapping = false;
         swapRoutine = null;

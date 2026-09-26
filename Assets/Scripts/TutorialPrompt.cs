@@ -235,7 +235,7 @@ public class TutorialPrompt : MonoBehaviour
         BeginControlsPause();
         SetControlsVisible(true);
         Record("Controls");
-        AudioManager.UIClick();
+        AudioManager.TutorialPopup();
     }
 
     void CloseControlsModal()
@@ -340,7 +340,7 @@ public class TutorialPrompt : MonoBehaviour
         Record(tip.message);
         bool pausing = IsPausingTip(tip);
         tipEndsAt = pausing ? float.PositiveInfinity : Time.unscaledTime + Mathf.Max(1.5f, tip.duration);
-        AudioManager.UIClick();
+        AudioManager.TutorialPopup();
         if (pausing)
             BeginMarkerLesson(tip);
     }
@@ -356,6 +356,7 @@ public class TutorialPrompt : MonoBehaviour
         if (!markerLesson)
             return;
 
+        AudioManager.UIClick();
         SetTipVisible(false);
         current = null;
         EndMarkerLesson();
@@ -617,7 +618,7 @@ public class TutorialPrompt : MonoBehaviour
         SetTipVisible(true);
         tipEndsAt = float.PositiveInfinity;
         Record(tip.message);
-        AudioManager.UIClick();
+        AudioManager.TutorialPopup();
     }
 
     bool QueueContains(string id)

@@ -49,10 +49,7 @@ public class Pistol : Weapon
 
         Bullet.Spawn(bulletPrefab, spawnPos, aimDir, bulletSpeed, Damage, transform.root.gameObject, bulletScale);
 
-        if (shotSound != null && audioSource != null)
-            audioSource.PlayOneShot(shotSound);
-        else
-            AudioManager.EnemyGunshot(spawnPos, EnemyWeaponKind.Pistol);
+        AudioManager.PlayGunshot(shotSound, spawnPos, EnemyWeaponKind.Pistol);
 
         Transform muzzle = bulletSpawnPoint != null ? bulletSpawnPoint : transform;
         CombatVfx.SpawnMuzzleFlash(spawnPos, lookDir, 0.28f, muzzle);
