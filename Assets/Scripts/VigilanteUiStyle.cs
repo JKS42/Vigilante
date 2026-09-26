@@ -123,6 +123,84 @@ public static class VigilanteUiStyle
         EnsureFrame(panel.transform);
     }
 
+    /// <summary>Applies the shared button visuals while keeping existing click actions intact.</summary>
+    public static void StyleInvertedButtonPreserveActions(Button button)
+    {
+        if (button == null)
+            return;
+
+        Image image = button.targetGraphic as Image;
+        if (image == null)
+            image = button.GetComponent<Image>();
+        if (image == null)
+            image = button.gameObject.AddComponent<Image>();
+
+        image.sprite = WhiteSprite();
+        image.color = LineWhite;
+        image.type = Image.Type.Simple;
+        button.targetGraphic = image;
+        button.transition = Selectable.Transition.None;
+        EnsureInvertedFrame(button.transform);
+
+        TextMeshProUGUI[] labels = button.GetComponentsInChildren<TextMeshProUGUI>(true);
+        for (int i = 0; i < labels.Length; i++)
+        {
+            ApplyFont(labels[i]);
+            labels[i].color = FillBlack;
+        }
+
+        VigilanteUiPress press = button.GetComponent<VigilanteUiPress>();
+        if (press == null)
+            press = button.gameObject.AddComponent<VigilanteUiPress>();
+        press.Configure(image, labels);
+    }
+    public static void StyleSettingsPanel(GameObject panel)
+    {
+        if (panel == null)
+            return;
+
+        Image image = panel.GetComponent<Image>();
+        if (image == null)
+            image = panel.AddComponent<Image>();
+        image.sprite = WhiteSprite();
+        image.color = new Color(0.08f, 0.08f, 0.1f, 0.92f);
+        image.type = Image.Type.Simple;
+        image.raycastTarget = true;
+        DestroyNamedChild(panel.transform, FrameRootName);
+        DestroyNamedChild(panel.transform, InvertedFrameRootName);
+        DestroyNamedChild(panel.transform, "UiDoubleFrame");
+    }
+
+    public static void StyleSettingsButton(Button button)
+    {
+        if (button == null)
+            return;
+
+        Image image = button.targetGraphic as Image;
+        if (image == null)
+            image = button.GetComponent<Image>();
+        if (image == null)
+            image = button.gameObject.AddComponent<Image>();
+        image.sprite = WhiteSprite();
+        image.color = new Color(0.18f, 0.18f, 0.2f, 0.95f);
+        image.type = Image.Type.Simple;
+        button.targetGraphic = image;
+        button.transition = Selectable.Transition.ColorTint;
+        DestroyNamedChild(button.transform, FrameRootName);
+        DestroyNamedChild(button.transform, InvertedFrameRootName);
+        DestroyNamedChild(button.transform, "UiDoubleFrame");
+
+        VigilanteUiPress press = button.GetComponent<VigilanteUiPress>();
+        if (press != null)
+            Object.Destroy(press);
+
+        TextMeshProUGUI[] labels = button.GetComponentsInChildren<TextMeshProUGUI>(true);
+        for (int i = 0; i < labels.Length; i++)
+        {
+            ApplyFont(labels[i]);
+            labels[i].color = Color.white;
+        }
+    }
     public static void StylePanel(GameObject panelGo)
     {
         if (panelGo == null)

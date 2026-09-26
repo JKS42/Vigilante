@@ -4,22 +4,19 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// Full-screen black fade-in when a combat level loads.
+/// Full-screen black fade-in when a scene opens.
 /// </summary>
 public class SceneFade : MonoBehaviour
 {
-    [SerializeField] float fadeDuration = 1.25f;
-    [SerializeField] float holdBlack = 0.15f;
+    [SerializeField] float fadeDuration = 10f;
+    [SerializeField] float holdBlack = 2f;
 
     static SceneFade instance;
     CanvasGroup group;
     Coroutine routine;
 
-    public static void PlayLevelIntro(float duration = 1.25f)
+    public static void PlayLevelIntro(float duration = 10f)
     {
-        if (SceneManager.GetActiveScene().buildIndex < 1)
-            return;
-
         SceneFade fade = EnsureExists();
         if (fade == null)
             return;

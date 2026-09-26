@@ -139,6 +139,9 @@ public class TutorialPrompt : MonoBehaviour
 
     void HandleWaveStarted(int waveIndex)
     {
+        if (PistolIntroCinematic.IsRunning)
+            return;
+
         if (waveIndex >= 1)
             Notify("wave_started");
     }

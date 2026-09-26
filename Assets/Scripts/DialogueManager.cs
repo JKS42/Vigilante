@@ -33,7 +33,6 @@ public class DialogueManager : MonoBehaviour
         }
 
         Instance = this;
-        EnsureUi();
     }
 
     void OnDestroy()
@@ -108,7 +107,6 @@ public class DialogueManager : MonoBehaviour
 
     void ShowInternal(string text, float duration)
     {
-        EnsureUi();
         showing = true;
         hideAt = Time.unscaledTime + duration;
         SetBoxVisible(true);
@@ -125,15 +123,8 @@ public class DialogueManager : MonoBehaviour
 
     void Enqueue(string text, float duration)
     {
-        if (string.IsNullOrEmpty(text))
-            return;
-
-        if (!showing)
-            ShowInternal(text, duration);
-        else
-            queue.Enqueue((text, duration));
+        // Gameplay subtitles are disabled. TutorialPrompt handles instructional UI.
     }
-
     public static void EnsureExists()
     {
         if (Instance != null)

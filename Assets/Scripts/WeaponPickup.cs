@@ -66,16 +66,17 @@ public class WeaponPickup : MonoBehaviour
 
         collected = true;
         bool newly = switcher.UnlockWeapon(weaponIndex, equip: true, lootAmmo: ammoGrant);
+        bool cinematicPickup = PistolIntroCinematic.NotifyCollected(this);
         AudioManager.WeaponPickup();
         CombatVfx.SpawnOnomatopoeia(transform.position + Vector3.up, newly ? "GET!" : "AMMO!");
         if (newly)
         {
             string name = weaponIndex == 1 ? "Pistol" : weaponIndex == 2 ? "Shotgun" : "Rifle";
             DialogueManager.PlayerLine($"Acquired {name}.");
-            TutorialPrompt.Notify("weapon_pickup");
+            if (!cinematicPickup)
+                TutorialPrompt.Notify("weapon_pickup");
         }
 
-        PistolIntroCinematic.NotifyCollected(this);
         Destroy(gameObject);
     }
 

@@ -28,11 +28,180 @@ public class SettingsMenu : MonoBehaviour
         menu.BuildIfNeeded();
         menu.FindSliders();
         menu.WireBack(onBack);
+        menu.ApplyStandardLayout();
         if (panel.activeInHierarchy)
             menu.RefreshFromPrefs();
         return menu;
     }
 
+    void ApplyStandardLayout()
+    {
+        RectTransform panelRect = transform as RectTransform;
+        if (panelRect != null)
+        {
+            panelRect.anchorMin = panelRect.anchorMax = panelRect.pivot = new Vector2(0.5f, 0.5f);
+            panelRect.anchoredPosition = Vector2.zero;
+            panelRect.sizeDelta = new Vector2(600f, 700f);
+        }
+        VigilanteUiStyle.StyleSettingsPanel(gameObject);
+
+        TextMeshProUGUI title = null;
+        TextMeshProUGUI[] labels = GetComponentsInChildren<TextMeshProUGUI>(true);
+        for (int i = 0; i < labels.Length; i++)
+        {
+            if (labels[i] != null && (labels[i].name == "SettingsTitle" || labels[i].text.Trim().Equals("SETTINGS", System.StringComparison.OrdinalIgnoreCase)))
+            {
+                title = labels[i];
+                break;
+            }
+        }
+        if (title == null)
+            title = CreateLabel(transform, "SettingsTitle", "SETTINGS", new Vector2(0f, 260f), new Vector2(420f, 56f), 42f);
+        title.gameObject.name = "SettingsTitle";
+        title.text = "SETTINGS";
+        title.fontSize = 42f;
+        title.fontStyle = FontStyles.Bold;
+        title.alignment = TextAlignmentOptions.Center;
+        title.raycastTarget = false;
+        RectTransform titleRect = title.rectTransform;
+        titleRect.anchorMin = titleRect.anchorMax = titleRect.pivot = new Vector2(0.5f, 0.5f);
+        titleRect.anchoredPosition = new Vector2(0f, 260f);
+        titleRect.sizeDelta = new Vector2(420f, 56f);
+        VigilanteUiStyle.ApplyFont(title);
+
+        NormalizeSlider(volumeSlider, "VOLUME", new Vector2(0f, 80f));
+        NormalizeSlider(brightnessSlider, "BRIGHTNESS", new Vector2(0f, -40f));
+        NormalizeSlider(sensitivitySlider, "SENSITIVITY", new Vector2(0f, -160f));
+
+        if (backButton != null)
+        {
+            RectTransform backRect = backButton.transform as RectTransform;
+            if (backRect != null)
+            {
+                backRect.anchorMin = backRect.anchorMax = backRect.pivot = new Vector2(0.5f, 0.5f);
+                backRect.anchoredPosition = new Vector2(0f, -280f);
+                backRect.sizeDelta = new Vector2(200f, 40f);
+                backRect.localScale = Vector3.one;
+            }
+            VigilanteUiStyle.StyleSettingsButton(backButton);
+        }
+    }
+
+    static void NormalizeSlider(Slider slider, string labelText, Vector2 position)
+    {
+        if (slider == null)
+            return;
+
+        RectTransform root = slider.transform as RectTransform;
+        if (root != null)
+        {
+            root.anchorMin = root.anchorMax = root.pivot = new Vector2(0.5f, 0.5f);
+            root.anchoredPosition = position;
+            root.sizeDelta = new Vector2(460f, 64f);
+            root.localScale = Vector3.one;
+        }
+
+        slider.minValue = 0f;
+        slider.maxValue = 100f;
+        slider.wholeNumbers = true;
+        slider.direction = Slider.Direction.LeftToRight;
+
+        TextMeshProUGUI[] labels = slider.GetComponentsInChildren<TextMeshProUGUI>(true);
+        if (labels.Length > 0)
+        {
+            TextMeshProUGUI label = labels[0];
+            label.text = labelText;
+            label.raycastTarget = false;
+            label.alignment = TextAlignmentOptions.Center;
+            label.fontSize = 24f;
+            RectTransform labelRect = label.rectTransform;
+            labelRect.anchorMin = labelRect.anchorMax = labelRect.pivot = new Vector2(0.5f, 0.5f);
+            labelRect.anchoredPosition = new Vector2(0f, 22f);
+            labelRect.sizeDelta = new Vector2(460f, 28f);
+            VigilanteUiStyle.ApplyFont(label);
+        }
+
+        if (slider.fillRect != null)
+        {
+            Image fill = slider.fillRect.GetComponent<Image>();
+            if (fill != null)
+            {
+                fill.sprite = VigilanteUiStyle.WhiteSprite();
+                fill.color = new Color(0.92f, 0.86f, 0.55f, 1f);
+            }
+            RectTransform fillArea = slider.fillRect.parent as RectTransform;
+            if (fillArea != null)
+            {
+                if (fillArea.parent == slider.transform)
+                {
+                    fillArea.anchorMin = fillArea.anchorMax = fillArea.pivot = new Vector2(0.5f, 0.5f);
+                    fillArea.anchoredPosition = new Vector2(0f, -12f);
+                    fillArea.sizeDelta = new Vector2(404f, 11f);
+                    slider.fillRect.anchorMin = Vector2.zero;
+                    slider.fillRect.anchorMax = Vector2.one;
+                    slider.fillRect.offsetMin = slider.fillRect.offsetMax = Vector2.zero;
+                }
+                else
+                {
+                    fillArea.anchorMin = new Vector2(0f, 0.25f);
+                    fillArea.anchorMax = new Vector2(1f, 0.75f);
+                    fillArea.offsetMin = new Vector2(8f, 0f);
+                    fillArea.offsetMax = new Vector2(-8f, 0f);
+                }
+            }
+        }
+
+        if (slider.handleRect != null)
+        {
+            RectTransform handleArea = slider.handleRect.parent as RectTransform;
+            if (handleArea != null)
+            {
+                if (handleArea.parent == slider.transform)
+                {
+                    handleArea.anchorMin = handleArea.anchorMax = handleArea.pivot = new Vector2(0.5f, 0.5f);
+                    handleArea.anchoredPosition = new Vector2(0f, -12f);
+                    handleArea.sizeDelta = new Vector2(400f, 22f);
+                }
+                else
+                {
+                    handleArea.anchorMin = Vector2.zero;
+                    handleArea.anchorMax = Vector2.one;
+                    handleArea.offsetMin = new Vector2(10f, 0f);
+                    handleArea.offsetMax = new Vector2(-10f, 0f);
+                }
+            }
+            slider.handleRect.anchorMin = slider.handleRect.anchorMax = slider.handleRect.pivot = new Vector2(0.5f, 0.5f);
+            slider.handleRect.sizeDelta = new Vector2(22f, 22f);
+        }
+
+        Transform bgTransform = FindChildByName(slider.transform, "Background");
+        Image background = bgTransform != null ? bgTransform.GetComponent<Image>() : null;
+        if (background != null)
+        {
+            background.sprite = VigilanteUiStyle.WhiteSprite();
+            background.color = new Color(0.22f, 0.22f, 0.24f, 1f);
+            RectTransform backgroundRect = background.rectTransform;
+            if (backgroundRect.parent == slider.transform)
+            {
+                backgroundRect.anchorMin = backgroundRect.anchorMax = backgroundRect.pivot = new Vector2(0.5f, 0.5f);
+                backgroundRect.anchoredPosition = new Vector2(0f, -12f);
+                backgroundRect.sizeDelta = new Vector2(420f, 11f);
+            }
+            else
+            {
+                backgroundRect.anchorMin = new Vector2(0f, 0.25f);
+                backgroundRect.anchorMax = new Vector2(1f, 0.75f);
+                backgroundRect.offsetMin = Vector2.zero;
+                backgroundRect.offsetMax = Vector2.zero;
+            }
+        }
+        Image handle = slider.targetGraphic as Image;
+        if (handle != null)
+        {
+            handle.sprite = VigilanteUiStyle.WhiteSprite();
+            handle.color = Color.white;
+        }
+    }
     void Awake()
     {
         FindSliders();

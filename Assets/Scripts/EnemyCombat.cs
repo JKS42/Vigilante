@@ -264,7 +264,7 @@ public class EnemyCombat : MonoBehaviour
             if (!mecanim.PlayMelee())
                 return false;
 
-            nextFireTime = Time.time + Mathf.Max(0.75f, mecanim.ShootCycleDuration);
+            nextFireTime = Time.time + Mathf.Max(0.75f, mecanim.MeleeCycleDuration);
             return true;
         }
 
@@ -614,7 +614,7 @@ public class EnemyCombat : MonoBehaviour
                 shotDamage += 1f;
         }
 
-        return shotDamage;
+        return shotDamage * 2f;
     }
 
     bool TryGetFirstHit(Vector3 origin, Vector3 dir, float maxDistance, out RaycastHit hit)

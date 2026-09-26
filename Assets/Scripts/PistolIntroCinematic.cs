@@ -67,15 +67,16 @@ public class PistolIntroCinematic : MonoBehaviour
         instance.StartCoroutine(instance.DropRoutine(pickup.transform));
     }
 
-    public static void NotifyCollected(WeaponPickup pickup)
+    public static bool NotifyCollected(WeaponPickup pickup)
     {
         if (instance == null || pickup == null || pickup != instance.watchedPickup)
-            return;
+            return false;
 
         instance.watchedPickup = null;
         if (WaveManager.Instance != null)
             WaveManager.Instance.UseDistantSpawns();
         instance.StartCoroutine(instance.WaveRoutine());
+        return true;
     }
 
     public static void NotifyLost(WeaponPickup pickup)
@@ -113,7 +114,10 @@ public class PistolIntroCinematic : MonoBehaviour
 
         WaveManager waves = WaveManager.Instance;
         if (waves == null)
+        {
+            TutorialPrompt.Notify("weapon_pickup");
             yield break;
+        }
 
         for (int i = 0; i < 3; i++)
             yield return null;
@@ -121,11 +125,11 @@ public class PistolIntroCinematic : MonoBehaviour
         if (!TryBeginCutscene(out Transform rig, out Transform parent, out Vector3 localPos, out Quaternion localRot, out Vector3 homePos, out Quaternion homeRot))
         {
             waves.ReleaseFollowingWave();
+            TutorialPrompt.Notify("weapon_pickup");
             yield break;
         }
 
         waves.BeginScriptedFollowingWave();
-        TutorialPrompt.ShowPinned("New wave. Hostiles are spawning in. Clear them before the next wave.");
         int failedSpawns = 0;
 
         while (waves.HasScriptedSpawnsRemaining && failedSpawns < 4)
@@ -142,14 +146,16 @@ public class PistolIntroCinematic : MonoBehaviour
             }
 
             KeepEnemyVisibleDuringPause(spawnedAt);
+            TutorialPrompt.ShowPinned("Enemies arrive in waves. Clear each wave to make the next one appear.");
             yield return new WaitForSecondsRealtime(5.5f);
+            TutorialPrompt.HidePinned();
             break;
         }
 
         waves.EndScriptedSpawn();
-        TutorialPrompt.HidePinned();
         rig.SetPositionAndRotation(homePos, homeRot);
         EndCutscene(rig, parent, localPos, localRot);
+        TutorialPrompt.Notify("weapon_pickup");
     }
 
     static void SnapToSpawn(Transform rig, Vector3 spot, Vector3 homePos)

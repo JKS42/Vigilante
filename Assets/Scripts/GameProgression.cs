@@ -57,6 +57,7 @@ public static class GameProgression
         SelectedLevel = level;
         startedThisSession = true;
         Time.timeScale = 1f;
+        UIManager.ResetHealthBinding();
         SceneManager.LoadScene(1);
     }
 

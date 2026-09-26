@@ -165,16 +165,16 @@ public class UIManager : MonoBehaviour
 
     void UnbindPlayerHealth()
     {
-        if (playerHealth == null)
-            return;
+        if (playerHealth != null)
+        {
+            playerHealth.OnDamaged -= HandlePlayerDamaged;
+            playerHealth.OnHealed -= HandlePlayerHealed;
+            playerHealth.OnDied -= HandlePlayerDied;
+        }
 
-        playerHealth.OnDamaged -= HandlePlayerDamaged;
-        playerHealth.OnHealed -= HandlePlayerHealed;
-        playerHealth.OnDied -= HandlePlayerDied;
-        if (healthBound && playerHealth != null)
-            healthBound = false;
+        playerHealth = null;
+        healthBound = false;
     }
-
     void HandlePlayerDamaged(float amount, Vector3 hitPoint, GameObject instigator)
     {
         RefreshHealthSlider();
@@ -348,32 +348,42 @@ public class UIManager : MonoBehaviour
         deathPanel.transform.SetAsLastSibling();
         Image bg = deathPanel.AddComponent<Image>();
         bg.sprite = CreateWhiteSprite();
-        bg.color = new Color(0f, 0f, 0f, 0.72f);
+        bg.color = new Color(0f, 0f, 0f, 0.78f);
+        bg.raycastTarget = true;
         RectTransform prt = bg.rectTransform;
         prt.anchorMin = Vector2.zero;
         prt.anchorMax = Vector2.one;
         prt.offsetMin = Vector2.zero;
         prt.offsetMax = Vector2.zero;
 
+        GameObject dialog = new GameObject("DeathDialog", typeof(RectTransform));
+        dialog.transform.SetParent(deathPanel.transform, false);
+        RectTransform drt = dialog.GetComponent<RectTransform>();
+        drt.anchorMin = drt.anchorMax = new Vector2(0.5f, 0.5f);
+        drt.anchoredPosition = Vector2.zero;
+        drt.sizeDelta = new Vector2(600f, 360f);
+        VigilanteUiStyle.StylePanel(dialog);
+
         GameObject textGo = new GameObject("DeathText");
-        textGo.transform.SetParent(deathPanel.transform, false);
+        textGo.transform.SetParent(dialog.transform, false);
         TextMeshProUGUI tmp = textGo.AddComponent<TextMeshProUGUI>();
         tmp.text = "YOU DIED";
-        tmp.fontSize = 64f;
+        tmp.fontSize = 48f;
+        tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
+        VigilanteUiStyle.ApplyFont(tmp);
         RectTransform trt = tmp.rectTransform;
-        trt.anchorMin = new Vector2(0.2f, 0.52f);
-        trt.anchorMax = new Vector2(0.8f, 0.72f);
+        trt.anchorMin = new Vector2(0.1f, 0.58f);
+        trt.anchorMax = new Vector2(0.9f, 0.82f);
         trt.offsetMin = Vector2.zero;
         trt.offsetMax = Vector2.zero;
 
-        CreateDeathButton(deathPanel.transform, "Restart", new Vector2(0.35f, 0.32f), new Vector2(0.49f, 0.42f), () =>
+        CreateDeathButton(dialog.transform, "Restart", new Vector2(0.18f, 0.2f), new Vector2(0.48f, 0.36f), () =>
         {
             GameProgression.RestartCurrentLevel();
         });
 
-        CreateDeathButton(deathPanel.transform, "Main Menu", new Vector2(0.51f, 0.32f), new Vector2(0.65f, 0.42f), () =>
+        CreateDeathButton(dialog.transform, "Main Menu", new Vector2(0.52f, 0.2f), new Vector2(0.82f, 0.36f), () =>
         {
             Time.timeScale = 1f;
             if (pause != null)
@@ -388,10 +398,7 @@ public class UIManager : MonoBehaviour
         GameObject go = new GameObject(label + "Button");
         go.transform.SetParent(parent, false);
         Image img = go.AddComponent<Image>();
-        img.sprite = CreateWhiteSprite();
-        img.color = new Color(0.18f, 0.18f, 0.2f, 0.95f);
         Button button = go.AddComponent<Button>();
-        button.targetGraphic = img;
         button.onClick.AddListener(action);
         RectTransform rt = img.rectTransform;
         rt.anchorMin = min;
@@ -403,14 +410,14 @@ public class UIManager : MonoBehaviour
         textGo.transform.SetParent(go.transform, false);
         TextMeshProUGUI tmp = textGo.AddComponent<TextMeshProUGUI>();
         tmp.text = label;
-        tmp.fontSize = 28f;
+        tmp.fontSize = 24f;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
         RectTransform trt = tmp.rectTransform;
         trt.anchorMin = Vector2.zero;
         trt.anchorMax = Vector2.one;
         trt.offsetMin = Vector2.zero;
         trt.offsetMax = Vector2.zero;
+        VigilanteUiStyle.StyleInvertedButtonPreserveActions(button);
     }
 
     static Sprite CreateWhiteSprite()
@@ -418,7 +425,6 @@ public class UIManager : MonoBehaviour
         Texture2D tex = Texture2D.whiteTexture;
         return Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 4f);
     }
-
     void OnWeaponChanged(int index, GameObject weapon)
     {
         boundIndex = index;

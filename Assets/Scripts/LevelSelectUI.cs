@@ -93,5 +93,6 @@ public class LevelSelectUI : MonoBehaviour
         trt.anchorMax = Vector2.one;
         trt.offsetMin = Vector2.zero;
         trt.offsetMax = Vector2.zero;
+        VigilanteUiStyle.StyleInvertedButtonPreserveActions(btn);
     }
 }

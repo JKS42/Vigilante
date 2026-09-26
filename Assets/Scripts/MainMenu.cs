@@ -21,9 +21,29 @@ public class MainMenu : MonoBehaviour
 
         WirePanelButtons();
         SettingsMenu.EnsureOn(SettingsPanel);
+        StyleMenuChrome();
+        SceneFade.PlayLevelIntro();
         GameSettings.ApplyAll();
     }
 
+    void StyleMenuChrome()
+    {
+        StyleMenuPanel(StartMenuPanel);
+        StyleMenuPanel(NewGamePanel);
+
+    }
+
+    static void StyleMenuPanel(GameObject panel)
+    {
+        if (panel == null)
+            return;
+
+        VigilanteUiStyle.StylePanel(panel);
+        VigilanteUiStyle.ApplyFontRecursive(panel.transform);
+        Button[] buttons = panel.GetComponentsInChildren<Button>(true);
+        for (int i = 0; i < buttons.Length; i++)
+            VigilanteUiStyle.StyleInvertedButtonPreserveActions(buttons[i]);
+    }
     void WirePanelButtons()
     {
         if (NewGamePanel == null)

@@ -17,6 +17,7 @@ public class EnemyMecanim : MonoBehaviour
     static readonly int DieVariantId = Animator.StringToHash("DieVariant");
 
     const float DefaultSampleRate = 30f;
+    const float MeleeAttackSpeed = 1.5f;
 
     [SerializeField] float moveThreshold = 0.15f;
     [SerializeField] float dampTime = 0.12f;
@@ -28,6 +29,7 @@ public class EnemyMecanim : MonoBehaviour
     bool dead;
     float fireBusyUntil;
     float currentSpeed;
+    float baseAnimatorSpeed = 1f;
 
     public bool HasAnimator => animator != null && animator.runtimeAnimatorController != null;
     public bool IsDead => dead;
@@ -69,6 +71,8 @@ public class EnemyMecanim : MonoBehaviour
         }
     }
 
+    public float MeleeCycleDuration => ShootCycleDuration / MeleeAttackSpeed;
+
     public float ShootCycleDuration
     {
         get
@@ -101,6 +105,7 @@ public class EnemyMecanim : MonoBehaviour
         {
             animator.applyRootMotion = false;
             animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            baseAnimatorSpeed = animator.speed;
         }
         agent = GetComponent<NavMeshAgent>();
         if (agent == null)
@@ -141,7 +146,10 @@ public class EnemyMecanim : MonoBehaviour
 
     void Update()
     {
-        if (dead || animator == null || !animator.enabled)
+        if (animator == null)
+            return;
+        animator.speed = dead ? baseAnimatorSpeed : (IsPlayingMeleeStrike() ? baseAnimatorSpeed * MeleeAttackSpeed : baseAnimatorSpeed);
+        if (dead || !animator.enabled)
             return;
 
         // While a swing or shot is locked in, keep locomotion flags clear so it isn't interrupted.
@@ -182,6 +190,15 @@ public class EnemyMecanim : MonoBehaviour
         SetUpperIdle(currentSpeed > moveThreshold);
     }
 
+    bool IsPlayingMeleeStrike()
+    {
+        if (animator == null)
+            return false;
+        AnimatorStateInfo current = animator.GetCurrentAnimatorStateInfo(0);
+        if (current.IsName("Strike"))
+            return true;
+        return animator.IsInTransition(0) && animator.GetNextAnimatorStateInfo(0).IsName("Strike");
+    }
     void SetUpperIdle(bool on)
     {
         if (animator == null)
@@ -192,7 +209,7 @@ public class EnemyMecanim : MonoBehaviour
         animator.SetLayerWeight(layer, on ? 1f : 0f);
     }
 
-    public float MeleeImpactDelay => ShootCycleDuration * 0.38f;
+    public float MeleeImpactDelay => MeleeCycleDuration * 0.38f;
 
     public bool PlayMelee()
     {
@@ -206,7 +223,7 @@ public class EnemyMecanim : MonoBehaviour
         SetUpperIdle(false);
         animator.ResetTrigger(FireId);
         animator.CrossFadeInFixedTime("Strike", 0.06f, 0, 0f);
-        fireBusyUntil = Time.time + ShootCycleDuration;
+        fireBusyUntil = Time.time + MeleeCycleDuration;
         return true;
     }
 
@@ -245,6 +262,8 @@ public class EnemyMecanim : MonoBehaviour
             return;
 
         dead = true;
+        if (animator != null)
+            animator.speed = baseAnimatorSpeed;
         fireBusyUntil = 0f;
         SetUpperIdle(false);
         animator.SetFloat(DieVariantId, Mathf.Clamp(variant, 0, 5));
