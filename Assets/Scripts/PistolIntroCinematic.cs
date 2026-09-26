@@ -416,7 +416,7 @@ public class PistolIntroCinematic : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    static Transform ResolveCameraRig()
+    public static Transform ResolveCameraRig()
     {
         MouseMovement look = Object.FindFirstObjectByType<MouseMovement>();
         Transform rig = look != null ? look.transform : null;
@@ -429,7 +429,7 @@ public class PistolIntroCinematic : MonoBehaviour
         return rig;
     }
 
-    static void Frame(Vector3 focus, Vector3 preferFrom, float distance, float height, float lookHeight, out Vector3 position, out Quaternion rotation)
+    public static void Frame(Vector3 focus, Vector3 preferFrom, float distance, float height, float lookHeight, out Vector3 position, out Quaternion rotation)
     {
         Vector3 lookPoint = focus + Vector3.up * lookHeight;
         Vector3 flat = preferFrom - focus;
@@ -643,6 +643,8 @@ public class PistolIntroCinematic : MonoBehaviour
         if (col.GetComponentInParent<EnemyAI>() != null)
             return false;
         if (col.GetComponentInParent<WeaponPickup>() != null)
+            return false;
+        if (col.GetComponentInParent<MedKitPickup>() != null)
             return false;
         return true;
     }

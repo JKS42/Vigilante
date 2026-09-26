@@ -209,6 +209,13 @@ public class TutorialPrompt : MonoBehaviour
             },
             new Tip
             {
+                id = "health_pickup",
+                message = "Health kits restore HP. Walk over one when you are hurt.",
+                duration = 6f,
+                showOnEvent = "health_pickup"
+            },
+            new Tip
+            {
                 id = "wave",
                 message = "Make use of your radar to help find enemies",
                 duration = 5f,
@@ -359,8 +366,14 @@ public class TutorialPrompt : MonoBehaviour
         AudioManager.UIClick();
         SetTipVisible(false);
         current = null;
-        EndMarkerLesson();
+        bool keepPaused = queue.Count > 0 && IsPausingTip(PeekQueue());
+        EndMarkerLesson(restoreTime: !keepPaused);
         TryShowNextQueued();
+    }
+
+    Tip PeekQueue()
+    {
+        return queue.Count > 0 ? queue.Peek() : null;
     }
 
     static bool IsPausingTip(Tip tip)
@@ -368,6 +381,7 @@ public class TutorialPrompt : MonoBehaviour
         if (tip == null)
             return false;
         return tip.id == "damage" || tip.showOnEvent == "player_hurt"
+            || tip.id == "health_pickup" || tip.showOnEvent == "health_pickup"
             || tip.id == "break" || tip.showOnEvent == "near_breakable"
             || tip.id == "wall_broken" || tip.showOnEvent == "wall_broken"
             || tip.id == "wave" || tip.showOnEvent == "wave_started";
@@ -379,9 +393,9 @@ public class TutorialPrompt : MonoBehaviour
             return;
 
         markerLesson = true;
-        markerLessonPaused = Time.timeScale > 0f;
-        if (markerLessonPaused)
+        if (Time.timeScale > 0f)
         {
+            markerLessonPaused = true;
             savedTimeScale = Time.timeScale;
             Time.timeScale = 0f;
         }
@@ -402,6 +416,18 @@ public class TutorialPrompt : MonoBehaviour
                     markers.BeginTutorialHighlight();
                 if (UIManager.Instance != null)
                     UIManager.Instance.BeginHealthTutorialHighlight();
+                return;
+            }
+
+            if (IsHealthPickupTip(tip))
+            {
+                MedKitPickup kit = FindNearestMedKit();
+                if (kit != null)
+                {
+                    BeginCameraFocus(kit.transform.position);
+                    HidePlayerVisuals();
+                    TutorialWorldHighlight.ShowObject(kit.gameObject);
+                }
                 return;
             }
 
@@ -430,7 +456,17 @@ public class TutorialPrompt : MonoBehaviour
         return tip != null && (tip.id == "damage" || tip.showOnEvent == "player_hurt");
     }
 
+    static bool IsHealthPickupTip(Tip tip)
+    {
+        return tip != null && (tip.id == "health_pickup" || tip.showOnEvent == "health_pickup");
+    }
+
     void EndMarkerLesson()
+    {
+        EndMarkerLesson(restoreTime: true);
+    }
+
+    void EndMarkerLesson(bool restoreTime)
     {
         if (!markerLesson)
             return;
@@ -450,6 +486,8 @@ public class TutorialPrompt : MonoBehaviour
         if (radar != null)
             radar.EndTutorialHighlight();
 
+        EndCameraFocus();
+        RestorePlayerVisuals();
         TutorialWorldHighlight.ClearHighlight();
         if (continueHint != null)
             continueHint.SetActive(false);
@@ -457,9 +495,123 @@ public class TutorialPrompt : MonoBehaviour
         if (!markerLessonPaused)
             return;
 
+        if (!restoreTime)
+            return;
+
         markerLessonPaused = false;
         if (!controlsOpen)
             Time.timeScale = savedTimeScale > 0f ? savedTimeScale : 1f;
+    }
+
+    void BeginCameraFocus(Vector3 focus)
+    {
+        EndCameraFocus();
+
+        cameraRig = PistolIntroCinematic.ResolveCameraRig();
+        if (cameraRig == null)
+            return;
+
+        cameraParent = cameraRig.parent;
+        cameraLocalPos = cameraRig.localPosition;
+        cameraLocalRot = cameraRig.localRotation;
+        Vector3 preferFrom = cameraRig.position;
+        cameraRig.SetParent(null, true);
+        cameraHeld = true;
+
+        PistolIntroCinematic.Frame(focus, preferFrom, 2.4f, 1.15f, 0.2f, out Vector3 shotPos, out Quaternion shotRot);
+        cameraRig.SetPositionAndRotation(shotPos, shotRot);
+    }
+
+    readonly List<Renderer> hiddenPlayerRenderers = new List<Renderer>();
+    readonly List<bool> playerRendererWasEnabled = new List<bool>();
+
+    void HidePlayerVisuals()
+    {
+        RestorePlayerVisuals();
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+            return;
+
+        AddPlayerRenderers(player.GetComponentsInChildren<Renderer>(true));
+        WeaponSwitcher switcher = player.GetComponentInChildren<WeaponSwitcher>(true);
+        if (switcher != null && switcher.weapons != null)
+        {
+            foreach (GameObject weapon in switcher.weapons)
+                if (weapon != null)
+                    AddPlayerRenderers(weapon.GetComponentsInChildren<Renderer>(true));
+        }
+
+        for (int i = 0; i < hiddenPlayerRenderers.Count; i++)
+        {
+            Renderer renderer = hiddenPlayerRenderers[i];
+            playerRendererWasEnabled.Add(renderer != null && renderer.enabled);
+            if (renderer != null)
+                renderer.enabled = false;
+        }
+    }
+
+    void AddPlayerRenderers(Renderer[] renderers)
+    {
+        if (renderers == null)
+            return;
+        foreach (Renderer renderer in renderers)
+            if (renderer != null && !hiddenPlayerRenderers.Contains(renderer))
+                hiddenPlayerRenderers.Add(renderer);
+    }
+
+    void RestorePlayerVisuals()
+    {
+        for (int i = 0; i < hiddenPlayerRenderers.Count; i++)
+            if (hiddenPlayerRenderers[i] != null)
+                hiddenPlayerRenderers[i].enabled = i < playerRendererWasEnabled.Count && playerRendererWasEnabled[i];
+        hiddenPlayerRenderers.Clear();
+        playerRendererWasEnabled.Clear();
+    }
+    void EndCameraFocus()
+    {
+        if (!cameraHeld)
+            return;
+
+        cameraHeld = false;
+        if (cameraRig != null)
+        {
+            cameraRig.SetParent(cameraParent, false);
+            cameraRig.localPosition = cameraLocalPos;
+            cameraRig.localRotation = cameraLocalRot;
+        }
+
+        cameraRig = null;
+        cameraParent = null;
+    }
+
+    static MedKitPickup FindNearestMedKit()
+    {
+        MedKitPickup[] kits = UnityEngine.Object.FindObjectsByType<MedKitPickup>(FindObjectsSortMode.None);
+        if (kits == null || kits.Length == 0)
+            return null;
+
+        Vector3 from = Vector3.zero;
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            from = player.transform.position;
+        else if (Camera.main != null)
+            from = Camera.main.transform.position;
+
+        MedKitPickup best = null;
+        float bestDist = float.PositiveInfinity;
+        for (int i = 0; i < kits.Length; i++)
+        {
+            MedKitPickup kit = kits[i];
+            if (kit == null)
+                continue;
+            float dist = (kit.transform.position - from).sqrMagnitude;
+            if (dist >= bestDist)
+                continue;
+            bestDist = dist;
+            best = kit;
+        }
+
+        return best;
     }
 
     void EnsureMarkerDim()
@@ -678,6 +830,11 @@ public class TutorialPrompt : MonoBehaviour
     int lastWeaponIndex = -1;
     static Break focusBreak;
     GameObject continueHint;
+    bool cameraHeld;
+    Transform cameraRig;
+    Transform cameraParent;
+    Vector3 cameraLocalPos;
+    Quaternion cameraLocalRot;
 
     public static void ShowPinned(string message)
     {
@@ -731,6 +888,9 @@ public class TutorialPrompt : MonoBehaviour
 
         if (eventTips.TryGetValue(eventId, out Tip tip))
             EnqueueOrShow(tip);
+
+        if (eventId == "player_hurt" && eventTips.TryGetValue("health_pickup", out Tip health))
+            EnqueueOrShow(health);
     }
 
     public static void EnsureForLevel1()

@@ -50,6 +50,14 @@ public class TutorialWorldHighlight : MonoBehaviour
         Show(renderers);
     }
 
+    public static void ShowObject(GameObject root)
+    {
+        List<Renderer> renderers = new List<Renderer>();
+        if (root != null)
+            AddRenderers(root, renderers);
+        Show(renderers);
+    }
+
     public static void ClearHighlight()
     {
         if (instance != null)
