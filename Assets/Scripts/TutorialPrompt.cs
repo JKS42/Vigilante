@@ -210,7 +210,7 @@ public class TutorialPrompt : MonoBehaviour
             new Tip
             {
                 id = "wave",
-                message = "Defeating all enemies spawns additional waves. Defeat all waves to clear the level",
+                message = "Make use of your radar to help find enemies",
                 duration = 5f,
                 showOnEvent = "wave_started"
             },
