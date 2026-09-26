@@ -175,7 +175,7 @@ public class TutorialPrompt : MonoBehaviour
             new Tip
             {
                 id = "first_kill",
-                message = "Nice hit. Keep clearing hostiles — they drop guns when they fall.",
+                message = "Defeat all enemies to progress.",
                 duration = 5f,
                 showOnEvent = "first_kill"
             },
@@ -210,14 +210,14 @@ public class TutorialPrompt : MonoBehaviour
             new Tip
             {
                 id = "wave",
-                message = "New wave inbound. Use space, break walls, and don't get pinched.",
+                message = "Defeating all enemies spawns additional waves. Defeat all waves to clear the level",
                 duration = 5f,
                 showOnEvent = "wave_started"
             },
             new Tip
             {
                 id = "clear",
-                message = "Clear every wave to finish the tutorial.",
+                message = "All enemies defeated. Level complete",
                 duration = 5f,
                 showOnEvent = "all_waves_cleared"
             },
