@@ -46,7 +46,17 @@ public class TutorialPrompt : MonoBehaviour
     bool savedCursorVisible;
     CursorLockMode savedCursorLock;
 
-    public static bool BlocksGameplay => Instance != null && (Instance.controlsOpen || Instance.markerLesson);
+    // Level 1 opening story, shown before the controls modal.
+    GameObject openingStoryRoot;
+    CanvasGroup openingStoryGroup;
+    CanvasGroup openingStoryContentGroup;
+    TextMeshProUGUI openingStoryMessage;
+    bool openingStoryActive;
+    bool openingStoryTransitioning;
+    int openingStoryIndex;
+    Coroutine openingStoryRoutine;
+
+    public static bool BlocksGameplay => Instance != null && (Instance.controlsOpen || Instance.markerLesson || Instance.openingStoryActive);
 
     void Awake()
     {
@@ -84,11 +94,18 @@ public class TutorialPrompt : MonoBehaviour
         BindWaves();
         BindWeaponSwitcher();
         // Unscaled, so a tip that pauses gameplay cannot swallow the controls screen.
-        openControlsAt = Time.unscaledTime + 0.35f;
+        openControlsAt = openingStoryActive ? 0f : Time.unscaledTime + 0.35f;
     }
 
     void Update()
     {
+        if (openingStoryActive)
+        {
+            if (!openingStoryTransitioning && WasContinuePressed())
+                AdvanceOpeningStory();
+            return;
+        }
+
         if (!controlsDone && !controlsOpen && openControlsAt > 0f && Time.unscaledTime >= openControlsAt)
             OpenControlsModal();
 
@@ -898,11 +915,153 @@ public class TutorialPrompt : MonoBehaviour
 
     public static void EnsureForLevel1()
     {
-        if (Instance != null)
+        TutorialPrompt prompt = Instance;
+        if (prompt == null)
+        {
+            GameObject go = new GameObject("TutorialPrompt");
+            prompt = go.AddComponent<TutorialPrompt>();
+        }
+
+        prompt.BeginOpeningStory();
+    }
+
+    void BeginOpeningStory()
+    {
+        if (openingStoryActive || controlsDone)
             return;
 
-        GameObject go = new GameObject("TutorialPrompt");
-        go.AddComponent<TutorialPrompt>();
+        openingStoryActive = true;
+        openingStoryIndex = 0;
+        openControlsAt = 0f;
+        EnsureOpeningStoryUi();
+        openingStoryRoot.SetActive(true);
+        openingStoryGroup.alpha = 1f;
+        openingStoryContentGroup.alpha = 1f;
+        SetOpeningStoryLine();
+
+        savedTimeScale = Time.timeScale > 0f ? Time.timeScale : 1f;
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
+    void EnsureOpeningStoryUi()
+    {
+        if (openingStoryRoot != null)
+            return;
+
+        GameObject canvasGo = EnsureCanvas();
+        Transform existing = canvasGo.transform.Find("OpeningStory");
+        openingStoryRoot = existing != null ? existing.gameObject : new GameObject("OpeningStory", typeof(RectTransform));
+        if (existing == null)
+            openingStoryRoot.transform.SetParent(canvasGo.transform, false);
+
+        RectTransform rootRect = openingStoryRoot.GetComponent<RectTransform>();
+        rootRect.anchorMin = Vector2.zero;
+        rootRect.anchorMax = Vector2.one;
+        rootRect.offsetMin = Vector2.zero;
+        rootRect.offsetMax = Vector2.zero;
+
+        Image background = openingStoryRoot.GetComponent<Image>();
+        if (background == null)
+            background = openingStoryRoot.AddComponent<Image>();
+        background.sprite = WhiteSprite();
+        background.color = Color.black;
+        background.raycastTarget = false;
+
+        openingStoryGroup = openingStoryRoot.GetComponent<CanvasGroup>();
+        if (openingStoryGroup == null)
+            openingStoryGroup = openingStoryRoot.AddComponent<CanvasGroup>();
+        openingStoryGroup.interactable = false;
+        openingStoryGroup.blocksRaycasts = false;
+
+        Transform content = openingStoryRoot.transform.Find("Content");
+        GameObject contentGo = content != null ? content.gameObject : new GameObject("Content", typeof(RectTransform));
+        if (content == null)
+            contentGo.transform.SetParent(openingStoryRoot.transform, false);
+
+        RectTransform contentRect = contentGo.GetComponent<RectTransform>();
+        contentRect.anchorMin = Vector2.zero;
+        contentRect.anchorMax = Vector2.one;
+        contentRect.offsetMin = Vector2.zero;
+        contentRect.offsetMax = Vector2.zero;
+        openingStoryContentGroup = contentGo.GetComponent<CanvasGroup>();
+        if (openingStoryContentGroup == null)
+            openingStoryContentGroup = contentGo.AddComponent<CanvasGroup>();
+
+        openingStoryMessage = CreateTmp(contentGo.transform, "StoryLine", string.Empty, 34f, FontStyles.Normal);
+        openingStoryMessage.alignment = TextAlignmentOptions.Center;
+        RectTransform messageRect = openingStoryMessage.rectTransform;
+        messageRect.anchorMin = new Vector2(0.1f, 0.38f);
+        messageRect.anchorMax = new Vector2(0.9f, 0.62f);
+        messageRect.offsetMin = Vector2.zero;
+        messageRect.offsetMax = Vector2.zero;
+        openingStoryMessage.color = Color.white;
+
+        TextMeshProUGUI hint = CreateTmp(contentGo.transform, "ContinueHint", "Space to continue", 18f, FontStyles.Normal);
+        hint.alignment = TextAlignmentOptions.Center;
+        hint.color = new Color(1f, 1f, 1f, 0.7f);
+        RectTransform hintRect = hint.rectTransform;
+        hintRect.anchorMin = new Vector2(0.2f, 0.12f);
+        hintRect.anchorMax = new Vector2(0.8f, 0.2f);
+        hintRect.offsetMin = Vector2.zero;
+        hintRect.offsetMax = Vector2.zero;
+    }
+
+    void SetOpeningStoryLine()
+    {
+        if (openingStoryMessage == null)
+            return;
+
+        openingStoryMessage.text = openingStoryIndex == 0
+            ? "This building was ours, then the gang took it."
+            : "Police did nothing. So I will.";
+    }
+
+    void AdvanceOpeningStory()
+    {
+        if (openingStoryRoutine != null)
+            return;
+        openingStoryRoutine = StartCoroutine(AdvanceOpeningStoryRoutine());
+    }
+
+    System.Collections.IEnumerator AdvanceOpeningStoryRoutine()
+    {
+        openingStoryTransitioning = true;
+        yield return FadeCanvasGroup(openingStoryContentGroup, 1f, 0f, 0.35f);
+
+        if (openingStoryIndex == 0)
+        {
+            openingStoryIndex = 1;
+            SetOpeningStoryLine();
+            yield return FadeCanvasGroup(openingStoryContentGroup, 0f, 1f, 0.35f);
+        }
+        else
+        {
+            OpenControlsModal();
+            openingStoryRoot.transform.SetAsLastSibling();
+            yield return FadeCanvasGroup(openingStoryGroup, 1f, 0f, 0.6f);
+            openingStoryRoot.SetActive(false);
+            openingStoryActive = false;
+        }
+
+        openingStoryTransitioning = false;
+        openingStoryRoutine = null;
+    }
+
+    static System.Collections.IEnumerator FadeCanvasGroup(CanvasGroup group, float from, float to, float duration)
+    {
+        if (group == null)
+            yield break;
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            group.alpha = Mathf.Lerp(from, to, Mathf.Clamp01(elapsed / duration));
+            yield return null;
+        }
+        group.alpha = to;
     }
 
     void SetTipVisible(bool on)

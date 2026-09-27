@@ -124,6 +124,12 @@ public class MinimapUI : MonoBehaviour
         if (root == null)
             return;
 
+        if (!GameUiVisibility.IsVisible)
+        {
+            if (group != null) group.alpha = 0f;
+            return;
+        }
+
         if (tutorialHighlight)
         {
             if (group != null)
@@ -133,7 +139,7 @@ public class MinimapUI : MonoBehaviour
         }
         else
         {
-            bool hide = ShouldHide();
+            bool hide = ShouldHide() || !GameUiVisibility.IsVisible;
             if (group != null)
                 group.alpha = hide ? 0f : 1f;
             if (hide)

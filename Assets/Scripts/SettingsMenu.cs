@@ -12,6 +12,8 @@ public class SettingsMenu : MonoBehaviour
     public Slider brightnessSlider;
     public Slider sensitivitySlider;
     public Button backButton;
+    public Button gameUiButton;
+    TextMeshProUGUI gameUiButtonLabel;
 
     bool suppress;
     UnityEngine.Events.UnityAction backAction;
@@ -41,7 +43,7 @@ public class SettingsMenu : MonoBehaviour
         {
             panelRect.anchorMin = panelRect.anchorMax = panelRect.pivot = new Vector2(0.5f, 0.5f);
             panelRect.anchoredPosition = Vector2.zero;
-            panelRect.sizeDelta = new Vector2(600f, 700f);
+            panelRect.sizeDelta = new Vector2(600f, 740f);
         }
         VigilanteUiStyle.StyleSettingsPanel(gameObject);
 
@@ -72,6 +74,9 @@ public class SettingsMenu : MonoBehaviour
         NormalizeSlider(volumeSlider, "VOLUME", new Vector2(0f, 80f));
         NormalizeSlider(brightnessSlider, "BRIGHTNESS", new Vector2(0f, -40f));
         NormalizeSlider(sensitivitySlider, "SENSITIVITY", new Vector2(0f, -160f));
+        EnsureUiVisibilityButton();
+        LayoutUiVisibilityButton();
+        WireUiToggle();
 
         if (backButton != null)
         {
@@ -79,12 +84,109 @@ public class SettingsMenu : MonoBehaviour
             if (backRect != null)
             {
                 backRect.anchorMin = backRect.anchorMax = backRect.pivot = new Vector2(0.5f, 0.5f);
-                backRect.anchoredPosition = new Vector2(0f, -280f);
+                backRect.anchoredPosition = new Vector2(0f, -320f);
                 backRect.sizeDelta = new Vector2(200f, 40f);
                 backRect.localScale = Vector3.one;
             }
             VigilanteUiStyle.StyleSettingsButton(backButton);
         }
+    }
+
+    void EnsureUiVisibilityButton()
+    {
+        if (gameUiButton == null)
+        {
+            Transform existing = FindChildByName(transform, "GameUiToggle");
+            if (existing != null)
+                gameUiButton = existing.GetComponent<Button>();
+        }
+
+        if (gameUiButton == null)
+        {
+            GameObject go = new GameObject("GameUiToggle");
+            go.layer = 5;
+            go.transform.SetParent(transform, false);
+            RectTransform rect = go.AddComponent<RectTransform>();
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(280f, 44f);
+            Image image = go.AddComponent<Image>();
+            image.sprite = VigilanteUiStyle.WhiteSprite();
+            image.color = new Color(0.18f, 0.18f, 0.2f, 0.95f);
+            gameUiButton = go.AddComponent<Button>();
+            gameUiButton.targetGraphic = image;
+
+            GameObject labelGo = new GameObject("Label");
+            labelGo.layer = 5;
+            labelGo.transform.SetParent(go.transform, false);
+            RectTransform labelRect = labelGo.AddComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = labelRect.offsetMax = Vector2.zero;
+            gameUiButtonLabel = labelGo.AddComponent<TextMeshProUGUI>();
+            gameUiButtonLabel.fontSize = 20f;
+            gameUiButtonLabel.alignment = TextAlignmentOptions.Center;
+            gameUiButtonLabel.raycastTarget = false;
+            VigilanteUiStyle.ApplyFont(gameUiButtonLabel);
+        }
+        else
+        {
+            Transform label = gameUiButton.transform.Find("Label");
+            if (label != null)
+                gameUiButtonLabel = label.GetComponent<TextMeshProUGUI>();
+        }
+    }
+
+    void LayoutUiVisibilityButton()
+    {
+        if (gameUiButton == null)
+            return;
+
+        RectTransform rect = gameUiButton.transform as RectTransform;
+        if (rect != null)
+        {
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = new Vector2(0f, -245f);
+            rect.sizeDelta = new Vector2(280f, 44f);
+            rect.localScale = Vector3.one;
+        }
+        VigilanteUiStyle.StyleSettingsButton(gameUiButton);
+        RefreshUiVisibilityLabel();
+    }
+
+    void WireUiToggle()
+    {
+        if (gameUiButton != null)
+        {
+            gameUiButton.onClick.RemoveListener(OnGameUiButtonClicked);
+            gameUiButton.onClick.AddListener(OnGameUiButtonClicked);
+        }
+        GameUiVisibility.VisibilityChanged -= OnGameUiVisibilityChanged;
+        GameUiVisibility.VisibilityChanged += OnGameUiVisibilityChanged;
+        RefreshUiVisibilityLabel();
+    }
+
+    void OnGameUiButtonClicked()
+    {
+        AudioManager.UIClick();
+        GameUiVisibility.Toggle();
+        RefreshUiVisibilityLabel();
+    }
+
+    void OnGameUiVisibilityChanged(bool visible)
+    {
+        RefreshUiVisibilityLabel();
+    }
+
+    void RefreshUiVisibilityLabel()
+    {
+        if (gameUiButtonLabel == null && gameUiButton != null)
+        {
+            Transform label = gameUiButton.transform.Find("Label");
+            if (label != null)
+                gameUiButtonLabel = label.GetComponent<TextMeshProUGUI>();
+        }
+        if (gameUiButtonLabel != null)
+            gameUiButtonLabel.text = GameUiVisibility.IsVisible ? "GAME UI: ON" : "GAME UI: OFF";
     }
 
     static void NormalizeSlider(Slider slider, string labelText, Vector2 position)
@@ -213,6 +315,7 @@ public class SettingsMenu : MonoBehaviour
         Wire(volumeSlider, OnVolumeChanged);
         Wire(brightnessSlider, OnBrightnessChanged);
         Wire(sensitivitySlider, OnSensitivityChanged);
+        WireUiToggle();
         RefreshFromPrefs();
     }
 
@@ -221,6 +324,9 @@ public class SettingsMenu : MonoBehaviour
         Unwire(volumeSlider, OnVolumeChanged);
         Unwire(brightnessSlider, OnBrightnessChanged);
         Unwire(sensitivitySlider, OnSensitivityChanged);
+        if (gameUiButton != null)
+            gameUiButton.onClick.RemoveListener(OnGameUiButtonClicked);
+        GameUiVisibility.VisibilityChanged -= OnGameUiVisibilityChanged;
     }
 
     void BuildIfNeeded()
@@ -240,7 +346,7 @@ public class SettingsMenu : MonoBehaviour
         volumeSlider = CreateLabeledSlider(transform, "Volume", "VOLUME", new Vector2(0f, 80f));
         brightnessSlider = CreateLabeledSlider(transform, "Brightness", "BRIGHTNESS", new Vector2(0f, -40f));
         sensitivitySlider = CreateLabeledSlider(transform, "Sensitivity", "SENSITIVITY", new Vector2(0f, -160f));
-        backButton = CreateBackButton(transform, new Vector2(0f, -280f));
+        backButton = CreateBackButton(transform, new Vector2(0f, -320f));
     }
 
     void EnsureSensitivitySlider()

@@ -92,6 +92,9 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
+        if (!GameProgression.IsCurrentLevelTimerRunning)
+            GameProgression.BeginCurrentLevelTimer();
+
         if (waveManager == null)
             waveManager = WaveManager.Instance;
 
@@ -110,6 +113,7 @@ public class UIManager : MonoBehaviour
         MinimapUI.EnsureExists();
         DamageIndicatorUI.EnsureExists();
         PauseMenu.EnsureExists();
+        RegisterGameplayHud();
 
         RefreshWaveTimer();
         RefreshEnemyCount();
@@ -459,16 +463,60 @@ public class UIManager : MonoBehaviour
         label.text = meleeAmmoLabel;
     }
 
+    void RegisterGameplayHud()
+    {
+        RegisterObjects(weaponHudIcons);
+        RegisterObjects(inventorySlots);
+        if (ammoTexts != null)
+        {
+            for (int i = 0; i < ammoTexts.Length; i++)
+            {
+                if (ammoTexts[i] != null)
+                    GameUiVisibility.Register(ammoTexts[i].gameObject);
+            }
+        }
+
+        if (timerText != null)
+            GameUiVisibility.Register(timerText.gameObject);
+        if (enemyCountText != null)
+            GameUiVisibility.Register(enemyCountText.gameObject);
+        if (healthSlider != null)
+            GameUiVisibility.Register(healthSlider.gameObject);
+        if (damageVignette != null)
+            GameUiVisibility.Register(damageVignette.gameObject);
+
+        WeaponAccuracy accuracy = WeaponAccuracy.EnsureExists();
+        CrosshairUI crosshair = CrosshairUI.EnsureExists();
+        MinimapUI minimap = MinimapUI.EnsureExists();
+        DamageIndicatorUI indicators = DamageIndicatorUI.EnsureExists();
+        if (crosshair != null) GameUiVisibility.Register(crosshair.gameObject);
+        if (minimap != null) GameUiVisibility.Register(minimap.gameObject);
+        if (indicators != null) GameUiVisibility.Register(indicators.gameObject);
+    }
+
+    static void RegisterObjects(GameObject[] objects)
+    {
+        if (objects == null)
+            return;
+        for (int i = 0; i < objects.Length; i++)
+        {
+            if (objects[i] != null)
+                GameUiVisibility.Register(objects[i]);
+        }
+    }
+
+    public void BeginLevelTimer()
+    {
+        GameProgression.BeginCurrentLevelTimer();
+    }
+
     void RefreshWaveTimer()
     {
         if (timerText == null)
             return;
 
-        if (waveManager == null)
-            waveManager = WaveManager.Instance;
-
-        float seconds = waveManager != null ? waveManager.TimeRemaining : 0f;
-        int total = Mathf.Max(0, Mathf.CeilToInt(seconds));
+        float seconds = GameProgression.CurrentLevelElapsedSeconds;
+        int total = Mathf.Max(0, Mathf.FloorToInt(seconds));
         int minutes = total / 60;
         int secs = total % 60;
         timerText.text = $"{timerPrefix}{minutes:00}:{secs:00}";

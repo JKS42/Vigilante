@@ -25,6 +25,39 @@ public class SceneFade : MonoBehaviour
         fade.StartFadeIn();
     }
 
+    public static void FadeToBlack(System.Action onComplete, float duration = 1.25f)
+    {
+        SceneFade fade = EnsureExists();
+        if (fade == null)
+        {
+            onComplete?.Invoke();
+            return;
+        }
+
+        if (fade.group == null)
+            fade.BuildOverlay();
+        if (fade.routine != null)
+            fade.StopCoroutine(fade.routine);
+        fade.routine = fade.StartCoroutine(fade.FadeOutRoutine(onComplete, duration));
+    }
+
+    IEnumerator FadeOutRoutine(System.Action onComplete, float duration)
+    {
+        float startAlpha = group != null ? group.alpha : 0f;
+        float t = 0f;
+        duration = Mathf.Max(0.05f, duration);
+        group.blocksRaycasts = true;
+        while (t < duration)
+        {
+            t += Time.unscaledDeltaTime;
+            group.alpha = Mathf.Lerp(startAlpha, 1f, Mathf.Clamp01(t / duration));
+            yield return null;
+        }
+
+        group.alpha = 1f;
+        routine = null;
+        onComplete?.Invoke();
+    }
     public static SceneFade EnsureExists()
     {
         if (instance != null)

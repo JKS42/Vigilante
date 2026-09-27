@@ -88,6 +88,9 @@ public class LevelDirector : MonoBehaviour
 
         LevelCombatBootstrap.RebuildPlayableNavMesh();
         waves.BeginConfigured();
+        UIManager ui = FindFirstObjectByType<UIManager>();
+        if (ui != null)
+            ui.BeginLevelTimer();
         waves.OnAllWavesCompleted -= HandleLevelComplete;
         waves.OnAllWavesCompleted += HandleLevelComplete;
     }
@@ -397,6 +400,13 @@ public class LevelDirector : MonoBehaviour
 
     void HandleLevelComplete()
     {
+        if (GameProgression.ActiveLevel == 2)
+        {
+            GameProgression.CompleteCurrentLevel();
+            SceneFade.FadeToBlack(Level2Ending.Show, 1.25f);
+            return;
+        }
+
         DialogueManager.Announcer("AREA CLEARED");
         DialogueManager.PlayerLine(GameProgression.ActiveLevel >= 3
             ? "It's over."
@@ -407,6 +417,6 @@ public class LevelDirector : MonoBehaviour
 
     void Advance()
     {
-        GameProgression.AdvanceOrReturnToMenu();
+        SceneFade.FadeToBlack(GameProgression.AdvanceOrReturnToMenu);
     }
 }

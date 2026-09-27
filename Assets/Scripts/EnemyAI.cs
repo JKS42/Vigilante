@@ -418,6 +418,12 @@ public class EnemyAI : MonoBehaviour
     void HandleDied()
     {
         ReleaseCover();
+        Collider[] bodyColliders = GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < bodyColliders.Length; i++)
+        {
+            if (bodyColliders[i] != null)
+                bodyColliders[i].enabled = false;
+        }
         if (agent != null && agent.enabled)
         {
             if (agent.isOnNavMesh)

@@ -107,7 +107,7 @@ public class CrosshairUI : MonoBehaviour
         if (root == null)
             return;
 
-        bool hide = ShouldHide();
+        bool hide = ShouldHide() || !GameUiVisibility.IsVisible;
         if (group != null)
             group.alpha = hide ? 0f : 1f;
         if (hide)

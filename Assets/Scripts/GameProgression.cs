@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Persists selected campaign level across MainMenu → LevelDemo.
-/// Levels: 1 tutorial pistols, 2 mixed shotgun/rifle (bigger), 3 boss arena.
+/// Levels: L1 tutorial, L2 mixed shotgun/rifle, L3 boss arena.
 /// </summary>
 public static class GameProgression
 {
@@ -11,11 +11,17 @@ public static class GameProgression
     const string UnlockedKey = "Vigilante.UnlockedLevel";
 
     static bool startedThisSession;
+    static float elapsedBeforeCurrentLevel;
+    static float currentLevelStartedAt;
+    static bool currentLevelTimerRunning;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetSession()
     {
         startedThisSession = false;
+        elapsedBeforeCurrentLevel = 0f;
+        currentLevelStartedAt = 0f;
+        currentLevelTimerRunning = false;
     }
 
     public static int SelectedLevel
@@ -38,10 +44,6 @@ public static class GameProgression
         }
     }
 
-    /// <summary>
-    /// Level to run for this play. If nothing was started via the menu this
-    /// session, force Level 1 so stale PlayerPrefs don't skip the tutorial.
-    /// </summary>
     public static int ActiveLevel
     {
         get
@@ -52,7 +54,31 @@ public static class GameProgression
         }
     }
 
+    public static float CurrentLevelElapsedSeconds => currentLevelTimerRunning
+        ? Mathf.Max(0f, Time.time - currentLevelStartedAt)
+        : 0f;
+
+    public static float TotalElapsedSeconds => elapsedBeforeCurrentLevel + CurrentLevelElapsedSeconds;
+    public static bool IsCurrentLevelTimerRunning => currentLevelTimerRunning;
+
+    public static void BeginCurrentLevelTimer()
+    {
+        if (currentLevelTimerRunning)
+            return;
+
+        currentLevelStartedAt = Time.time;
+        currentLevelTimerRunning = true;
+    }
+
+    /// <summary>Begins a fresh run at the selected level.</summary>
     public static void StartLevel(int level)
+    {
+        elapsedBeforeCurrentLevel = 0f;
+        currentLevelTimerRunning = false;
+        LoadLevel(level);
+    }
+
+    static void LoadLevel(int level)
     {
         SelectedLevel = level;
         startedThisSession = true;
@@ -66,6 +92,7 @@ public static class GameProgression
         int level = ActiveLevel;
         SelectedLevel = level;
         startedThisSession = true;
+        currentLevelTimerRunning = false;
         Time.timeScale = 1f;
         UIManager.ResetHealthBinding();
         int scene = SceneManager.GetActiveScene().buildIndex;
@@ -76,10 +103,26 @@ public static class GameProgression
 
     public static void CompleteCurrentLevel()
     {
+        if (currentLevelTimerRunning)
+        {
+            elapsedBeforeCurrentLevel += CurrentLevelElapsedSeconds;
+            currentLevelTimerRunning = false;
+        }
+
         int current = ActiveLevel;
         int next = Mathf.Min(3, current + 1);
         if (next > UnlockedLevel)
             UnlockedLevel = next;
+    }
+
+    public static void ReturnToMainMenu()
+    {
+        startedThisSession = false;
+        elapsedBeforeCurrentLevel = 0f;
+        currentLevelTimerRunning = false;
+        Time.timeScale = 1f;
+        UIManager.ResetHealthBinding();
+        SceneManager.LoadSceneAsync(0);
     }
 
     public static void AdvanceOrReturnToMenu()
@@ -93,6 +136,7 @@ public static class GameProgression
             return;
         }
 
-        StartLevel(current + 1);
+        // Continue the current run without clearing its accumulated level time.
+        LoadLevel(current + 1);
     }
 }

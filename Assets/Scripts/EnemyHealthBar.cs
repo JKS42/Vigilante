@@ -78,7 +78,7 @@ public class EnemyHealthBar : MonoBehaviour
 
         RefreshHover();
 
-        bool shouldShow = hovered == this && health != null && !health.IsDead;
+        bool shouldShow = GameUiVisibility.IsVisible && hovered == this && health != null && !health.IsDead;
         if (shouldShow)
         {
             PlaceAndBillboard();

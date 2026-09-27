@@ -169,6 +169,8 @@ public class Bullet : MonoBehaviour
         if (hitEnemy || hitPlayer)
         {
             Health health = other.GetComponentInParent<Health>();
+            if (hitEnemy && health != null && health.IsDead)
+                return;
             if (health != null)
             {
                 float dealt = damage;

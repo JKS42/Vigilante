@@ -85,7 +85,7 @@ public class DamageIndicatorUI : MonoBehaviour
         if (group == null)
             return;
 
-        bool hide = ShouldHide();
+        bool hide = ShouldHide() || !GameUiVisibility.IsVisible;
         group.alpha = hide ? 0f : 1f;
         if (hide)
             return;

@@ -648,6 +648,10 @@ public class EnemyCombat : MonoBehaviour
             if (col == null || IsOwnCollider(col))
                 continue;
 
+            EnemyAI hitEnemy = col.GetComponentInParent<EnemyAI>();
+            if (hitEnemy != null && hitEnemy.IsDead)
+                continue;
+
             if (hitBuffer[i].distance < bestDist)
             {
                 bestDist = hitBuffer[i].distance;
