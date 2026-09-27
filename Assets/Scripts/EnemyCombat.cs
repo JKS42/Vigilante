@@ -48,6 +48,7 @@ public class EnemyCombat : MonoBehaviour
     bool isReloading;
     Coroutine reloadRoutine;
     Coroutine pendingShotRoutine;
+    float nextEmptySoundTime;
     readonly RaycastHit[] hitBuffer = new RaycastHit[16];
 
     public float AttackRange => meleeOnly ? meleeRange : attackRange;
@@ -70,6 +71,8 @@ public class EnemyCombat : MonoBehaviour
         EnemyProfile profile = GetComponent<EnemyProfile>();
         if (profile != null
             && profile.archetype != EnemyArchetype.Pistol
+            && profile.archetype != EnemyArchetype.Shotgun
+            && profile.archetype != EnemyArchetype.Rifle
             && profile.archetype != EnemyArchetype.Melee)
             mecanim = null;
 
@@ -340,17 +343,26 @@ public class EnemyCombat : MonoBehaviour
 
     public bool TryFireAt(Transform target)
     {
-        if (target == null || isReloading || Time.time < nextFireTime)
-            return false;
-
-        if (IsRangedFireBlocked())
+        if (target == null)
             return false;
 
         if (magazineSize > 0 && shotsRemaining <= 0)
         {
+            if ((weaponKind == EnemyWeaponKind.Rifle || weaponKind == EnemyWeaponKind.Shotgun)
+                && Time.time >= nextEmptySoundTime)
+            {
+                float soundLength = AudioManager.EnemyEmpty(transform.position, weaponKind);
+                nextEmptySoundTime = Time.time + soundLength;
+            }
             BeginReload();
             return false;
         }
+
+        if (isReloading || Time.time < nextFireTime)
+            return false;
+
+        if (IsRangedFireBlocked())
+            return false;
 
         Vector3 origin = GetMuzzlePosition();
         Vector3 aimPoint = GetAimPoint(target);
@@ -462,7 +474,7 @@ public class EnemyCombat : MonoBehaviour
             Health health = hit.collider.GetComponentInParent<Health>();
             if (health != null)
             {
-                health.TakeDamage(GetShotDamage(), hit.point, gameObject);
+                health.TakeDamage(GetShotDamage(Vector3.Distance(origin, hit.point)), hit.point, gameObject);
                 CombatVfx.PlayBulletHit(hit.point, hit.normal);
                 CombatVfx.SpawnOnomatopoeia(hit.point, "BANG!");
                 anyHit = true;
@@ -551,7 +563,9 @@ public class EnemyCombat : MonoBehaviour
     {
         isReloading = true;
         CombatVfx.SpawnOnomatopoeia(GetMuzzlePosition(), "CHK!");
-        yield return new WaitForSeconds(Mathf.Max(0.1f, reloadTime));
+        float duration = AudioManager.EnemyReload(transform.position, weaponKind);
+        reloadTime = duration;
+        yield return new WaitForSeconds(duration);
         shotsRemaining = magazineSize;
         isReloading = false;
         reloadRoutine = null;
@@ -597,8 +611,14 @@ public class EnemyCombat : MonoBehaviour
         return playerMove;
     }
 
-    float GetShotDamage()
+    float GetShotDamage(float hitDistance)
     {
+        if (weaponKind == EnemyWeaponKind.Shotgun)
+        {
+            float distanceScale = Mathf.InverseLerp(attackRange, 0f, hitDistance);
+            return damage * Mathf.Lerp(0.5f, 1.5f, distanceScale);
+        }
+
         if (weaponKind != EnemyWeaponKind.Pistol)
             return damage;
 

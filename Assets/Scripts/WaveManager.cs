@@ -252,6 +252,11 @@ public class WaveManager : MonoBehaviour
         timer = 0f;
         phase = Phase.Delay;
         started = false;
+        preferDistantSpawns = false;
+        blockedNearPlayer.Clear();
+        spawnLocations = null;
+        locationSpawnCounts = null;
+        locationPickPenalty = null;
     }
 
     public void SetPrefabs(GameObject pistol, GameObject shotgun, GameObject rifle, GameObject boss)

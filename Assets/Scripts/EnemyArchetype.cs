@@ -182,6 +182,28 @@ public class EnemyProfile : MonoBehaviour
         if (type == EnemyArchetype.Pistol || type == EnemyArchetype.Melee)
             return;
 
+        // Rifle and shotgun prefabs have authored animated character models.
+        // Keep those models/controllers and the capsule collider, but never
+        // restore the capsule's visible mesh over the character.
+        string animatedVisualName = type == EnemyArchetype.Rifle ? "RifleVisual"
+            : type == EnemyArchetype.Shotgun ? "ShotgunVisual" : null;
+        Transform animatedVisual = !string.IsNullOrEmpty(animatedVisualName)
+            ? go.transform.Find(animatedVisualName)
+            : null;
+        if (animatedVisual != null
+            && animatedVisual.GetComponentInChildren<SkinnedMeshRenderer>(true) != null
+            && animatedVisual.GetComponentInChildren<Animator>(true) != null)
+        {
+            MeshRenderer capsuleRenderer = go.GetComponent<MeshRenderer>();
+            if (capsuleRenderer != null)
+                capsuleRenderer.enabled = false;
+
+            MeshFilter capsuleFilter = go.GetComponent<MeshFilter>();
+            if (capsuleFilter != null)
+                capsuleFilter.sharedMesh = null;
+            return;
+        }
+
         Transform visual = go.transform.Find("PistolVisual");
         if (visual != null)
             Destroy(visual.gameObject);

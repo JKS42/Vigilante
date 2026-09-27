@@ -94,6 +94,8 @@ public class EnemyAI : MonoBehaviour
 
         if (profile != null
             && profile.archetype != EnemyArchetype.Pistol
+            && profile.archetype != EnemyArchetype.Shotgun
+            && profile.archetype != EnemyArchetype.Rifle
             && profile.archetype != EnemyArchetype.Melee)
         {
             Transform pistolVisual = transform.Find("PistolVisual");

@@ -31,7 +31,9 @@ public class AudioManager : MonoBehaviour
     [Header("Weapons")]
     public AudioClip weaponSwap;
     public AudioClip pistolReload;
+    public AudioClip rifleReload;
     public AudioClip emptyMag;
+    public AudioClip rifleEmpty;
     public AudioClip pistolEquip;
     public AudioClip batEquip;
     [Range(0f, 1f)] public float weaponVolume = 0.42f;
@@ -161,7 +163,9 @@ public class AudioManager : MonoBehaviour
         if (gunshotShotgun == null) gunshotShotgun = Resources.Load<AudioClip>("Audio/shotgun_shot");
         if (gunshotRifle == null) gunshotRifle = Resources.Load<AudioClip>("Audio/ar_shot");
         if (pistolReload == null) pistolReload = Resources.Load<AudioClip>("Audio/mag_reload");
+        if (rifleReload == null) rifleReload = Resources.Load<AudioClip>("Audio/rifle reload");
         if (emptyMag == null) emptyMag = Resources.Load<AudioClip>("Audio/empty_click");
+        if (rifleEmpty == null) rifleEmpty = Resources.Load<AudioClip>("Audio/rifle empty");
         if (pistolEquip == null) pistolEquip = Resources.Load<AudioClip>("Audio/pistol_cock");
         if (batEquip == null) batEquip = Resources.Load<AudioClip>("Audio/bat_whoosh");
         if (ambientLoop == null) ambientLoop = Resources.Load<AudioClip>("Audio/ambient_street");
@@ -283,6 +287,44 @@ public class AudioManager : MonoBehaviour
     public static void WeaponSwap() { EnsureExists(); Instance.PlayWeaponSwap(); }
     public static void PistolReload() { EnsureExists(); Instance.PlayPistolReload(); }
     public static void EmptyMag() { EnsureExists(); Instance.PlayEmptyMag(); }
+
+    static AudioClip GetEnemyWeaponClip(EnemyWeaponKind kind, bool reload)
+    {
+        EnsureExists();
+        bool rifleStyle = kind == EnemyWeaponKind.Rifle || kind == EnemyWeaponKind.Shotgun;
+        AudioClip clip = reload
+            ? (rifleStyle ? Instance.rifleReload : Instance.pistolReload)
+            : (rifleStyle ? Instance.rifleEmpty : Instance.emptyMag);
+
+        // Resolve these at point of use too, so older scene AudioManagers with
+        // unassigned Inspector fields still play the newly added Resources clips.
+        if (clip == null && rifleStyle)
+        {
+            clip = Resources.Load<AudioClip>(reload ? "Audio/rifle reload" : "Audio/rifle empty");
+            if (reload) Instance.rifleReload = clip;
+            else Instance.rifleEmpty = clip;
+        }
+        return clip;
+    }
+
+    public static float EnemyReload(Vector3 position, EnemyWeaponKind kind)
+    {
+        AudioClip clip = GetEnemyWeaponClip(kind, true);
+        if (clip == null)
+            return 1.5f;
+        // Use the global SFX source so cues remain audible when an enemy is far away.
+        Instance.PlayOneShot(clip, Instance.reloadVolume);
+        return Mathf.Max(0.05f, clip.length);
+    }
+
+    public static float EnemyEmpty(Vector3 position, EnemyWeaponKind kind)
+    {
+        AudioClip clip = GetEnemyWeaponClip(kind, false);
+        if (clip == null)
+            return 0.1f;
+        Instance.PlayOneShot(clip, Instance.emptyMagVolume);
+        return Mathf.Max(0.05f, clip.length);
+    }
 
     public static void PlayEquip(GameObject weapon)
     {

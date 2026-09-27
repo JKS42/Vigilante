@@ -114,12 +114,7 @@ public class UIManager : MonoBehaviour
         RefreshWaveTimer();
         RefreshEnemyCount();
 
-        if (enemyCountText != null)
-        {
-            string levelLabel = $"LEVEL {GameProgression.ActiveLevel}  ·  ";
-            if (!enemyCountPrefix.Contains("LEVEL"))
-                enemyCountPrefix = levelLabel + enemyCountPrefix;
-        }
+
     }
 
     void Update()

@@ -164,19 +164,19 @@ public class LevelDirector : MonoBehaviour
         DialogueManager.Announcer("LEVEL 2 — CROSSFIRE");
         DialogueManager.PlayerLine("Pistol's loaded. Shotgunners rush. Riflemen hold the angles.");
 
-        EnsureExtraCover(8);
 
         List<WaveDefinition> defs = new List<WaveDefinition>
         {
             new WaveDefinition { enemyCount = 4, startDelay = 2f, maxWaitBeforeNext = 80f, archetype = EnemyArchetype.Rifle },
             new WaveDefinition { enemyCount = 4, startDelay = 3f, maxWaitBeforeNext = 80f, archetype = EnemyArchetype.Shotgun },
-            new WaveDefinition { enemyCount = 3, startDelay = 3f, maxWaitBeforeNext = 70f, archetype = EnemyArchetype.Rifle },
-            new WaveDefinition { enemyCount = 3, startDelay = 3f, maxWaitBeforeNext = 70f, archetype = EnemyArchetype.Shotgun },
-            new WaveDefinition { enemyCount = 3, startDelay = 4f, maxWaitBeforeNext = 50f, archetype = EnemyArchetype.Rifle },
-            new WaveDefinition { enemyCount = 3, startDelay = 2f, maxWaitBeforeNext = 0f, archetype = EnemyArchetype.Shotgun },
+            new WaveDefinition { enemyCount = Random.Range(5, 8), startDelay = 3f, maxWaitBeforeNext = 70f, archetype = EnemyArchetype.Rifle },
+            new WaveDefinition { enemyCount = Random.Range(5, 8), startDelay = 3f, maxWaitBeforeNext = 70f, archetype = EnemyArchetype.Shotgun },
+            new WaveDefinition { enemyCount = Random.Range(5, 8), startDelay = 4f, maxWaitBeforeNext = 50f, archetype = EnemyArchetype.Rifle },
+            new WaveDefinition { enemyCount = Random.Range(5, 8), startDelay = 2f, maxWaitBeforeNext = 0f, archetype = EnemyArchetype.Shotgun },
         };
 
         waves.ConfigureLevel(defs, CollectSceneSpawnPoints());
+        waves.UseDistantSpawns();
         AudioManager.SetCombatMusicIntensity(1.1f);
     }
 
