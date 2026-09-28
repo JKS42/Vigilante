@@ -10,6 +10,8 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         AudioManager.EnsureExists();
 
         if (NewGamePanel != null) NewGamePanel.SetActive(false);

@@ -250,8 +250,11 @@ public class Level2Ending : MonoBehaviour
         if (instance == this)
             instance = null;
         if (finished || active)
-        {
             Time.timeScale = savedTimeScale > 0f ? savedTimeScale : 1f;
+
+        // Keep the pointer free when leaving the final choices for the main menu.
+        if (!finished)
+        {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
