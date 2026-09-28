@@ -7,6 +7,7 @@ using UnityEngine;
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
+    const float PistolGunshotVolumeMultiplier = 0.4f;
 
     [Header("UI")]
     public AudioClip uiClick;
@@ -347,7 +348,8 @@ public class AudioManager : MonoBehaviour
         if (kind == EnemyWeaponKind.Shotgun) clip = Instance.gunshotShotgun;
         else if (kind == EnemyWeaponKind.Rifle) clip = Instance.gunshotRifle;
         else if (kind == EnemyWeaponKind.BossGun) clip = Instance.gunshotRifle;
-        Instance.PlayOneShotAt(clip, position, Instance.combatVolume * 0.9f);
+        float weaponScale = kind == EnemyWeaponKind.Pistol ? PistolGunshotVolumeMultiplier : 1f;
+        Instance.PlayOneShotAt(clip, position, Instance.combatVolume * 0.9f * weaponScale);
     }
 
     public static void Explosion(Vector3 position)
@@ -402,7 +404,10 @@ public class AudioManager : MonoBehaviour
     {
         EnsureExists();
         if (clip != null)
-            Instance.PlayOneShot(clip, Instance.combatVolume);
+        {
+            float weaponScale = kind == EnemyWeaponKind.Pistol ? PistolGunshotVolumeMultiplier : 1f;
+            Instance.PlayOneShot(clip, Instance.combatVolume * weaponScale);
+        }
         else
             EnemyGunshot(position, kind);
     }

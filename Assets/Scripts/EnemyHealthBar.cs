@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 /// <summary>
 /// World-space HP bar above an enemy. Visible while the crosshair ray hits
-/// that enemy's collider. Unparented unlit quads so it always faces the camera.
+/// that enemy's collider.
 /// </summary>
 public class EnemyHealthBar : MonoBehaviour
 {
@@ -23,11 +24,8 @@ public class EnemyHealthBar : MonoBehaviour
 
     Health health;
     Transform barRoot;
-    Transform fillTf;
-    Renderer bgRenderer;
-    Renderer fillRenderer;
-    Material bgMat;
-    Material fillMat;
+    Canvas barCanvas;
+    Image fillImage;
     Camera cam;
     CapsuleCollider bodyCapsule;
     NavMeshAgent agent;
@@ -153,111 +151,94 @@ public class EnemyHealthBar : MonoBehaviour
         if (cam == null)
             return;
 
-        barRoot.position = transform.TransformPoint(Vector3.up * CurrentHeight());
+        barRoot.position = transform.position + Vector3.up * CurrentHeight();
 
         Vector3 away = barRoot.position - cam.transform.position;
         if (away.sqrMagnitude > 0.0001f)
             barRoot.rotation = Quaternion.LookRotation(away, Vector3.up);
+        barCanvas.worldCamera = cam;
     }
 
     void RefreshFill()
     {
-        if (fillTf == null || health == null)
+        if (fillImage == null || health == null)
             return;
 
-        float pct = Mathf.Clamp01(health.CurrentHealth / Mathf.Max(1f, health.MaxHealth));
-        float pad = Mathf.Max(0.004f, borderPadding);
-        float innerW = Mathf.Max(0.001f, barWidth - pad * 2f);
-        float innerH = Mathf.Max(0.001f, barHeight - pad * 2f);
-
-        fillTf.localScale = new Vector3(Mathf.Max(0.001f, innerW * pct), innerH, 1f);
-        // Left-align white fill inside the black border frame.
-        fillTf.localPosition = new Vector3((-innerW * 0.5f) + (innerW * pct * 0.5f), 0f, -0.001f);
-
-        if (fillMat != null)
-            fillMat.color = Color.white;
+        fillImage.fillAmount = Mathf.Clamp01(health.CurrentHealth / Mathf.Max(1f, health.MaxHealth));
     }
 
     void SetVisible(bool on)
     {
         visible = on;
-        if (bgRenderer != null)
-            bgRenderer.enabled = on;
-        if (fillRenderer != null)
-            fillRenderer.enabled = on;
+        if (barCanvas != null)
+            barCanvas.enabled = on;
     }
 
     void DestroyBar()
     {
-        if (bgMat != null)
-            Destroy(bgMat);
-        if (fillMat != null)
-            Destroy(fillMat);
-        bgMat = null;
-        fillMat = null;
-
         if (barRoot != null)
             Destroy(barRoot.gameObject);
 
         barRoot = null;
-        fillTf = null;
-        bgRenderer = null;
-        fillRenderer = null;
+        barCanvas = null;
+        fillImage = null;
     }
 
     void BuildUi()
     {
-        GameObject root = new GameObject("EnemyHealthBar");
+        GameObject root = new GameObject("EnemyHealthBar", typeof(RectTransform), typeof(Canvas));
         barRoot = root.transform;
         barRoot.SetParent(null, false);
 
-        bgMat = new Material(UnlitShader());
-        bgMat.color = Color.black;
-        fillMat = new Material(UnlitShader());
-        fillMat.color = Color.white;
+        barCanvas = root.GetComponent<Canvas>();
+        barCanvas.renderMode = RenderMode.WorldSpace;
+        barCanvas.worldCamera = cam != null ? cam : ResolveCamera();
+        barCanvas.overrideSorting = true;
+        barCanvas.sortingOrder = 50;
 
-        GameObject bgGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        bgGo.name = "Border";
-        Object.Destroy(bgGo.GetComponent<Collider>());
+        RectTransform canvasRect = root.GetComponent<RectTransform>();
+        canvasRect.sizeDelta = new Vector2(barWidth * 100f, barHeight * 100f);
+        barRoot.localScale = Vector3.one * 0.01f;
+
+        GameObject bgGo = new GameObject("Border", typeof(RectTransform), typeof(Image));
         bgGo.transform.SetParent(barRoot, false);
-        bgGo.transform.localPosition = Vector3.zero;
-        bgGo.transform.localRotation = Quaternion.identity;
-        bgGo.transform.localScale = new Vector3(barWidth, barHeight, 1f);
-        bgRenderer = bgGo.GetComponent<Renderer>();
-        bgRenderer.sharedMaterial = bgMat;
-        bgRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        bgRenderer.receiveShadows = false;
+        RectTransform bgRect = bgGo.GetComponent<RectTransform>();
+        bgRect.anchorMin = Vector2.zero;
+        bgRect.anchorMax = Vector2.one;
+        bgRect.offsetMin = Vector2.zero;
+        bgRect.offsetMax = Vector2.zero;
+        Image bgImage = bgGo.GetComponent<Image>();
+        bgImage.sprite = VigilanteUiStyle.WhiteSprite();
+        bgImage.color = Color.black;
+        bgImage.raycastTarget = false;
 
-        GameObject fillGo = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        fillGo.name = "Fill";
-        Object.Destroy(fillGo.GetComponent<Collider>());
-        fillTf = fillGo.transform;
-        fillTf.SetParent(barRoot, false);
-        fillTf.localRotation = Quaternion.identity;
-        fillRenderer = fillGo.GetComponent<Renderer>();
-        fillRenderer.sharedMaterial = fillMat;
-        fillRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        fillRenderer.receiveShadows = false;
-
-        RefreshFill();
+        GameObject fillGo = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+        fillGo.transform.SetParent(barRoot, false);
+        RectTransform fillRect = fillGo.GetComponent<RectTransform>();
+        float inset = Mathf.Max(1f, borderPadding * 100f);
+        fillRect.anchorMin = Vector2.zero;
+        fillRect.anchorMax = Vector2.one;
+        fillRect.offsetMin = new Vector2(inset, inset);
+        fillRect.offsetMax = new Vector2(-inset, -inset);
+        fillImage = fillGo.GetComponent<Image>();
+        fillImage.sprite = VigilanteUiStyle.WhiteSprite();
+        fillImage.type = Image.Type.Filled;
+        fillImage.fillMethod = Image.FillMethod.Horizontal;
+        fillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+        fillImage.fillAmount = 1f;
+        fillImage.color = Color.white;
+        fillImage.raycastTarget = false;
     }
 
     float CurrentHeight()
     {
-        if (bodyCapsule != null)
-            return bodyCapsule.center.y + bodyCapsule.height * 0.5f + headPadding;
+        Collider body = bodyCapsule != null ? bodyCapsule : GetComponentInChildren<Collider>();
+        if (body != null)
+            return body.bounds.max.y - transform.position.y + headPadding;
 
         if (agent != null)
-            return agent.height / Mathf.Max(0.01f, transform.lossyScale.y) + headPadding;
+            return agent.height + headPadding;
 
         return height;
-    }
-
-    static Shader UnlitShader()
-    {
-        return Shader.Find("Universal Render Pipeline/Unlit")
-               ?? Shader.Find("Unlit/Color")
-               ?? Shader.Find("Sprites/Default")
-               ?? Shader.Find("Standard");
     }
 }

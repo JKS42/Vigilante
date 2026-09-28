@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.AI.Navigation;
 
 /// <summary>
 /// Breakable prop / wall. The hit piece launches as a physics object (with a few chips)
@@ -179,6 +180,14 @@ public class Break : MonoBehaviour
 
         isBroken = true;
         bool wall = IsWallPiece();
+        if (wall)
+        {
+            Transform blocker = transform.Find("RuntimeWallNavBlocker");
+            NavMeshModifierVolume volume = blocker != null ? blocker.GetComponent<NavMeshModifierVolume>() : null;
+            if (volume != null)
+                volume.enabled = false;
+        }
+
         Vector3 launchDir = ResolveLaunchDirection(impulse);
         CombatStimulus.EmitBreach(transform.position);
         AudioManager.BreakObject(transform.position);

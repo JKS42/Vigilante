@@ -85,6 +85,7 @@ public class EnemyAI : MonoBehaviour
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        LevelCombatBootstrap.ExcludeFromNavMeshBuild(gameObject);
         health = GetComponent<Health>();
         combat = GetComponent<EnemyCombat>();
         profile = GetComponent<EnemyProfile>();

@@ -170,7 +170,9 @@ public static class CombatVfx
 
     public static void SpawnImpact(Vector3 position, Vector3 normal)
     {
-        SpawnFallbackFlash(position, normal, "ImpactFlash", new Color(1f, 0.7f, 0.2f, 1f), 0.18f, 0.45f, 0.18f);
+        // Do not fall back to a primitive sphere: its runtime-selected shader
+        // can be stripped from player builds and render as a magenta orb.
+        SpawnPrefab(Library != null ? Library.bulletHit : null, position, normal);
     }
 
     public static void PlayBulletHit(Vector3 position, Vector3 normal)

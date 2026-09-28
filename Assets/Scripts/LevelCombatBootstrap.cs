@@ -11,6 +11,7 @@ using Unity.AI.Navigation;
 public static class LevelCombatBootstrap
 {
     const float NavRebuildDelay = 0.2f;
+    const float RuntimeNavMeshVoxelSize = 0.05f;
 
     static float navRebuildDueAt = -1f;
     static Coroutine navRebuildRoutine;
@@ -191,6 +192,7 @@ public static class LevelCombatBootstrap
         if (player.GetComponent<WeaponAccuracy>() == null)
             player.AddComponent<WeaponAccuracy>();
 
+        ExcludeFromNavMeshBuild(player);
         SnapPlayerToFloor(player);
     }
 
@@ -304,21 +306,32 @@ public static class LevelCombatBootstrap
 
         surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
         surface.collectObjects = CollectObjects.All;
+        // Bake gameplay colliders first; the temporary floor collider guarantees a
+        // walkable base, and wall volumes exclude intact wall footprints.
+        surface.overrideVoxelSize = true;
+        surface.voxelSize = RuntimeNavMeshVoxelSize;
+        surface.ignoreNavMeshObstacle = true;
+        EnsureWallGeometryIsNonWalkable();
+        EnsureLiveCharactersExcludedFromNavMesh();
 
         List<Collider> skipped = TemporarilyDisableBrokenColliders();
+        List<Renderer> skippedRenderers = TemporarilyDisableBrokenRenderers();
         try
         {
             surface.BuildNavMesh();
 
             if (!HasPlayableNavMesh())
             {
-                surface.collectObjects = CollectObjects.Children;
+                // If collider sources produce no walkable result, retry with readable render meshes.
+                surface.collectObjects = CollectObjects.All;
+                surface.useGeometry = NavMeshCollectGeometry.RenderMeshes;
                 surface.BuildNavMesh();
             }
         }
         finally
         {
             RestoreColliders(skipped);
+            RestoreRenderers(skippedRenderers);
         }
 
         // Collider is only for baking. Leaving it in the scene blocks the player jump.
@@ -363,6 +376,149 @@ public static class LevelCombatBootstrap
         return disabled;
     }
 
+    static void EnsureWallGeometryIsNonWalkable()
+    {
+        GameObject wallRoot = GameObject.Find("WallTiles");
+        if (wallRoot == null)
+            return;
+
+        NavMeshModifier modifier = wallRoot.GetComponent<NavMeshModifier>();
+        if (modifier == null)
+            modifier = wallRoot.AddComponent<NavMeshModifier>();
+
+        modifier.ignoreFromBuild = false;
+        modifier.applyToChildren = true;
+        modifier.overrideArea = true;
+        int notWalkable = NavMesh.GetAreaFromName("Not Walkable");
+        modifier.area = notWalkable >= 0 ? notWalkable : 1;
+        Break[] wallPieces = wallRoot.GetComponentsInChildren<Break>(true);
+        for (int i = 0; i < wallPieces.Length; i++)
+        {
+            Break wallPiece = wallPieces[i];
+            if (wallPiece == null || !wallPiece.IsIntactWall)
+                continue;
+
+            Collider[] colliders = wallPiece.GetComponentsInChildren<Collider>(true);
+            Bounds bounds = default;
+            bool hasBounds = false;
+            for (int c = 0; c < colliders.Length; c++)
+            {
+                Collider col = colliders[c];
+                if (col == null || !col.enabled || col.isTrigger)
+                    continue;
+
+                if (!hasBounds)
+                {
+                    bounds = col.bounds;
+                    hasBounds = true;
+                }
+                else
+                {
+                    bounds.Encapsulate(col.bounds);
+                }
+            }
+
+            if (!hasBounds)
+                continue;
+
+            Transform blockerTransform = wallPiece.transform.Find("RuntimeWallNavBlocker");
+            GameObject blockerObject;
+            if (blockerTransform == null)
+            {
+                blockerObject = new GameObject("RuntimeWallNavBlocker");
+                blockerTransform = blockerObject.transform;
+                blockerTransform.SetParent(wallPiece.transform, true);
+            }
+            else
+            {
+                blockerObject = blockerTransform.gameObject;
+            }
+
+            blockerTransform.SetPositionAndRotation(bounds.center, Quaternion.identity);
+            NavMeshModifierVolume volume = blockerObject.GetComponent<NavMeshModifierVolume>();
+            if (volume == null)
+                volume = blockerObject.AddComponent<NavMeshModifierVolume>();
+
+            volume.center = Vector3.zero;
+            volume.size = new Vector3(
+                bounds.size.x + 0.2f,
+                Mathf.Max(bounds.size.y + 0.5f, 2.5f),
+                bounds.size.z + 0.2f);
+            volume.area = notWalkable >= 0 ? notWalkable : 1;
+            volume.enabled = true;
+        }
+    }
+    static void EnsureLiveCharactersExcludedFromNavMesh()
+    {
+        PlayerMovement[] players = Object.FindObjectsByType<PlayerMovement>(FindObjectsSortMode.None);
+        for (int i = 0; i < players.Length; i++)
+            ExcludeFromNavMeshBuild(players[i] != null ? players[i].gameObject : null);
+
+        EnemyAI[] enemies = Object.FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
+        for (int i = 0; i < enemies.Length; i++)
+            ExcludeFromNavMeshBuild(enemies[i] != null ? enemies[i].gameObject : null);
+    }
+
+    public static void ExcludeFromNavMeshBuild(GameObject target)
+    {
+        if (target == null)
+            return;
+
+        NavMeshModifier modifier = target.GetComponent<NavMeshModifier>();
+        if (modifier == null)
+            modifier = target.AddComponent<NavMeshModifier>();
+        modifier.ignoreFromBuild = true;
+        modifier.applyToChildren = true;
+    }
+
+    static List<Renderer> TemporarilyDisableBrokenRenderers()
+    {
+        List<Renderer> disabled = new List<Renderer>(64);
+
+        Break[] breaks = Object.FindObjectsByType<Break>(FindObjectsSortMode.None);
+        for (int i = 0; i < breaks.Length; i++)
+        {
+            Break br = breaks[i];
+            if (br == null || !br.IsBroken)
+                continue;
+            DisableEnabledRenderers(br.gameObject, disabled);
+        }
+
+        DebrisHazard[] debris = Object.FindObjectsByType<DebrisHazard>(FindObjectsSortMode.None);
+        for (int i = 0; i < debris.Length; i++)
+        {
+            DebrisHazard hazard = debris[i];
+            if (hazard != null)
+                DisableEnabledRenderers(hazard.gameObject, disabled);
+        }
+
+        return disabled;
+    }
+
+    static void DisableEnabledRenderers(GameObject go, List<Renderer> sink)
+    {
+        Renderer[] renderers = go.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer renderer = renderers[i];
+            if (renderer == null || !renderer.enabled)
+                continue;
+            renderer.enabled = false;
+            sink.Add(renderer);
+        }
+    }
+
+    static void RestoreRenderers(List<Renderer> disabled)
+    {
+        if (disabled == null)
+            return;
+
+        for (int i = 0; i < disabled.Count; i++)
+        {
+            if (disabled[i] != null)
+                disabled[i].enabled = true;
+        }
+    }
     static void DisableEnabledColliders(GameObject go, List<Collider> sink)
     {
         Collider[] cols = go.GetComponentsInChildren<Collider>(true);
