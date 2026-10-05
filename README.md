@@ -2,7 +2,7 @@
 
 A first-person combat game in Unity. You fight through levels with a pistol, shotgun, and melee weapon, against enemy squads that use cover, and a boss.
 
-This is a team project. I made the character prefabs, the damaged-looking materials, and the textured assets used on those prefabs.
+This is a team project. I made the character prefabs, the damaged-looking materials, the textured assets used on those prefabs, and some of the environment modeling.
 
 ## Run it
 
