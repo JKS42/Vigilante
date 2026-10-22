@@ -11,11 +11,15 @@ using Unity.AI.Navigation;
 public static class LevelCombatBootstrap
 {
     const float NavRebuildDelay = 0.2f;
-    const float RuntimeNavMeshVoxelSize = 0.05f;
+    // A 0.1 m voxel keeps full-scene runtime bakes much lighter while retaining
+    // enough detail for this room-scale combat map.
+    const float RuntimeNavMeshVoxelSize = 0.1f;
 
     static float navRebuildDueAt = -1f;
     static Coroutine navRebuildRoutine;
     static MonoBehaviour navRebuildHost;
+    static bool navRebuildAgain;
+    static bool navRebuildStarted;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void RegisterSceneHook()
@@ -25,6 +29,8 @@ public static class LevelCombatBootstrap
         navRebuildDueAt = -1f;
         navRebuildRoutine = null;
         navRebuildHost = null;
+        navRebuildAgain = false;
+        navRebuildStarted = false;
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -55,8 +61,8 @@ public static class LevelCombatBootstrap
     }
 
     /// <summary>
-    /// Cel shading reads main-light realtime shadows. Without a Directional Light
-    /// (LevelDemo only had unshadowed point lights), roofs never darken anything.
+    /// Cel shading reads main-light realtime shadows. Ensure gameplay has a
+    /// shadow-casting directional light even when the scene only has point lights.
     /// </summary>
     public static void EnsureMainDirectionalLight()
     {
@@ -85,6 +91,9 @@ public static class LevelCombatBootstrap
         sun.shadowStrength = 1f;
         sun.shadowBias = 0.05f;
         sun.shadowNormalBias = 0.4f;
+        // The runtime Sun is a directional light at the world origin. Do not let
+        // URP cull its shadows as the player camera moves away from that point.
+        sun.useViewFrustumForShadowCasterCull = false;
     }
 
     /// <summary>
@@ -249,7 +258,13 @@ public static class LevelCombatBootstrap
 
         navRebuildDueAt = Time.unscaledTime + Mathf.Max(0.05f, delay);
         if (navRebuildRoutine != null)
+        {
+            // While waiting for the debounce, fold new breaks into the same bake.
+            // Only queue a follow-up if a wall changes during an active async update.
+            if (navRebuildStarted)
+                navRebuildAgain = true;
             return;
+        }
 
         MonoBehaviour host = GetNavRebuildHost();
         if (host == null)
@@ -292,27 +307,25 @@ public static class LevelCombatBootstrap
 
     static IEnumerator NavRebuildWhenDue()
     {
-        while (Time.unscaledTime < navRebuildDueAt)
-            yield return null;
+        do
+        {
+            navRebuildAgain = false;
+            while (Time.unscaledTime < navRebuildDueAt)
+                yield return null;
+
+            navRebuildStarted = true;
+            yield return RebuildPlayableNavMeshAsync();
+            navRebuildStarted = false;
+        }
+        while (navRebuildAgain);
 
         navRebuildRoutine = null;
-        RebuildPlayableNavMesh();
     }
 
     public static void RebuildPlayableNavMesh()
     {
         NavMeshSurface surface = GetOrCreateRuntimeSurface();
-        EnsureRuntimeWalkableFloor(surface.transform);
-
-        surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-        surface.collectObjects = CollectObjects.All;
-        // Bake gameplay colliders first; the temporary floor collider guarantees a
-        // walkable base, and wall volumes exclude intact wall footprints.
-        surface.overrideVoxelSize = true;
-        surface.voxelSize = RuntimeNavMeshVoxelSize;
-        surface.ignoreNavMeshObstacle = true;
-        EnsureWallGeometryIsNonWalkable();
-        EnsureLiveCharactersExcludedFromNavMesh();
+        PrepareNavMeshBuild(surface);
 
         List<Collider> skipped = TemporarilyDisableBrokenColliders();
         List<Renderer> skippedRenderers = TemporarilyDisableBrokenRenderers();
@@ -334,6 +347,63 @@ public static class LevelCombatBootstrap
             RestoreRenderers(skippedRenderers);
         }
 
+        FinishNavMeshRebuild(surface);
+    }
+
+    static IEnumerator RebuildPlayableNavMeshAsync()
+    {
+        NavMeshSurface surface = GetOrCreateRuntimeSurface();
+        PrepareNavMeshBuild(surface);
+
+        List<Collider> skipped = TemporarilyDisableBrokenColliders();
+        List<Renderer> skippedRenderers = TemporarilyDisableBrokenRenderers();
+        try
+        {
+            if (surface.navMeshData == null)
+            {
+                surface.BuildNavMesh();
+            }
+            else
+            {
+                // Capture the changed scene sources now, then let Unity update the
+                // existing NavMesh in the background instead of stalling the frame.
+                AsyncOperation update = surface.UpdateNavMesh(surface.navMeshData);
+                if (update != null)
+                    yield return update;
+                else
+                    surface.BuildNavMesh();
+            }
+
+            if (!HasPlayableNavMesh())
+            {
+                surface.collectObjects = CollectObjects.All;
+                surface.useGeometry = NavMeshCollectGeometry.RenderMeshes;
+                surface.BuildNavMesh();
+            }
+        }
+        finally
+        {
+            RestoreColliders(skipped);
+            RestoreRenderers(skippedRenderers);
+        }
+
+        FinishNavMeshRebuild(surface);
+    }
+
+    static void PrepareNavMeshBuild(NavMeshSurface surface)
+    {
+        EnsureRuntimeWalkableFloor(surface.transform);
+        surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+        surface.collectObjects = CollectObjects.All;
+        surface.overrideVoxelSize = true;
+        surface.voxelSize = RuntimeNavMeshVoxelSize;
+        surface.ignoreNavMeshObstacle = true;
+        EnsureWallGeometryIsNonWalkable();
+        EnsureLiveCharactersExcludedFromNavMesh();
+    }
+
+    static void FinishNavMeshRebuild(NavMeshSurface surface)
+    {
         // Collider is only for baking. Leaving it in the scene blocks the player jump.
         RemoveRuntimeFloorCollider(surface.transform);
 

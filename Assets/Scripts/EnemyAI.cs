@@ -21,6 +21,9 @@ public enum EnemyState
 [RequireComponent(typeof(Health))]
 public class EnemyAI : MonoBehaviour
 {
+    // Reused by per-frame line-of-sight checks to avoid allocating a RaycastHit[] per enemy.
+    readonly RaycastHit[] sightHits = new RaycastHit[32];
+
     [Header("Perception")]
     [SerializeField] float sightRange = 28f;
     [SerializeField] float sightFov = 110f;
@@ -1017,28 +1020,31 @@ public class EnemyAI : MonoBehaviour
             }
         }
 
-        RaycastHit[] hits = Physics.RaycastAll(origin, toTarget.normalized, dist + 0.25f, losMask, QueryTriggerInteraction.Ignore);
-        if (hits == null || hits.Length == 0)
+        int hitCount = Physics.RaycastNonAlloc(origin, toTarget.normalized, sightHits, dist + 0.25f, losMask, QueryTriggerInteraction.Ignore);
+        if (hitCount == 0)
             return true;
 
-        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-        for (int i = 0; i < hits.Length; i++)
+        // RaycastNonAlloc does not sort results, so inspect the nearest non-self hit.
+        int nearestIndex = -1;
+        float nearestDistance = float.MaxValue;
+        for (int i = 0; i < hitCount; i++)
         {
-            Collider col = hits[i].collider;
-            if (col == null || col.transform.root == transform.root)
+            Collider col = sightHits[i].collider;
+            if (col == null || col.transform.root == transform.root || sightHits[i].distance >= nearestDistance)
                 continue;
-
-            if (hits[i].transform == player || hits[i].transform.IsChildOf(player))
-                return true;
-
-            Health h = col.GetComponentInParent<Health>();
-            if (h != null && h.transform.root.CompareTag("Player"))
-                return true;
-
-            return false;
+            nearestDistance = sightHits[i].distance;
+            nearestIndex = i;
         }
 
-        return true;
+        if (nearestIndex < 0)
+            return true;
+
+        Transform hitTransform = sightHits[nearestIndex].transform;
+        if (hitTransform == player || hitTransform.IsChildOf(player))
+            return true;
+
+        Health hitHealth = sightHits[nearestIndex].collider.GetComponentInParent<Health>();
+        return hitHealth != null && hitHealth.transform.root.CompareTag("Player");
     }
 
     void FaceTarget(Vector3 worldPos)

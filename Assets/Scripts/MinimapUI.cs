@@ -275,11 +275,15 @@ public class MinimapUI : MonoBehaviour
         return c;
     }
 
-    static void Place(RectTransform rt, Vector2 uv, float size)
+    void Place(RectTransform rt, Vector2 uv, float size)
     {
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f + uv.x, 0.5f + uv.y);
-        rt.sizeDelta = new Vector2(size, size);
-        rt.anchoredPosition = Vector2.zero;
+        // Icons are created with centered anchors. Keep their layout fixed so moving
+        // blips does not invalidate the Canvas layout on every LateUpdate.
+        Vector2 targetSize = new Vector2(size, size);
+        if (rt.sizeDelta != targetSize)
+            rt.sizeDelta = targetSize;
+
+        rt.anchoredPosition = uv * mapSize;
     }
 
     void BuildUi()
